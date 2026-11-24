@@ -57,7 +57,7 @@ from historypy.io import (
     save_dataset_csv_bundle,
 )
 from historypy.research import (
-    ClaimAssessment,
+    ClaimAssessment,\n    ClaimEvidenceAnalysis,
     DatasetProfile,
     DatasetProvenanceReport,
     DatasetQualityReport,
@@ -72,11 +72,11 @@ from historypy.research import (
     ResearchFacets,
     ResearchQuery,
     ResearchSearchResult,
-    SearchHit,
+    SearchHit,\n    SemanticSearchHit,\n    SemanticSearchIndex,
     SourceMetadataAudit,
     TimelineEntry,
     TimelineResult,
-    append_research_action,
+    analyze_claim_evidence,\n    append_research_action,
     assess_claim,
     assess_dataset_quality,
     audit_dataset_provenance,
@@ -99,11 +99,11 @@ from historypy.research import (
     verify_research_audit_trail,
 )
 
-__version__ = "0.7.0"
+__version__ = "0.8.0"
 
 __all__ = [
     "AggregationReport",
-    "ClaimAssessment",
+    "ClaimAssessment",\n    "ClaimEvidenceAnalysis",
     "DatasetProfile",
     "DatasetProvenanceReport",
     "DatasetQualityReport",
@@ -144,7 +144,7 @@ __all__ = [
     "ResearchQuery",
     "ResearchSearchResult",
     "SQLiteDatasetStore",
-    "SearchHit",
+    "SearchHit",\n    "SemanticSearchHit",\n    "SemanticSearchIndex",
     "SearchProvider",
     "SmithsonianSearch",
     "SourceMetadataAudit",
@@ -156,7 +156,7 @@ __all__ = [
     "ValidationIssue",
     "WikidataSearch",
     "__version__",
-    "append_research_action",
+    "analyze_claim_evidence",\n    "append_research_action",
     "assess_claim",
     "assess_dataset_quality",
     "audit_dataset_provenance",
