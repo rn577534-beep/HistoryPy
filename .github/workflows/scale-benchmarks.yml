@@ -1,5 +1,9 @@
 name: Scale Benchmarks
 
+concurrency:
+  group: historypy-scale-benchmarks
+  cancel-in-progress: true
+
 on:
   push:
     branches: [main]
