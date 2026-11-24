@@ -15,6 +15,7 @@ from historypy import (
     SourceRecord,
 )
 
+
 def test_person_and_place_records():
     person = HistoricalPerson(
         id="person-1", name="Example historical person",
@@ -27,11 +28,13 @@ def test_person_and_place_records():
     assert person.name == "Example historical person"
     assert place.latitude == 24.0
 
+
 def test_place_requires_coordinate_pair_and_valid_ranges():
     with pytest.raises(ValueError, match="supplied together"):
         HistoricalPlace(id="p1", name="Place", latitude=20.0)
     with pytest.raises(ValueError, match="latitude"):
         HistoricalPlace(id="p1", name="Place", latitude=91.0, longitude=0.0)
+
 
 def test_civilization_and_organization_records():
     civilization = HistoricalCivilization(
@@ -45,6 +48,7 @@ def test_civilization_and_organization_records():
     assert civilization.name == "Example civilization"
     assert organization.organization_type == "dynasty"
 
+
 def test_relationship_validates_confidence_and_self_parent():
     with pytest.raises(ValueError, match="confidence"):
         HistoricalRelationship(
@@ -55,6 +59,7 @@ def test_relationship_validates_confidence_and_self_parent():
         HistoricalOrganization(
             id="o1", name="Org", parent_organization_ids=("o1",)
         )
+
 
 def test_dataset_validates_cross_references():
     source = SourceRecord(
@@ -86,6 +91,7 @@ def test_dataset_validates_cross_references():
     assert dataset.is_valid()
     dataset.require_valid()
 
+
 def test_dataset_reports_missing_references_without_dropping_records():
     dataset = HistoricalDataset(
         events=(HistoricalEvent(
@@ -98,6 +104,7 @@ def test_dataset_reports_missing_references_without_dropping_records():
     assert {"missing_source", "missing_place"} <= codes
     assert len(dataset.events) == 1
 
+
 def test_dataset_reports_unknown_relationship_endpoints():
     dataset = HistoricalDataset(
         relationships=(HistoricalRelationship(
@@ -107,6 +114,7 @@ def test_dataset_reports_unknown_relationship_endpoints():
     )
     issues = dataset.validate()
     assert sum(issue.code == "missing_relationship_endpoint" for issue in issues) == 2
+
 
 def test_relationship_graph_neighbors_and_predicate_filter():
     edges = (
@@ -121,6 +129,7 @@ def test_relationship_graph_neighbors_and_predicate_filter():
     assert graph.neighbors("a") == ("b", "c")
     assert graph.neighbors("a", predicate="member_of") == ("b",)
     assert graph.neighbors("b", direction="incoming") == ("a",)
+
 
 def test_relationship_graph_shortest_path_and_components():
     edges = (
@@ -137,6 +146,7 @@ def test_relationship_graph_shortest_path_and_components():
     assert graph.shortest_path("c", "a", direction="both") == ("c", "b", "a")
     assert graph.connected_components() == (("a", "b", "c"), ("isolated",))
 
+
 def test_relationship_graph_rejects_missing_nodes_and_edges():
     edge = HistoricalRelationship(
         id="r1", subject_id="a", predicate="related_to", object_id="missing"
@@ -147,6 +157,7 @@ def test_relationship_graph_rejects_missing_nodes_and_edges():
     with pytest.raises(KeyError, match="Unknown entity"):
         graph.neighbors("missing")
 
+
 def test_rejects_boolean_coordinates_and_confidence():
     with pytest.raises(ValueError, match="latitude"):
         HistoricalPlace(id="p", name="Place", latitude=True, longitude=0.0)
@@ -156,12 +167,14 @@ def test_rejects_boolean_coordinates_and_confidence():
             confidence=True,
         )
 
+
 def test_dataset_detects_entity_id_collisions_across_types():
     dataset = HistoricalDataset(
         people=(HistoricalPerson(id="same-id", name="Person"),),
         places=(HistoricalPlace(id="same-id", name="Place"),),
     )
     assert any(issue.code == "duplicate_entity_id" for issue in dataset.validate())
+
 
 def test_relationship_graph_can_be_built_from_dataset():
     person = HistoricalPerson(id="person", name="Person")
