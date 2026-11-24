@@ -41,6 +41,8 @@ from historypy.research.quality import (
 from historypy.research.query import SearchHit, events_overlapping, search_dataset
 from historypy.research.report import render_claim_report
 from historypy.research.search_index import DatasetSearchIndex
+from historypy.research.timeline import TimelineEntry, TimelineResult, timeline_for_dataset
+from historypy.research.provenance import DatasetProvenanceReport, audit_dataset_provenance
 from historypy.research.source_audit import (
     SourceMetadataAudit,
     audit_dataset_sources,
@@ -51,6 +53,7 @@ from historypy.research.verification import ClaimAssessment, assess_claim
 __all__ = [
     "ClaimAssessment",
     "DatasetProfile",
+    "DatasetProvenanceReport",
     "DatasetQualityReport",
     "DatasetSearchIndex",
     "EntityMatchCandidate",
@@ -65,7 +68,10 @@ __all__ = [
     "ResearchSearchResult",
     "SearchHit",
     "SourceMetadataAudit",
+    "TimelineEntry",
+    "TimelineResult",
     "append_research_action",
+    "audit_dataset_provenance",
     "assess_claim",
     "assess_dataset_quality",
     "audit_dataset_sources",
@@ -82,6 +88,7 @@ __all__ = [
     "render_claim_report",
     "search_dataset",
     "suggest_entity_matches",
+    "timeline_for_dataset",
     "summarize_claim_evidence",
     "verify_research_audit_trail",
 ]
