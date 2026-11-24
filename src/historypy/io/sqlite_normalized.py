@@ -274,6 +274,10 @@ class NormalizedSQLiteStore:
 
     def delete(self, name: str) -> bool:
         with closing(self._connect()) as connection, connection:
+            if self._fts5_available:
+                connection.execute(
+                    "DELETE FROM hp06_records_fts WHERE dataset_name = ?", (name,)
+                )
             cursor = connection.execute(
                 "DELETE FROM hp06_datasets WHERE name = ?", (name,)
             )
@@ -386,7 +390,7 @@ class NormalizedSQLiteStore:
                      WHERE dataset_name = ?"""
             params: list[Any] = [name]
             if not include_undated:
-                sql += " AND start_year IS NOT NULL AND end_year IS NOT NULL"
+                sql += " AND (start_year IS NOT NULL OR end_year IS NOT NULL)"
             sql += " AND (start_year IS NULL OR start_year <= ?)"
             sql += " AND (end_year IS NULL OR end_year >= ?)"
             params.extend((end_year, start_year))
