@@ -36,7 +36,7 @@ from historypy.research.geography import (
     great_circle_distance_km,
     places_within_radius,
 )
-from historypy.research.profile import DatasetProfile, profile_dataset
+from historypy.research.pipeline import (\n    ResearchPipeline, ResearchReport, ResearchTask, ResearchTaskResult,\n    render_research_report,\n)\nfrom historypy.research.profile import DatasetProfile, profile_dataset
 from historypy.research.provenance import DatasetProvenanceReport, audit_dataset_provenance
 from historypy.research.quality import (
     DatasetQualityReport,
