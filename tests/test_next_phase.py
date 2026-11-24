@@ -73,6 +73,7 @@ def test_search_index_matches_lexical_query_and_kind_filter():
     index = DatasetSearchIndex.build(dataset)
     assert [hit.record_id for hit in index.search("ada mathematician")] == ["p1"]
     assert index.search("example", kinds=("place",)) == ()
+    assert [hit.record_id for hit in index.search("mathemat")] == ["p1"]
 
 
 def test_profile_counts_missing_data_without_scoring_truth():
