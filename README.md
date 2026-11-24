@@ -260,7 +260,7 @@ source = to_source_record(selected, source_id="selected-source-001")
 
 Six aggregation capabilities are provided: federated search, per-provider failure isolation, conservative exact duplicate candidates, field-level metadata conflict reports, explicit conversion of selected records into `SourceRecord`, and automated tests/documentation. Duplicate candidates are not merged. Similar titles do not prove identity. Conflicting dates or creators are not automatically reconciled. The imported source preserves provider identity, external ID, retrieval timestamp, rights statement, URL, and language in its metadata/notes.
 
-Search is currently sequential, has no persistent cache or automatic retry, and uses each provider's own public API limits. Respect upstream terms, rate limits, and attribution requirements. Do not bulk harvest unless the provider permits it.
+Federated provider requests run concurrently by default (bounded to eight workers) while results retain provider input order and failures remain isolated. Set max_workers=1 for sequential operation. There is no persistent cache or automatic retry; each provider's own public API limits still apply. Respect upstream terms, rate limits, and attribution requirements. Do not bulk harvest unless the provider permits it.
 
 ## Chronology notes
 
