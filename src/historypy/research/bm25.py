@@ -1,10 +1,10 @@
 """BM25 lexical retrieval for historical datasets."""
 from __future__ import annotations
 
+import collections
 import math
 import re
 import unicodedata
-from collections import Counter, defaultdict
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from types import MappingProxyType
@@ -59,11 +59,11 @@ class BM25SearchIndex:
 
         records = []
         frequencies = []
-        mutable_postings: dict[str, list[tuple[int, int]]] = defaultdict(list)
+        mutable_postings: dict[str, list[tuple[int, int]]] = collections.defaultdict(list)
         lengths = []
         for kind, record_id, label, searchable in _searchable_records(dataset):
             index = len(records)
-            counts = Counter(_tokens(searchable))
+            counts = collections.Counter(_tokens(searchable))
             records.append((kind, record_id, label))
             frequencies.append(MappingProxyType(dict(counts)))
             lengths.append(sum(counts.values()))
