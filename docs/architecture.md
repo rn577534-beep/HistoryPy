@@ -34,6 +34,10 @@ People, places, civilizations, and organizations have stable IDs and source refe
 
 `search_dataset()` performs deterministic, case-insensitive lexical retrieval. All query terms must appear in the combined searchable fields. It is not semantic search and does not resolve entities. `suggest_entity_matches()` generates same-type lexical name-similarity candidates for human review; it does not merge records or assert shared identity. `events_overlapping()` uses the date model's three-valued overlap result: true, false, or indeterminate. Indeterminate events are omitted unless explicitly requested.
 
+## Source metadata audit
+
+`research.source_audit` reports missing recommended bibliographic fields such as creator, publication date, publisher, language, URL/archive reference, and access date. This is a catalogue completeness check only; it is not a source-quality score, authenticity check, or historical-truth verdict.
+
 ## Evidence analysis
 
 The `research.evidence` module retrieves evidence links for a claim and summarizes source IDs by relation. It can identify claims with both supporting and contradicting links. These are descriptive summaries, not credibility rankings; source independence, provenance, author expertise, genre, bias, and context require scholarly assessment.
