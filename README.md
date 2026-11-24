@@ -390,3 +390,27 @@ print(provenance.evidence_relation_counts)
 ```
 
 This is a coverage and traceability audit only. A source referenced many times is not necessarily reliable, independent, or correct. Missing links indicate documentation gaps, not that a historical claim is false.
+
+
+## Normalized SQLite research store (0.6)
+
+For larger collections, `NormalizedSQLiteStore` stores each source, claim, event, person, place, civilization, organization, relationship, and evidence link as an individual database row. Source references are indexed separately. The store uses a versioned SQLite schema and atomic replacement of a named dataset; the earlier JSON-payload `SQLiteDatasetStore` remains available for compatibility.
+
+```python
+from historypy import NormalizedSQLiteStore
+
+store = NormalizedSQLiteStore("historypy.sqlite3")
+store.save("ancient-world", dataset)
+
+print(store.count_records("ancient-world"))
+hits = store.search_records(
+    "ancient-world", "Babylon", kind="events", limit=25, offset=0
+)
+for hit in hits:
+    print(hit.kind, hit.record_id, hit.payload)
+
+for usage in store.source_usage("ancient-world"):
+    print(usage.source_id, usage.record_links, usage.evidence_links)
+```
+
+Search currently uses indexed dataset/kind selection plus case-insensitive substring matching over normalized record text. It is not full-text ranking or semantic/vector search. Pagination is deterministic by record kind and ID. SQLite FTS5 and external embedding providers are not required.
