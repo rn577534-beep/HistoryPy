@@ -1,8 +1,12 @@
-from benchmarks.benchmark_historian_relevance import (
-    build_historypy_dataset,
-    evaluate,
-    resolve_gold_ids,
+import runpy
+from pathlib import Path
+
+benchmark = runpy.run_path(
+    str(Path(__file__).parents[1] / "benchmarks" / "benchmark_historian_relevance.py")
 )
+build_historypy_dataset = benchmark["build_historypy_dataset"]
+evaluate = benchmark["evaluate"]
+resolve_gold_ids = benchmark["resolve_gold_ids"]
 from historypy import DatasetSearchIndex
 
 
