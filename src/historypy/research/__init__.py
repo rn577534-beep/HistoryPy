@@ -54,6 +54,12 @@ from historypy.research.query import SearchHit, events_overlapping, search_datas
 from historypy.research.report import render_claim_report
 from historypy.research.search_index import DatasetSearchIndex
 from historypy.research.semantic import SemanticSearchHit, SemanticSearchIndex
+from historypy.research.source_comparison import (
+    EventSourceComparison,
+    EventSourceEntry,
+    SourceEvidenceExcerpt,
+    compare_event_sources,
+)
 from historypy.research.source_audit import (
     SourceMetadataAudit,
     audit_dataset_sources,
@@ -71,6 +77,8 @@ __all__ = [
     "DatasetSearchIndex",
     "EntityMatchCandidate",
     "EvidenceSummary",
+    "EventSourceComparison",
+    "EventSourceEntry",
     "MetricComparison",
     "MetricObservation",
     "PlaceDistance",
@@ -86,6 +94,7 @@ __all__ = [
     "SearchHit",
     "SemanticSearchHit",
     "SemanticSearchIndex",
+    "SourceEvidenceExcerpt",
     "SourceMetadataAudit",
     "TimelineEntry",
     "TimelineResult",
@@ -97,6 +106,7 @@ __all__ = [
     "audit_dataset_sources",
     "audit_source_record",
     "claims_with_conflicting_evidence",
+    "compare_event_sources",
     "compare_metrics",
     "content_hash",
     "events_overlapping",
