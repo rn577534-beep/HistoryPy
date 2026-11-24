@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 
 from historypy.core.dataset import HistoricalDataset
@@ -20,7 +21,7 @@ class SQLiteDatasetStore:
 
     def __init__(self, path: str | Path):
         self.path = str(path)
-        with self._connect() as connection:
+        with closing(self._connect()) as connection:
             connection.execute(
                 """CREATE TABLE IF NOT EXISTS historypy_datasets (
                     name TEXT PRIMARY KEY,
