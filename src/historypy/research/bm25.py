@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 import collections
+import collections.abc
 import math
 import re
 import unicodedata
-from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from types import MappingProxyType
 
@@ -41,8 +41,8 @@ class BM25SearchIndex:
     """An in-memory BM25 index with accent-insensitive Unicode tokenization."""
 
     records: tuple[tuple[str, str, str], ...]
-    term_frequencies: tuple[Mapping[str, int], ...]
-    postings: Mapping[str, tuple[tuple[int, int], ...]]
+    term_frequencies: tuple[collections.abc.Mapping[str, int], ...]
+    postings: collections.abc.Mapping[str, tuple[tuple[int, int], ...]]
     document_lengths: tuple[int, ...]
     average_document_length: float
     k1: float = 1.5
@@ -87,7 +87,7 @@ class BM25SearchIndex:
         self,
         query: str,
         *,
-        kinds: Iterable[str] | None = None,
+        kinds: collections.abc.Iterable[str] | None = None,
         limit: int | None = 20,
     ) -> tuple[BM25SearchHit, ...]:
         """Return OR-matched results ordered by BM25 score, then stable IDs."""
