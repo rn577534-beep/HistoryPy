@@ -72,12 +72,9 @@ def _year_bounds(record: Mapping[str, Any]) -> tuple[int | None, int | None, str
     return start, end, calendar
 
 
-def _record_id(kind: str, record: Mapping[str, Any]) -> str:
+def _record_id(kind: str, record: Mapping[str, Any], index: int) -> str:
     if kind == "evidence":
-        return ":".join((
-            str(record["claim_id"]), str(record["source_id"]), str(record["relation"]),
-            str(record.get("locator") or ""),
-        ))
+        return f"evidence:{index:012d}"
     return str(record["id"])
 
 
@@ -171,8 +168,8 @@ class NormalizedSQLiteStore:
                 ),
             )
             for kind in _RECORD_KINDS:
-                for record in payload[kind]:
-                    record_id = _record_id(kind, record)
+                for index, record in enumerate(payload[kind]):
+                    record_id = _record_id(kind, record, index)
                     start, end, calendar = _year_bounds(record)
                     serialized = json.dumps(
                         record, ensure_ascii=False, sort_keys=True, separators=(",", ":")
