@@ -41,7 +41,7 @@ class SQLiteDatasetStore:
             raise ValueError("dataset name cannot be empty")
         dataset.require_valid()
         payload = dataset_to_json(dataset)
-        with self._connect() as connection:
+        with closing(self._connect()) as connection:
             with connection:
                 connection.execute(
                     """INSERT INTO historypy_datasets(name, schema_version, payload)
@@ -54,7 +54,7 @@ class SQLiteDatasetStore:
                 )
 
     def load(self, name: str) -> HistoricalDataset:
-        with self._connect() as connection:
+        with closing(self._connect()) as connection:
             row = connection.execute(
                 "SELECT schema_version, payload FROM historypy_datasets WHERE name = ?",
                 (name,),
@@ -67,14 +67,14 @@ class SQLiteDatasetStore:
         return dataset_from_json(payload)
 
     def names(self) -> tuple[str, ...]:
-        with self._connect() as connection:
+        with closing(self._connect()) as connection:
             rows = connection.execute(
                 "SELECT name FROM historypy_datasets ORDER BY name"
             ).fetchall()
         return tuple(row[0] for row in rows)
 
     def delete(self, name: str) -> bool:
-        with self._connect() as connection:
+        with closing(self._connect()) as connection:
             with connection:
                 cursor = connection.execute(
                     "DELETE FROM historypy_datasets WHERE name = ?", (name,)
