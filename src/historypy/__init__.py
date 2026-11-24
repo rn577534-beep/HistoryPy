@@ -2,16 +2,29 @@
 
 from historypy.core.dataset import HistoricalDataset, ValidationIssue
 from historypy.core.entities import (
-    HistoricalCivilization, HistoricalOrganization, HistoricalPerson,
-    HistoricalPlace, HistoricalRelationship,
+    HistoricalCivilization,
+    HistoricalOrganization,
+    HistoricalPerson,
+    HistoricalPlace,
+    HistoricalRelationship,
 )
 from historypy.core.models import (
-    EvidenceLink, HistoricalClaim, HistoricalDate, HistoricalEvent, SourceRecord,
+    EvidenceLink,
+    HistoricalClaim,
+    HistoricalDate,
+    HistoricalEvent,
+    SourceRecord,
 )
 from historypy.graph import RelationshipGraph
 from historypy.io import (
-    dataset_from_dict, dataset_from_json, dataset_to_dict, dataset_to_json,
-    load_dataset, load_dataset_csv_bundle, save_dataset, save_dataset_csv_bundle,
+    dataset_from_dict,
+    dataset_from_json,
+    dataset_to_dict,
+    dataset_to_json,
+    load_dataset,
+    load_dataset_csv_bundle,
+    save_dataset,
+    save_dataset_csv_bundle,
 )
 from historypy.research import (
     DatasetProfile,
