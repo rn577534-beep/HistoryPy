@@ -148,3 +148,30 @@ decomposition, entity-aware retrieval, and a hybrid semantic/BM25 reranker
 against the same pinned question set. Do not tune against the test questions
 and then present the same scores as an independent evaluation; preserve a
 held-out split for model selection.
+
+
+## Synthetic scale test results (2026-11-24)
+
+CI run: https://github.com/rn577534-beep/HistoryPy/actions/runs/45460840022
+
+Both 100,000 and 1,000,000 synthetic person records completed with exact
+result parity between indexed and linear search for the selective query
+`scaleprobe raremarker`.
+
+| Records | Index build | Build peak additional Python memory | Linear search | Indexed search | Speedup |
+|---:|---:|---:|---:|---:|---:|
+| 100,000 | 1.304 s | 44.325 MiB | 77.110 ms | 3.747 ms | 20.581x |
+| 1,000,000 | 12.849 s | 440.223 MiB | 742.973 ms | 66.297 ms | 11.207x |
+
+At one million records the indexed query used 64.795 MiB of additional
+traced Python allocations; the linear query used 0.193 MiB. This reflects
+candidate-set and result materialization costs for this particular query and
+does not imply the index is always more memory-efficient per query. The
+index's build memory is a substantial cost and should be planned for.
+
+These figures are synthetic selective-query stress tests on a GitHub Actions
+Python 3.12 runner. `tracemalloc` excludes pre-existing dataset memory,
+native allocations, and total process RSS. Broad queries, different text
+distributions, different hardware, and real historical corpora can behave
+very differently. The million-record run demonstrates that this fixture and
+index can complete at that size; it is not a guarantee for every dataset.
