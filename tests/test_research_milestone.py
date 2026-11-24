@@ -92,7 +92,7 @@ def test_claim_report_contains_sources_and_limitations():
     report = render_claim_report(sample_dataset(), "c1")
     assert "# Research note:" in report
     assert "Archive catalogue" in report
-    assert "do not assess" in report
+    assert "does not assess" in report
 
 
 def test_sqlite_store_round_trips_and_deletes(tmp_path):
