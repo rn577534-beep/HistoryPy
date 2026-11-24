@@ -4,8 +4,8 @@ from __future__ import annotations
 import math
 import re
 import unicodedata
-from collections.abc import Iterable, Mapping
 from collections import Counter, defaultdict
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from types import MappingProxyType
 
