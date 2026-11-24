@@ -10,7 +10,7 @@ HistoryPy is an evidence-aware Python toolkit for organizing and analyzing histo
 2. **Dataset integrity** — in-memory collections with stable identifiers and referential-integrity diagnostics.
 3. **Chronology** — bounded dates, BCE/CE astronomical year numbering, calendar labels, and overlap detection.
 4. **Knowledge graph** — directed, typed relationships, graph traversal, shortest paths, and connected components.
-5. **Research tools** — evidence retrieval, conflict summaries, lexical search, and event/date overlap queries.
+5. **Research tools** — evidence retrieval, conflict summaries, lexical search, event/date overlap queries, and conservative possible-duplicate suggestions.
 6. **Interchange** — versioned JSON serialization, validation on import, and UTF-8 file persistence.
 7. **Future interfaces and analysis** — source comparison, entity resolution, geographic analysis, network measures, CSV interchange, command-line tools, APIs, notebooks, and visual research interfaces.
 
@@ -28,11 +28,11 @@ People, places, civilizations, and organizations have stable IDs and source refe
 
 ## Dataset validation
 
-`HistoricalDataset.validate()` reports duplicate IDs and broken references without modifying or deleting records. `require_valid()` raises a summarized error for workflows that require referential integrity. Validation is structural, not a verification of historical accuracy.
+`HistoricalDataset.validate()` reports duplicate IDs, broken references, and circular place/civilization/organization hierarchies without modifying or deleting records. `require_valid()` raises a summarized error for workflows that require referential integrity. Validation is structural, not a verification of historical accuracy.
 
 ## Research queries
 
-`search_dataset()` performs deterministic, case-insensitive lexical retrieval. All query terms must appear in the combined searchable fields. It is not semantic search and does not resolve entities. `events_overlapping()` uses the date model's three-valued overlap result: true, false, or indeterminate. Indeterminate events are omitted unless explicitly requested.
+`search_dataset()` performs deterministic, case-insensitive lexical retrieval. All query terms must appear in the combined searchable fields. It is not semantic search and does not resolve entities. `suggest_entity_matches()` generates same-type lexical name-similarity candidates for human review; it does not merge records or assert shared identity. `events_overlapping()` uses the date model's three-valued overlap result: true, false, or indeterminate. Indeterminate events are omitted unless explicitly requested.
 
 ## Evidence analysis
 
@@ -48,4 +48,4 @@ Every imported dataset should record its source and maintainer, license and perm
 
 ## Current implementation
 
-The early 0.1.x codebase includes dependency-light core records, chronology operations, entity records, dataset validation, relationship graph analysis, evidence summaries, lexical and temporal research queries, versioned JSON import/export, and automated tests. It does not include a comprehensive historical dataset, calendar-conversion engine, geospatial index, semantic search, automatic source authentication, or entity resolution.
+The early 0.1.x codebase includes dependency-light core records, chronology operations, entity records, dataset validation, relationship graph analysis, evidence summaries, lexical and temporal research queries, versioned JSON import/export, and automated tests. It does not include a comprehensive historical dataset, calendar-conversion engine, geospatial index, semantic search, or automatic source authentication. Entity matching is candidate generation only, not automatic identity resolution.
