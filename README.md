@@ -651,3 +651,36 @@ print(render_event_source_comparison(dataset, "event-001"))
 
 The report keeps researcher-entered support/contradiction labels and clearly
 flags missing citation locations; it does not decide which source is correct.
+
+
+## BM25 and real-corpus relevance evaluation
+
+For natural-language queries where exact substring matching is too strict,
+`BM25SearchIndex` provides accent-insensitive tokenization, OR-term retrieval,
+document-length normalization, and deterministic score ordering. A BM25 score
+is a ranking signal, not a probability or confidence estimate.
+
+```python
+from historypy import BM25SearchIndex
+
+bm25 = BM25SearchIndex.build(dataset)
+for hit in bm25.search("réformes parlement séance", kinds=("event",), limit=10):
+    print(hit.record_id, hit.score, hit.matched_terms)
+```
+
+The reproducible HistoriQA-ThirdRepublic evaluation is documented in
+`docs/research-benchmarks.md`. In the pinned 3,386-document / 1,782-question
+benchmark run (Python 3.12), BM25 achieved Recall@10 **0.5564** and MRR@10
+**0.4889**, compared with **0.0022** and **0.0015** for the strict all-terms
+trigram substring baseline. BM25 Recall@10 was 0.8239 for single-hop questions,
+but 0.2839 for comparative multi-hop questions and 0.2829 for bridge-entity
+multi-hop questions. This is promising retrieval evidence, not proof of
+historical correctness or general performance across languages and periods.
+
+For comparing accounts of a specific event, use
+`compare_event_sources(dataset, event_id)` or
+`render_event_source_comparison(dataset, event_id)`. These group event-linked
+sources and claim quotations by source, preserving researcher-entered support
+or contradiction labels and exact page/paragraph/archive/timecode locators.
+They do not automatically determine whether sources are independent or which
+account is true.
