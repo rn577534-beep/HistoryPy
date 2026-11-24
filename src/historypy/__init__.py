@@ -52,6 +52,7 @@ __all__ = [
     "SearchHit",
     "SourceRecord",
     "ValidationIssue",
+    "__version__",
     "claims_with_conflicting_evidence",
     "dataset_from_dict",
     "dataset_from_json",
@@ -63,5 +64,4 @@ __all__ = [
     "save_dataset",
     "search_dataset",
     "summarize_claim_evidence",
-    "__version__",
 ]
