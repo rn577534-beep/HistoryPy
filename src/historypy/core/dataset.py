@@ -106,6 +106,54 @@ class HistoricalDataset:
                     first_entity_kind[record.id] = kind
 
 
+        def detect_hierarchy_cycles(
+            kind: str, records: tuple[object, ...], reference_field: str
+        ) -> None:
+            adjacency = {
+                record.id: tuple(
+                    ref for ref in getattr(record, reference_field)
+                    if ref in {item.id for item in records}
+                )
+                for record in records
+            }
+            visited: set[str] = set()
+            active: list[str] = []
+            active_positions: dict[str, int] = {}
+            reported: set[frozenset[str]] = set()
+
+            def visit(node: str) -> None:
+                visited.add(node)
+                active_positions[node] = len(active)
+                active.append(node)
+                for neighbor in adjacency[node]:
+                    if neighbor in active_positions:
+                        cycle = active[active_positions[neighbor]:] + [neighbor]
+                        identity = frozenset(cycle[:-1])
+                        if identity not in reported:
+                            reported.add(identity)
+                            issues.append(ValidationIssue(
+                                "hierarchy_cycle",
+                                f"Circular {kind} hierarchy: {' -> '.join(cycle)}",
+                                node,
+                                reference_field,
+                            ))
+                    elif neighbor not in visited:
+                        visit(neighbor)
+                active.pop()
+                active_positions.pop(node)
+            
+            for record_id in adjacency:
+                if record_id not in visited:
+                    visit(record_id)
+
+        detect_hierarchy_cycles("place", self.places, "parent_place_ids")
+        detect_hierarchy_cycles(
+            "civilization", self.civilizations, "predecessor_ids"
+        )
+        detect_hierarchy_cycles(
+            "organization", self.organizations, "parent_organization_ids"
+        )
+
         def check_sources(record: object, record_id: str, source_refs: tuple[str, ...]) -> None:
             for source_id in source_refs:
                 if source_id not in source_ids:
