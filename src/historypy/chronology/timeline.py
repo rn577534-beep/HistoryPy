@@ -25,7 +25,18 @@ def sort_events(events: Iterable[HistoricalEvent]) -> list[HistoricalEvent]:
     This orders stored bounds; it does not convert calendar systems. If a
     collection mixes calendars, callers should group or normalize them first.
     """
-    return sorted(events, key=lambda event: (_start_key(event.date), event.title.casefold()))
+    records = list(events)
+    dated = [
+        event for event in records
+        if event.date.earliest is not None
+        or event.date.earliest_year is not None
+    ]
+    calendars = {event.date.calendar for event in dated}
+    if "unspecified" in calendars or len(calendars) > 1:
+        raise ValueError(
+            "Normalize events to one explicit calendar before sorting a timeline"
+        )
+    return sorted(records, key=lambda event: (_start_key(event.date), event.title.casefold()))
 
 
 def find_overlapping_events(
