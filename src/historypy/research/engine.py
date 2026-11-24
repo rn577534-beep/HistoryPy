@@ -184,7 +184,11 @@ def _matches_period(record: object, period: HistoricalDate, include_indeterminat
         else:
             dates = tuple(item for item in (record.founded, record.dissolved) if item)
             results = tuple(item.overlaps(period) for item in dates)
-            result = True if True in results else (None if None in results else False)
+            result = (
+                True if True in results
+                else None if None in results or not dates
+                else False
+            )
     else:
         return False
     return result is True or (result is None and include_indeterminate)
