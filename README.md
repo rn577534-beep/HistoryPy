@@ -569,3 +569,24 @@ benchmark runs; it does not enforce machine-dependent speed thresholds.
   score, and human source review remains necessary.
 - The package remains pre-alpha while schemas, provider integrations, and
   research workflows continue to evolve.
+
+
+### Large-corpus scale and memory benchmark
+
+The opt-in GitHub Actions workflow `.github/workflows/scale-benchmarks.yml`
+tests synthetic corpora of 100,000 and 1,000,000 records. It measures index
+build time, additional Python allocations during index construction and query
+execution, linear/indexed query time, and exact ordered result parity for a
+selective query. Run locally with:
+
+```bash
+python benchmarks/benchmark_scale.py --records 100000 --repeat 1
+python benchmarks/benchmark_scale.py --records 1000000 --repeat 1
+```
+
+Memory values use Python `tracemalloc`: they exclude the already-created
+dataset, native allocations, and total process RSS. The benchmark deliberately
+uses a selective synthetic query; it does not establish performance for broad
+queries, real historical corpora, retrieval relevance, or historical accuracy.
+The workflow is separate from the required fast test matrix because the
+million-record case is resource-intensive.
