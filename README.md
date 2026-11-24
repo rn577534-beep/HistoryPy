@@ -74,6 +74,7 @@ print(events_overlapping(dataset, period))
 | `historypy.research.evidence` | Claim evidence retrieval and transparent conflict summaries |
 | `historypy.research.query` | Lexical dataset search and date-overlap event queries |
 | `historypy.research.entity_resolution` | Conservative possible-duplicate suggestions for human review |
+| `historypy.research.source_audit` | Bibliographic metadata completeness checks, not credibility scores |
 
 ## Research queries
 
@@ -106,6 +107,17 @@ conflicts = claims_with_conflicting_evidence(dataset)
 ```
 
 Evidence summaries count linked sources and relationships; they are not automated credibility scores. The library does not independently authenticate sources or decide historical truth. Multiple sources repeating one earlier account are not automatically independent corroboration.
+
+## Source metadata audit
+
+`audit_dataset_sources(dataset)` reports which recommended catalogue fields are present or absent for each source record. It checks creator, publication date, publisher, language, a URL or archival reference, and access date. Missing fields are catalogue gaps, not evidence that a source is unreliable or false.
+
+```python
+from historypy import audit_dataset_sources
+
+for audit in audit_dataset_sources(dataset):
+    print(audit.source_id, audit.missing_recommended_fields)
+```
 
 ## Dataset validation
 
