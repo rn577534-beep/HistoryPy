@@ -82,9 +82,7 @@ def main() -> None:
     index = DatasetSearchIndex.build(dataset)
     index_build_ms = (time.perf_counter() - started) * 1000
 
-    query = "scalep robe raremarker"
-    # Deliberately use a rare, stable query to avoid materializing hundreds of
-    # thousands of broad-query hits at the largest scale.
+    # A rare, stable query avoids materializing broad-query result sets.
     query = "scaleprobe raremarker"
     linear_hits = search_dataset(dataset, query, limit=None)
     indexed_hits = index.search(query, limit=None)
@@ -95,7 +93,8 @@ def main() -> None:
     linear_peak = peak_additional_bytes(lambda: search_dataset(dataset, query, limit=None))
     indexed_query_peak = peak_additional_bytes(lambda: index.search(query, limit=None))
 
-    mib = lambda value: round(value / (1024 * 1024), 3)
+    def mib(value: int) -> float:
+        return round(value / (1024 * 1024), 3)
     print(json.dumps({
         "benchmark": "historypy-large-scale-selective-search",
         "historypy_version": __version__,
