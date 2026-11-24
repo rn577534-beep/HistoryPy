@@ -27,50 +27,38 @@ ruff check .
 
 ```python
 from historypy import (
-    HistoricalDate,
-    HistoricalEvent,
-    HistoricalPerson,
-    HistoricalPlace,
-    HistoricalRelationship,
-    HistoricalDataset,
-    RelationshipGraph,
+    HistoricalDate, HistoricalEvent, HistoricalPerson, HistoricalPlace,
+    HistoricalRelationship, HistoricalDataset, RelationshipGraph,
+    search_dataset, events_overlapping,
 )
 
 person = HistoricalPerson(id="person-001", name="Example historical person")
 place = HistoricalPlace(id="place-001", name="Example historical place")
-
 event = HistoricalEvent(
-    id="event-001",
-    title="Example event",
+    id="event-001", title="Example event",
     date=HistoricalDate(
-        earliest="1947-08-14",
-        latest="1947-08-14",
-        precision="day",
-        calendar="gregorian",
+        earliest="1947-08-14", latest="1947-08-14",
+        precision="day", calendar="gregorian",
     ),
     place_ids=(place.id,),
 )
-
 relationship = HistoricalRelationship(
-    id="relationship-001",
-    subject_id=person.id,
-    predicate="associated_with",
-    object_id=place.id,
+    id="relationship-001", subject_id=person.id,
+    predicate="associated_with", object_id=place.id,
 )
-
 dataset = HistoricalDataset(
-    people=(person,),
-    places=(place,),
-    events=(event,),
+    people=(person,), places=(place,), events=(event,),
     relationships=(relationship,),
 )
 dataset.require_valid()
 
-graph = RelationshipGraph(
-    entity_ids=(person.id, place.id, event.id),
-    relationships=(relationship,),
-)
+graph = RelationshipGraph.from_dataset(dataset)
 print(graph.neighbors(person.id))
+print(search_dataset(dataset, "historical person"))
+period = HistoricalDate(
+    earliest="1947-01-01", latest="1947-12-31", calendar="gregorian"
+)
+print(events_overlapping(dataset, period))
 ```
 
 ## Main capabilities
@@ -83,20 +71,28 @@ print(graph.neighbors(person.id))
 | `historypy.chronology` | Date interval comparisons and event timeline utilities |
 | `historypy.graph` | Directed relationship graph, neighbors, paths, components |
 | `historypy.io` | Versioned JSON import/export and file persistence |
-| `historypy.research` | Claim evidence retrieval and conflict summaries without truth scoring |
+| `historypy.research.evidence` | Claim evidence retrieval and transparent conflict summaries |
+| `historypy.research.query` | Lexical dataset search and date-overlap event queries |
+
+## Research queries
+
+`search_dataset(dataset, query)` searches names, aliases, descriptions, titles, tags, claims, and source metadata. Every whitespace-separated query term must appear in the searchable text. Search is case-insensitive and deterministic, but lexical only: it does not perform semantic search, entity resolution, or historical inference.
+
+`events_overlapping(dataset, period)` returns events whose bounded dates overlap the requested period. If the calendar or date bounds make comparison indeterminate, those events are excluded by default. Set `include_indeterminate=True` to include them explicitly; this does not mean they are confirmed matches.
+
+```python
+from historypy import search_dataset, events_overlapping
+
+hits = search_dataset(dataset, "Alexandria ancient", kinds=("place", "event"))
+for hit in hits:
+    print(hit.kind, hit.record_id, hit.label, hit.matched_terms)
+
+events = events_overlapping(dataset, period, include_indeterminate=False)
+```
 
 ## Evidence workflow
 
-A claim and the evidence for it are separate records. An evidence link can be marked as:
-
-- `supports`
-- `contradicts`
-- `contextualizes`
-- `mentions`
-
-The library stores source metadata and locators, but does not independently authenticate sources or decide historical truth. Multiple sources repeating the same earlier account are not automatically independent corroboration.
-
-Use the evidence analysis helpers to inspect the links without collapsing disagreement:
+A claim and the evidence for it are separate records. An evidence link can be marked as `supports`, `contradicts`, `contextualizes`, or `mentions`.
 
 ```python
 from historypy import summarize_claim_evidence, claims_with_conflicting_evidence
@@ -105,24 +101,20 @@ summary = summarize_claim_evidence(dataset, "claim-001")
 print(summary.supporting_source_ids)
 print(summary.contradicting_source_ids)
 print(summary.has_conflicting_evidence)
-
 conflicts = claims_with_conflicting_evidence(dataset)
 ```
 
-These summaries count linked sources and relationships; they are not automated credibility scores.
+Evidence summaries count linked sources and relationships; they are not automated credibility scores. The library does not independently authenticate sources or decide historical truth. Multiple sources repeating one earlier account are not automatically independent corroboration.
 
 ## Dataset validation
 
 ```python
 issues = dataset.validate()
-if issues:
-    for issue in issues:
-        print(issue.code, issue.record_id, issue.message)
-else:
-    print("Dataset structure is valid")
+for issue in issues:
+    print(issue.code, issue.record_id, issue.message)
 ```
 
-Validation checks identifiers and references. It does not certify the historical accuracy of a record.
+Validation checks identifiers and references. It does not certify historical accuracy.
 
 ## JSON interchange
 
@@ -131,12 +123,11 @@ from historypy import save_dataset, load_dataset, dataset_to_json, dataset_from_
 
 save_dataset(dataset, "research-dataset.json")
 restored = load_dataset("research-dataset.json")
-
 payload = dataset_to_json(dataset)
 restored_again = dataset_from_json(payload)
 ```
 
-The JSON format declares the schema name and version. Unknown schema versions and unknown record fields are rejected. Import validates references by default; use `validate=False` only when deliberately loading a dataset for repair.
+The JSON format declares a schema name and version. Unknown schema versions and fields are rejected. Import validates references by default; use `validate=False` only for deliberate repair workflows.
 
 ## Chronology notes
 
@@ -147,13 +138,10 @@ The JSON format declares the schema name and version. Unknown schema versions an
 
 ## Development status
 
-Early development / pre-alpha. APIs may change. This repository does not yet ship a comprehensive historical dataset, a calendar-conversion engine, automatic source authentication, or a production research database.
+Early development / pre-alpha. APIs may change. This repository does not yet ship a comprehensive historical dataset, a calendar-conversion engine, automatic source authentication, semantic search, entity resolution, or a production research database.
 
 See [architecture](docs/architecture.md) and [contribution guidelines](CONTRIBUTING.md).
 
-
 ## Automated checks
 
-The repository currently includes 44 test cases covering chronology, BCE date handling, entity validation, dataset references, graph traversal, evidence conflict summaries, and JSON round trips. GitHub Actions is configured to run the test suite and Ruff on Python 3.10–3.13.
-
-A configured workflow is not the same as a verified passing run. Check the Actions tab for the latest execution before treating a commit as release-ready.
+The repository includes tests for chronology, BCE date handling, entities, dataset validation, graph traversal, evidence analysis, JSON interchange, and research queries. GitHub Actions is configured to run pytest and Ruff on Python 3.10–3.13. A configured workflow is not a verified passing run; consult the Actions tab for the latest execution.
