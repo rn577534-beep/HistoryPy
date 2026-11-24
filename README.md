@@ -83,6 +83,7 @@ print(graph.neighbors(person.id))
 | `historypy.chronology` | Date interval comparisons and event timeline utilities |
 | `historypy.graph` | Directed relationship graph, neighbors, paths, components |
 | `historypy.io` | Versioned JSON import/export and file persistence |
+| `historypy.research` | Claim evidence retrieval and conflict summaries without truth scoring |
 
 ## Evidence workflow
 
@@ -94,6 +95,21 @@ A claim and the evidence for it are separate records. An evidence link can be ma
 - `mentions`
 
 The library stores source metadata and locators, but does not independently authenticate sources or decide historical truth. Multiple sources repeating the same earlier account are not automatically independent corroboration.
+
+Use the evidence analysis helpers to inspect the links without collapsing disagreement:
+
+```python
+from historypy import summarize_claim_evidence, claims_with_conflicting_evidence
+
+summary = summarize_claim_evidence(dataset, "claim-001")
+print(summary.supporting_source_ids)
+print(summary.contradicting_source_ids)
+print(summary.has_conflicting_evidence)
+
+conflicts = claims_with_conflicting_evidence(dataset)
+```
+
+These summaries count linked sources and relationships; they are not automated credibility scores.
 
 ## Dataset validation
 
