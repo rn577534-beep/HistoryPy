@@ -303,15 +303,22 @@ class NormalizedSQLiteStore:
                 ).fetchall()
             }:
                 raise KeyError(name)
-            sql = """SELECT source_id,
-                     SUM(CASE WHEN relation = 'record' THEN 1 ELSE 0 END) AS record_links,
-                     SUM(CASE WHEN relation != 'record' THEN 1 ELSE 0 END) AS evidence_links
-                     FROM hp06_source_links WHERE dataset_name = ?"""
+            sql = """SELECT sources.record_id AS source_id,
+                     SUM(CASE WHEN links.relation = 'record' THEN 1 ELSE 0 END)
+                         AS record_links,
+                     SUM(CASE WHEN links.relation IS NOT NULL
+                                   AND links.relation != 'record' THEN 1 ELSE 0 END)
+                         AS evidence_links
+                     FROM hp06_records AS sources
+                     LEFT JOIN hp06_source_links AS links
+                       ON links.dataset_name = sources.dataset_name
+                      AND links.source_id = sources.record_id
+                     WHERE sources.dataset_name = ? AND sources.kind = 'sources'"""
             params: list[Any] = [name]
             if source_id is not None:
-                sql += " AND source_id = ?"
+                sql += " AND sources.record_id = ?"
                 params.append(source_id)
-            sql += " GROUP BY source_id ORDER BY source_id"
+            sql += " GROUP BY sources.record_id ORDER BY sources.record_id"
             rows = connection.execute(sql, params).fetchall()
         return tuple(
             SourceUsage(row["source_id"], int(row["record_links"]), int(row["evidence_links"]))
