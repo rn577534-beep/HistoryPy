@@ -71,10 +71,13 @@ print(events_overlapping(dataset, period))
 | `historypy.chronology` | Date interval comparisons and event timeline utilities |
 | `historypy.graph` | Directed relationship graph, neighbors, paths, components |
 | `historypy.io` | Versioned JSON and lossless multi-table CSV bundle interchange |
-| `historypy.research.evidence` | Claim evidence retrieval and transparent conflict summaries |\n| `historypy.research.evidence_analysis` | Evidence relation counts, source-type coverage, and locator completeness |\n| `historypy.research.semantic` | Embedding-backed semantic retrieval using an explicitly supplied model |
+| `historypy.research.evidence` | Claim evidence retrieval and transparent conflict summaries |
+| `historypy.research.evidence_analysis` | Evidence relation counts, source-type coverage, and locator completeness |
+| `historypy.research.semantic` | Embedding-backed semantic retrieval using an explicitly supplied model |
 | `historypy.research.query` | Lexical dataset search and date-overlap event queries |
 | `historypy.research.entity_resolution` | Conservative possible-duplicate suggestions for human review |
-| `historypy.research.source_audit` | Bibliographic metadata completeness checks, not credibility scores |\n| `historypy.research.geography` | Great-circle distance and radius search for geocoded places |
+| `historypy.research.source_audit` | Bibliographic metadata completeness checks, not credibility scores |
+| `historypy.research.geography` | Great-circle distance and radius search for geocoded places |
 
 ## Research queries
 
@@ -142,7 +145,30 @@ restored_again = dataset_from_json(payload)
 
 The JSON format declares a schema name and version. Unknown schema versions and fields are rejected. Import validates references by default; use `validate=False` only for deliberate repair workflows.
 
-## CSV bundle interchange\n\nCSV is inherently flat, while HistoryPy records contain nested dates, aliases, and references. The CSV bundle therefore stores each record collection in its own CSV table and encodes each cell as JSON, with a manifest carrying schema/version and dataset metadata. This is designed for lossless round-tripping and spreadsheet inspection; it is not a claim that arbitrary CSV files can be imported without a mapping.\n\n```python\nfrom historypy import save_dataset_csv_bundle, load_dataset_csv_bundle\n\nsave_dataset_csv_bundle(dataset, "research-csv-bundle")\nrestored = load_dataset_csv_bundle("research-csv-bundle")\n```\n\n## Geographic queries\n\n```python\nfrom historypy import places_within_radius\n\nnearby = places_within_radius(dataset, 23.7, 90.4, radius_km=50)\nfor place in nearby:\n    print(place.name, place.distance_km)\n```\n\nOnly places with coordinates are returned. Distances use a spherical Earth approximation; they do not express uncertainty in historical place locations.\n\n## Research audit trail
+## CSV bundle interchange
+
+CSV is inherently flat, while HistoryPy records contain nested dates, aliases, and references. The CSV bundle therefore stores each record collection in its own CSV table and encodes each cell as JSON, with a manifest carrying schema/version and dataset metadata. This is designed for lossless round-tripping and spreadsheet inspection; it is not a claim that arbitrary CSV files can be imported without a mapping.
+
+```python
+from historypy import save_dataset_csv_bundle, load_dataset_csv_bundle
+
+save_dataset_csv_bundle(dataset, "research-csv-bundle")
+restored = load_dataset_csv_bundle("research-csv-bundle")
+```
+
+## Geographic queries
+
+```python
+from historypy import places_within_radius
+
+nearby = places_within_radius(dataset, 23.7, 90.4, radius_km=50)
+for place in nearby:
+    print(place.name, place.distance_km)
+```
+
+Only places with coordinates are returned. Distances use a spherical Earth approximation; they do not express uncertainty in historical place locations.
+
+## Research audit trail
 
 `append_research_action()` returns a new immutable hash-linked sequence. Each action can record before/after content hashes, actor, timestamp, target, and rationale. `verify_research_audit_trail()` detects changed entries and broken links. This is tamper-evident, not a digital signature or proof of author identity.
 
