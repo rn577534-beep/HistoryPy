@@ -67,10 +67,14 @@ class HistoricalPlace:
             raise ValueError(f"Unsupported place type: {self.place_type}")
         if (self.latitude is None) != (self.longitude is None):
             raise ValueError("latitude and longitude must be supplied together")
-        if self.latitude is not None and not -90 <= self.latitude <= 90:
-            raise ValueError("latitude must be between -90 and 90")
-        if self.longitude is not None and not -180 <= self.longitude <= 180:
-            raise ValueError("longitude must be between -180 and 180")
+        if self.latitude is not None and (
+            isinstance(self.latitude, bool) or not -90 <= self.latitude <= 90
+        ):
+            raise ValueError("latitude must be a number between -90 and 90")
+        if self.longitude is not None and (
+            isinstance(self.longitude, bool) or not -180 <= self.longitude <= 180
+        ):
+            raise ValueError("longitude must be a number between -180 and 180")
         _validate_ids(self.parent_place_ids, "parent_place_ids")
         _validate_ids(self.source_ids, "source_ids")
         if self.id in self.parent_place_ids:
@@ -151,8 +155,10 @@ class HistoricalRelationship:
             self.id, self.subject_id, self.predicate, self.object_id
         )):
             raise ValueError("Relationship identifiers and predicate cannot be empty")
-        if self.confidence is not None and not 0.0 <= self.confidence <= 1.0:
-            raise ValueError("confidence must be between 0.0 and 1.0")
+        if self.confidence is not None and (
+            isinstance(self.confidence, bool) or not 0.0 <= self.confidence <= 1.0
+        ):
+            raise ValueError("confidence must be a number between 0.0 and 1.0")
         _validate_ids(self.source_ids, "source_ids")
         if self.valid_from and self.valid_to:
             overlap = self.valid_from.overlaps(self.valid_to)
