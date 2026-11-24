@@ -352,3 +352,41 @@ print("Tags:", result.facets.tag_counts)
 Supported evidence statuses are `supported`, `contradicted`, `mixed`, and `insufficient`. They reflect only recorded evidence-link labels, not a machine judgment of historical truth or source credibility. Place filters apply to place records and records explicitly linked to those places. Source filters apply to records with recorded source links and claims with linked evidence. Tag filters apply to events. Date filters use explicit calendar compatibility; a person's birth-to-death interval and an institution's founding-to-dissolution interval are considered as ranges. Records with incomparable dates are excluded unless `include_indeterminate=True`.
 
 For repeated text queries, pass a prebuilt `DatasetSearchIndex` using `execute_research_query(dataset, query, index=index)`. The index must have been built from the same unchanged dataset snapshot; rebuild it after edits. Search remains lexical substring retrieval, not semantic or vector search. Facets are descriptive counts, not quality scores. This release adds query composition and result navigation without introducing opaque ranking or automated historical conclusions.
+
+
+## Unified historical timeline (0.5)
+
+The timeline engine combines dated events with person lifespans, civilization spans, and organization lifespans. It sorts using astronomical year numbering for BCE dates and preserves the original calendar metadata. A period filter uses the existing three-state overlap behavior: true, false, or indeterminate. No calendar conversion is performed.
+
+```python
+from historypy import HistoricalDate, timeline_for_dataset
+
+period = HistoricalDate(
+    earliest_year=1200, latest_year=1500,
+    precision="year", calendar="gregorian",
+)
+timeline = timeline_for_dataset(dataset, period=period)
+
+for entry in timeline.entries:
+    print(entry.kind, entry.label, entry.date_label)
+print("Undated records:", timeline.undated_count)
+print("Incomparable dates:", timeline.excluded_indeterminate_count)
+```
+
+Undated records are omitted by default and counted separately. Set `include_indeterminate=True` to include undated records when no period is specified, or to retain records whose calendars cannot be compared with a requested period. This is an explicit inclusion choice, not a claim that dates match.
+
+## Dataset provenance audit (0.5)
+
+`audit_dataset_provenance(dataset)` summarizes how source records are linked across events, people, places, civilizations, organizations, and relationships. It also identifies unused source records, claims without evidence links, records without source references, and counts each recorded evidence-link relation.
+
+```python
+from historypy import audit_dataset_provenance
+
+provenance = audit_dataset_provenance(dataset)
+print(provenance.source_usage_counts)
+print(provenance.orphan_source_ids)
+print(provenance.claims_without_evidence)
+print(provenance.evidence_relation_counts)
+```
+
+This is a coverage and traceability audit only. A source referenced many times is not necessarily reliable, independent, or correct. Missing links indicate documentation gaps, not that a historical claim is false.
