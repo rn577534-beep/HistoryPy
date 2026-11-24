@@ -1,10 +1,10 @@
-"""Reproducible synthetic benchmark for HistoryPy lexical retrieval.
+"""Synthetic scale and parity benchmark for HistoryPy lexical retrieval.
 
 Run from the repository root:
     python benchmarks/benchmark_search.py --records 10000 --repeat 7
 
-Results measure this synthetic fixture and machine only; they are not measures
-of historical accuracy, source quality, or production-corpus performance.
+Timings describe this generated fixture and machine only, not historical
+accuracy, source quality, or production-corpus performance.
 """
 from __future__ import annotations
 
@@ -55,6 +55,10 @@ def median_ms(operation: Callable[[], object], repeat: int) -> float:
     return statistics.median(samples)
 
 
+def result_ids(hits: tuple) -> tuple[tuple[str, str], ...]:
+    return tuple((hit.kind, hit.record_id) for hit in hits)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--records", type=int, default=5000)
@@ -64,20 +68,39 @@ def main() -> None:
         parser.error("--records and --repeat must both be positive")
 
     dataset = build_dataset(args.records)
-    query = "Bengal maritime trade"
+    queries = (
+        "Bengal maritime trade",
+        "synthetic administrative",
+        "scholar archive",
+        "no matching phrase xyz",
+    )
     build_started = time.perf_counter()
     index = DatasetSearchIndex.build(dataset)
     index_build_ms = (time.perf_counter() - build_started) * 1000
 
-    linear_hits = search_dataset(dataset, query, limit=None)
-    indexed_hits = index.search(query, limit=None)
-    linear_ids = tuple((hit.kind, hit.record_id) for hit in linear_hits)
-    indexed_ids = tuple((hit.kind, hit.record_id) for hit in indexed_hits)
-    if linear_ids != indexed_ids:
-        raise RuntimeError("Indexed and linear lexical results differ")
+    query_results = []
+    for query in queries:
+        linear_hits = search_dataset(dataset, query, limit=None)
+        indexed_hits = index.search(query, limit=None)
+        if result_ids(linear_hits) != result_ids(indexed_hits):
+            raise RuntimeError(f"Indexed and linear results differ for query: {query!r}")
+        linear_ms = median_ms(
+            lambda: search_dataset(dataset, query, limit=None), args.repeat
+        )
+        indexed_ms = median_ms(lambda: index.search(query, limit=None), args.repeat)
+        query_results.append(
+            {
+                "query": query,
+                "result_count": len(linear_hits),
+                "linear_search_median_ms": round(linear_ms, 3),
+                "trigram_index_search_median_ms": round(indexed_ms, 3),
+                "observed_speedup": (
+                    round(linear_ms / indexed_ms, 3) if indexed_ms else None
+                ),
+                "result_parity": True,
+            }
+        )
 
-    linear_ms = median_ms(lambda: search_dataset(dataset, query, limit=None), args.repeat)
-    indexed_ms = median_ms(lambda: index.search(query, limit=None), args.repeat)
     report = {
         "benchmark": "historypy-lexical-search",
         "historypy_version": __version__,
@@ -85,13 +108,9 @@ def main() -> None:
         "platform": platform.platform(),
         "synthetic_record_count": args.records,
         "repeat": args.repeat,
-        "query": query,
-        "result_count": len(linear_hits),
         "index_build_ms": round(index_build_ms, 3),
-        "linear_search_median_ms": round(linear_ms, 3),
-        "trigram_index_search_median_ms": round(indexed_ms, 3),
-        "observed_speedup": round(linear_ms / indexed_ms, 3) if indexed_ms else None,
-        "result_parity": True,
+        "queries": query_results,
+        "all_query_results_match": True,
         "interpretation": (
             "Synthetic-fixture timing only; not a historical-accuracy, "
             "source-quality, or production-scale guarantee."
