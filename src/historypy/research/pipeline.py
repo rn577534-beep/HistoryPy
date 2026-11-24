@@ -5,8 +5,8 @@ resolve historical disputes, or treat retrieval relevance as evidence of truth.
 """
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Sequence
 
 from historypy.core.dataset import HistoricalDataset
 from historypy.integrations.aggregation import (
@@ -24,8 +24,8 @@ from historypy.research.evidence_analysis import (
     ClaimEvidenceAnalysis,
     analyze_claim_evidence,
 )
-from historypy.research.semantic import EmbeddingBatch, SemanticSearchHit, SemanticSearchIndex
 from historypy.research.query import SearchHit
+from historypy.research.semantic import EmbeddingBatch, SemanticSearchHit, SemanticSearchIndex
 
 
 @dataclass(frozen=True, slots=True)
@@ -246,8 +246,8 @@ def render_research_report(report: ResearchReport) -> str:
         lines.extend(f"- {gap}" for gap in report.gaps)
     else:
         lines.append("- No automatic conclusion is drawn; inspect original sources and provenance.")
-    lines.extend(("", "External records are discovery leads, not automatically imported sources. "
-                  "Duplicate candidates and metadata conflicts require human review."))
+    lines.extend(("", ("External records are discovery leads, not automatically imported sources. "
+                   "Duplicate candidates and metadata conflicts require human review.")))
     return "\n".join(lines)
 
 
