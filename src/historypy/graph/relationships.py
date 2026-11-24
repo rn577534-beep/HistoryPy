@@ -32,6 +32,7 @@ class RelationshipGraph:
     @classmethod
     def from_dataset(cls, dataset: HistoricalDataset) -> RelationshipGraph:
         """Build a graph from every entity and relationship in a validated dataset."""
+        dataset.require_valid()
         entity_ids = (
             [item.id for item in dataset.events]
             + [item.id for item in dataset.people]
