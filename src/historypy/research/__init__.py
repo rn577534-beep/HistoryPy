@@ -33,6 +33,7 @@ from historypy.research.geography import (
     places_within_radius,
 )
 from historypy.research.profile import DatasetProfile, profile_dataset
+from historypy.research.provenance import DatasetProvenanceReport, audit_dataset_provenance
 from historypy.research.quality import (
     DatasetQualityReport,
     QualityFinding,
@@ -41,7 +42,6 @@ from historypy.research.quality import (
 from historypy.research.query import SearchHit, events_overlapping, search_dataset
 from historypy.research.report import render_claim_report
 from historypy.research.search_index import DatasetSearchIndex
-from historypy.research.provenance import DatasetProvenanceReport, audit_dataset_provenance
 from historypy.research.source_audit import (
     SourceMetadataAudit,
     audit_dataset_sources,
