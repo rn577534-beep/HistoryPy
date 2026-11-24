@@ -7,8 +7,9 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Protocol, Sequence
+from typing import Protocol
 
 from historypy.core.models import SourceRecord
 from historypy.integrations.historical_apis import ExternalRecord
@@ -75,7 +76,7 @@ def search_all(
             if any(not isinstance(item, ExternalRecord) for item in records):
                 raise TypeError("provider returned a non-ExternalRecord result")
             results.append(ProviderSearchResult(name, records))
-        except Exception as exc:  # Keep other provider responses available.
+        except Exception as exc:  # noqa: BLE001 - isolate failures from independent providers.
             results.append(ProviderSearchResult(name, (), f"{type(exc).__name__}: {exc}"))
     return AggregationReport(query.strip(), tuple(results))
 
