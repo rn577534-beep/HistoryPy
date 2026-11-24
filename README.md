@@ -278,3 +278,36 @@ See [architecture](docs/architecture.md) and [contribution guidelines](CONTRIBUT
 ## Automated checks
 
 The repository includes tests for chronology, BCE date handling, entities, dataset validation, graph traversal, evidence analysis, JSON interchange, and research queries. GitHub Actions is configured to run pytest and Ruff on Python 3.10–3.13. A configured workflow is not a verified passing run; consult the Actions tab for the latest execution.
+
+
+## Next research infrastructure milestone (0.3)
+
+### Dataset-wide knowledge graph
+
+`HistoricalKnowledgeGraph.from_dataset(dataset)` projects recorded claims, events, entities, sources, relationships, and evidence links into typed nodes and directed edges. Edges preserve the recorded relation and optional provenance identifiers; they are not automatically authenticated facts.
+
+### Temporal graph views
+
+`temporal_graph(dataset, period)` selects events whose dates are comparable and overlap the requested period. Incomparable dates are excluded by default; `include_indeterminate=True` includes them explicitly. Calendar conversion is never implicit.
+
+### Evidence-based claim assessment
+
+`assess_claim(dataset, claim_id)` reports `supported`, `contradicted`, `mixed`, or `insufficient` according to the labels researchers attached to evidence links. These labels do not establish truth, source reliability, or source independence.
+
+### SQLite dataset storage
+
+`SQLiteDatasetStore("research.sqlite")` stores versioned JSON dataset payloads in a transactional SQLite table. It uses Python's standard-library `sqlite3`, validates datasets before saving, and supports `save`, `load`, `names`, and `delete`.
+
+### Reproducible claim reports
+
+`render_claim_report(dataset, "claim-001")` creates Markdown with the claim, recorded assessment, linked sources, and limitations. It does not invent citations or narrative conclusions.
+
+### Smithsonian and Harvard Art Museums discovery
+
+`SmithsonianSearch` reads Smithsonian Open Access search metadata and `HarvardArtMuseumsSearch` reads Harvard Art Museums object metadata. Both require keys supplied explicitly or through `SMITHSONIAN_API_KEY` and `HARVARD_ART_MUSEUMS_API_KEY`. Do not commit keys. Smithsonian rights and media access are item-specific; Harvard API content is non-commercial, limited to 2,500 requests/day, and may not be cached for more than two weeks without written permission. These adapters have mock-based tests only; live access depends on valid credentials and provider availability.
+
+The two providers' official developer documentation and terms should be reviewed before publishing or redistributing returned material:
+- [Smithsonian Open Access developer tools](https://www.si.edu/openaccess/devtools)
+- [Harvard Art Museums API documentation](https://github.com/harvardartmuseums/api-docs)
+
+All six capabilities are research infrastructure, not a pre-verified historical knowledgebase. Researchers remain responsible for checking original sources, item-level rights, and competing interpretations.
