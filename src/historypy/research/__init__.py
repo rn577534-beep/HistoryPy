@@ -21,7 +21,11 @@ from historypy.research.entity_resolution import (
     EntityMatchCandidate,
     suggest_entity_matches,
 )
-from historypy.research.evidence_analysis import (\n    ClaimEvidenceAnalysis,\n    analyze_claim_evidence,\n)\nfrom historypy.research.evidence import (
+from historypy.research.evidence_analysis import (
+    ClaimEvidenceAnalysis,
+    analyze_claim_evidence,
+)
+from historypy.research.evidence import (
     EvidenceSummary,
     claims_with_conflicting_evidence,
     evidence_for_claim,
@@ -41,7 +45,8 @@ from historypy.research.quality import (
 )
 from historypy.research.query import SearchHit, events_overlapping, search_dataset
 from historypy.research.report import render_claim_report
-from historypy.research.search_index import DatasetSearchIndex\nfrom historypy.research.semantic import SemanticSearchHit, SemanticSearchIndex
+from historypy.research.search_index import DatasetSearchIndex
+from historypy.research.semantic import SemanticSearchHit, SemanticSearchIndex
 from historypy.research.source_audit import (
     SourceMetadataAudit,
     audit_dataset_sources,
@@ -51,7 +56,8 @@ from historypy.research.timeline import TimelineEntry, TimelineResult, timeline_
 from historypy.research.verification import ClaimAssessment, assess_claim
 
 __all__ = [
-    "ClaimAssessment",\n    "ClaimEvidenceAnalysis",
+    "ClaimAssessment",
+    "ClaimEvidenceAnalysis",
     "DatasetProfile",
     "DatasetProvenanceReport",
     "DatasetQualityReport",
@@ -66,11 +72,14 @@ __all__ = [
     "ResearchFacets",
     "ResearchQuery",
     "ResearchSearchResult",
-    "SearchHit",\n    "SemanticSearchHit",\n    "SemanticSearchIndex",
+    "SearchHit",
+    "SemanticSearchHit",
+    "SemanticSearchIndex",
     "SourceMetadataAudit",
     "TimelineEntry",
     "TimelineResult",
-    "analyze_claim_evidence",\n    "append_research_action",
+    "analyze_claim_evidence",
+    "append_research_action",
     "assess_claim",
     "assess_dataset_quality",
     "audit_dataset_provenance",
