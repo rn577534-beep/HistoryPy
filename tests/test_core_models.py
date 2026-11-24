@@ -1,9 +1,8 @@
 import pytest
 
-from historypy import (
-    EvidenceLink, HistoricalClaim, HistoricalDate, HistoricalEvent, SourceRecord
-)
+from historypy import EvidenceLink, HistoricalClaim, HistoricalDate, HistoricalEvent, SourceRecord
 from historypy.chronology import find_overlapping_events, sort_events
+
 
 
 def test_exact_date_display():
