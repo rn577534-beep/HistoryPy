@@ -6,6 +6,7 @@ from historypy import (
     HistoricalEvent,
     SourceRecord,
     compare_event_sources,
+    render_event_source_comparison,
 )
 
 
@@ -61,6 +62,13 @@ def test_compare_event_sources_preserves_source_quotes_relations_and_locators():
     assert report.evidence_count == 2
     assert report.evidence_missing_locators == 0
     assert report.has_recorded_support_contradiction is True
+
+    rendered = render_event_source_comparison(dataset, "event-1")
+    assert "Chronicle A" in rendered
+    assert "Study B" in rendered
+    assert "The treaty was concluded in late autumn." in rendered
+    assert "page: 12" in rendered
+    assert "Citation location: locator: chapter 4, paragraph 8" in rendered
 
 
 def test_compare_event_sources_counts_missing_locator_and_rejects_unknown_event():
