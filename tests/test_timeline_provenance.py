@@ -52,6 +52,7 @@ def test_timeline_excludes_incomparable_calendar_by_default():
         dataset, period=day("1900-01-01"), include_indeterminate=True
     )
     assert len(included.entries) == 1
+    assert included.excluded_indeterminate_count == 0
 
 
 def test_timeline_counts_undated_records_and_can_include_them():
