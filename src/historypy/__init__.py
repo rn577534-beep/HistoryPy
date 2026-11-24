@@ -57,6 +57,8 @@ from historypy.io import (
     save_dataset_csv_bundle,
 )
 from historypy.research import (
+    BM25SearchHit,
+    BM25SearchIndex,
     ClaimAssessment,
     ClaimEvidenceAnalysis,
     DatasetProfile,
@@ -116,6 +118,8 @@ __version__ = "1.0.0"
 
 __all__ = [
     "AggregationReport",
+    "BM25SearchHit",
+    "BM25SearchIndex",
     "ClaimAssessment",
     "ClaimEvidenceAnalysis",
     "DatasetProfile",
