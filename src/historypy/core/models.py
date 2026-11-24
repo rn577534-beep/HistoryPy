@@ -96,7 +96,11 @@ class HistoricalDate:
         The comparison is only meaningful when both records use the same
         calendar. An expression-only date has no computable bounds.
         """
-        if self.calendar != other.calendar:
+        if (
+            self.calendar == "unspecified"
+            or other.calendar == "unspecified"
+            or self.calendar != other.calendar
+        ):
             return None
         left_start, left_end = self._comparison_bounds()
         right_start, right_end = other._comparison_bounds()
@@ -178,6 +182,11 @@ class SourceRecord:
     def __post_init__(self) -> None:
         if not self.id.strip() or not self.title.strip():
             raise ValueError("Source id and title cannot be empty")
+        if self.source_type not in {
+            "primary", "secondary", "tertiary", "archaeological", "oral",
+            "epigraphic", "numismatic", "archival", "other",
+        }:
+            raise ValueError(f"Unsupported source type: {self.source_type}")
         if self.publication_date:
             _validate_iso_date(self.publication_date, "publication_date")
         if self.accessed_on:
