@@ -62,27 +62,78 @@ def record_date(row: dict[str, Any]) -> HistoricalDate:
     )
 
 
-def build_historypy_dataset(corpus_rows: list[dict[str, Any]]) -> HistoricalDataset:
+def build_historypy_dataset(
+    corpus_rows: list[dict[str, Any]],
+) -> tuple[HistoricalDataset, dict[str, tuple[str, ...]]]:
     events = []
     seen_ids = set()
+    original_id_map: dict[str, list[str]] = defaultdict(list)
     for row in corpus_rows:
         record_id = str(row.get("id", "")).strip()
         if not record_id:
             raise ValueError("Every corpus record must have a non-empty id")
-        if record_id in seen_ids:
-            raise ValueError(f"Duplicate corpus record id: {record_id}")
-        seen_ids.add(record_id)
         collection = str(row.get("collection") or "unspecified")
+        unique_id = f"{collection}::{record_id}"
+        if unique_id in seen_ids:
+            raise ValueError(f"Duplicate corpus record id within collection: {unique_id}")
+        seen_ids.add(unique_id)
+        original_id_map[record_id].append(unique_id)
         title = str(row.get("sommaire") or row.get("base_name") or record_id)
         text = document_text(row.get("document"))
         events.append(HistoricalEvent(
-            id=record_id,
+            id=unique_id,
             title=title,
             date=record_date(row),
             summary=text,
             tags=(collection,),
         ))
-    return HistoricalDataset(events=tuple(events))
+    return (
+        HistoricalDataset(events=tuple(events)),
+        {record_id: tuple(unique_ids) for record_id, unique_ids in original_id_map.items()},
+    )
+
+
+def resolve_gold_ids(
+    question: dict[str, Any], id_map: dict[str, tuple[str, ...]]
+) -> tuple[str, ...]:
+    """Resolve original IDs using source labels when an ID occurs in multiple papers."""
+    aliases = {
+        "le gaulois": "legaulois_1887_v1",
+        "l'intransigeant": "lintransigeant_1887_v1",
+        "les débats": "debattre_1887__sectioncohere",
+        "les debats": "debattre_1887__sectioncohere",
+        "les débats parlementaires": "debattre_1887__sectioncohere",
+        "les debats parlementaires": "debattre_1887__sectioncohere",
+    }
+    resolved = []
+    for raw_gold_id in question.get("gold_ids") or ():
+        gold_id = str(raw_gold_id)
+        candidates = id_map.get(gold_id, ())
+        slot_matches = []
+        for slot in (1, 2):
+            if str(question.get(f"id_{slot}") or "") != gold_id:
+                continue
+            source = str(question.get(f"source_{slot}") or "").strip().casefold()
+            collection = aliases.get(source)
+            if collection is None:
+                collection = next(
+                    (value for key, value in aliases.items() if key in source),
+                    None,
+                )
+            if collection:
+                slot_matches.append(f"{collection}::{gold_id}")
+        if slot_matches:
+            resolved.extend(slot_matches)
+        elif len(candidates) == 1:
+            resolved.append(candidates[0])
+        elif len(candidates) > 1:
+            raise ValueError(
+                f"Ambiguous gold document ID {gold_id!r}; source_1/source_2 "
+                "must identify the corresponding collection"
+            )
+        else:
+            raise ValueError(f"Gold document ID {gold_id!r} is absent from the corpus")
+    return tuple(dict.fromkeys(resolved))
 
 
 def evaluate(
@@ -171,7 +222,11 @@ def main() -> None:
 
     corpus_rows = load_jsonl(args.corpus)
     question_rows = load_jsonl(args.questions)
-    dataset = build_historypy_dataset(corpus_rows)
+    dataset, id_map = build_historypy_dataset(corpus_rows)
+    question_rows = [
+        {**row, "gold_ids": resolve_gold_ids(row, id_map)}
+        for row in question_rows
+    ]
     build_started = time.perf_counter()
     index = DatasetSearchIndex.build(dataset)
     index_build_ms = (time.perf_counter() - build_started) * 1000
