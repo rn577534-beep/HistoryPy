@@ -17,7 +17,13 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from historypy import DatasetSearchIndex, HistoricalDataset, HistoricalDate, HistoricalEvent
+from historypy import (
+    BM25SearchIndex,
+    DatasetSearchIndex,
+    HistoricalDataset,
+    HistoricalDate,
+    HistoricalEvent,
+)
 
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -137,7 +143,7 @@ def resolve_gold_ids(
 
 
 def evaluate(
-    index: DatasetSearchIndex,
+    index: DatasetSearchIndex | BM25SearchIndex,
     questions: list[dict[str, Any]],
     *,
     top_k: int,
@@ -233,16 +239,32 @@ def main() -> None:
     metrics = evaluate(
         index, question_rows, top_k=args.top_k, max_questions=args.max_questions
     )
+    bm25_build_started = time.perf_counter()
+    bm25_index = BM25SearchIndex.build(dataset)
+    bm25_index_build_ms = (time.perf_counter() - bm25_build_started) * 1000
+    bm25_metrics = evaluate(
+        bm25_index, question_rows, top_k=args.top_k, max_questions=args.max_questions
+    )
     report = {
         "benchmark": "historiqa-thirdrepublic-real-corpus",
         "corpus_records": len(corpus_rows),
         "available_questions": len(question_rows),
         "index_build_ms": round(index_build_ms, 3),
-        "metrics": metrics,
-        "retrieval_method": (
-            "HistoryPy trigram candidate index with all-query-terms substring matching; "
-            "deterministic record-ID tie-breaking."
-        ),
+        "bm25_index_build_ms": round(bm25_index_build_ms, 3),
+        "metrics": {
+            "trigram_all_terms": metrics,
+            "bm25": bm25_metrics,
+        },
+        "retrieval_methods": {
+            "trigram_all_terms": (
+                "HistoryPy trigram candidate index with all-query-terms substring "
+                "matching; deterministic record-ID tie-breaking."
+            ),
+            "bm25": (
+                "BM25 with Unicode accent folding, OR term matching, document-length "
+                "normalization, and deterministic score tie-breaking."
+            ),
+        },
         "dataset_note": (
             "French historical corpus from 1887. Gold document IDs are benchmark labels, "
             "not a claim that other documents are historically irrelevant."
