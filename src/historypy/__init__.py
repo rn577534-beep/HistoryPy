@@ -91,7 +91,7 @@ from historypy.research import (
     verify_research_audit_trail,
 )
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 __all__ = [
     "AggregationReport",
