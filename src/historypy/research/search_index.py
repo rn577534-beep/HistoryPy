@@ -1,9 +1,10 @@
-"""Reusable trigram index for repeated lexical dataset searches."""
+"""Reusable compact trigram index for repeated lexical dataset searches."""
 from __future__ import annotations
 
-from collections import defaultdict
-from collections.abc import Iterable
+from array import array
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
+from types import MappingProxyType
 
 from historypy.core.dataset import HistoricalDataset
 from historypy.research.query import SearchHit, _searchable_records
@@ -11,28 +12,43 @@ from historypy.research.query import SearchHit, _searchable_records
 
 @dataclass(frozen=True, slots=True)
 class DatasetSearchIndex:
-    """Immutable trigram index; rebuild after changing the source dataset."""
+    """Immutable compact trigram index; rebuild after changing the dataset.
+
+    Posting lists use read-only memory views over packed unsigned integers.
+    This avoids the large Python-int/set overhead of a conventional postings
+    dictionary. Record indexes are 32-bit, supporting up to 2^32-1 records.
+    """
 
     records: tuple[tuple[str, str, str, str], ...]
-    postings: dict[str, tuple[int, ...]]
+    postings: Mapping[str, memoryview]
 
     @classmethod
     def build(cls, dataset: HistoricalDataset) -> DatasetSearchIndex:
         records: list[tuple[str, str, str, str]] = []
-        mutable: dict[str, set[int]] = defaultdict(set)
+        mutable: dict[str, array] = {}
         for kind, record_id, label, searchable in _searchable_records(dataset):
             normalized = searchable.casefold()
             index = len(records)
+            if index > 0xFFFFFFFF:
+                raise ValueError("DatasetSearchIndex supports at most 2^32 records")
             records.append((kind, record_id, label, normalized))
             for token in set(normalized.split()):
                 if len(token) < 3:
                     continue
-                for start in range(len(token) - 2):
-                    mutable[token[start:start + 3]].add(index)
-        return cls(
-            tuple(records),
-            {key: tuple(sorted(value)) for key, value in mutable.items()},
-        )
+                for gram in {
+                    token[start:start + 3] for start in range(len(token) - 2)
+                }:
+                    posting = mutable.get(gram)
+                    if posting is None:
+                        posting = array("I")
+                        mutable[gram] = posting
+                    # Records are visited in increasing order, so each posting
+                    # list is already sorted and contains no duplicate index.
+                    posting.append(index)
+        postings = MappingProxyType({
+            gram: values.toreadonly() for gram, values in mutable.items()
+        })
+        return cls(tuple(records), postings)
 
     def search(
         self, query: str, *, kinds: Iterable[str] | None = None, limit: int | None = 20
