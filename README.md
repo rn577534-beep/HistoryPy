@@ -638,3 +638,16 @@ for hit in bm25.search("réformes parlementaires", limit=10):
 BM25 scores are relative retrieval scores, not confidence estimates or
 historical-truth assessments. See docs/research-benchmarks.md for the measured
 comparison against the existing trigram search and the real historical corpus.
+
+
+To render a source-by-source evidence report with quotations and exact
+citation positions:
+
+~~~python
+from historypy import render_event_source_comparison
+
+print(render_event_source_comparison(dataset, "event-001"))
+~~~
+
+The report keeps researcher-entered support/contradiction labels and clearly
+flags missing citation locations; it does not decide which source is correct.
