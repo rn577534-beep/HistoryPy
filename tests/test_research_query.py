@@ -1,10 +1,16 @@
 import pytest
 
 from historypy import (
-    HistoricalDate, HistoricalDataset, HistoricalEvent, HistoricalPerson,
-    HistoricalPlace, SourceRecord,
+    HistoricalDataset,
+    HistoricalDate,
+    HistoricalEvent,
+    HistoricalPerson,
+    HistoricalPlace,
+    SourceRecord,
 )
 from historypy.research.query import events_overlapping, search_dataset
+
+
 
 
 def test_search_dataset_matches_names_aliases_and_descriptions():
