@@ -1,10 +1,20 @@
 import pytest
 
 from historypy import (
-    EvidenceLink, HistoricalClaim, HistoricalCivilization, HistoricalDataset,
-    HistoricalDate, HistoricalEvent, HistoricalOrganization, HistoricalPerson,
-    HistoricalPlace, HistoricalRelationship, RelationshipGraph, SourceRecord,
+    EvidenceLink,
+    HistoricalCivilization,
+    HistoricalClaim,
+    HistoricalDataset,
+    HistoricalDate,
+    HistoricalEvent,
+    HistoricalOrganization,
+    HistoricalPerson,
+    HistoricalPlace,
+    HistoricalRelationship,
+    RelationshipGraph,
+    SourceRecord,
 )
+
 
 
 def test_person_and_place_records():
