@@ -1,0 +1,43 @@
+name: Historical Relevance Benchmark
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/benchmark_historian_relevance.py"
+      - "docs/research-benchmarks.md"
+      - ".github/workflows/historical-relevance.yml"
+  workflow_dispatch:
+
+jobs:
+  historiqa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install HistoryPy
+        run: python -m pip install -e .
+      - name: Download pinned CC-BY-4.0 corpus
+        run: |
+          curl --fail --location --retry 3 \
+            https://raw.githubusercontent.com/atomegoyan/historiqa-thirdrepublic/08bf3cc5f25ae5cd065ce8330f4275147081ab66/dataset/corpus_dataset.jsonl \
+            --output corpus_dataset.jsonl
+          curl --fail --location --retry 3 \
+            https://raw.githubusercontent.com/atomegoyan/historiqa-thirdrepublic/08bf3cc5f25ae5cd065ce8330f4275147081ab66/dataset/question_dataset.jsonl \
+            --output question_dataset.jsonl
+      - name: Run real-corpus retrieval evaluation
+        run: |
+          python benchmarks/benchmark_historian_relevance.py \
+            --corpus corpus_dataset.jsonl \
+            --questions question_dataset.jsonl \
+            --top-k 10 \
+            --output historical-relevance-report.json
+      - name: Upload benchmark report
+        uses: actions/upload-artifact@v4
+        with:
+          name: historiqa-relevance-report
+          path: historical-relevance-report.json
+          if-no-files-found: error
