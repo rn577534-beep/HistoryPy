@@ -37,7 +37,6 @@ from historypy.research import (
 __version__ = "0.1.0"
 
 __all__ = [
-    "__version__",
     "EvidenceLink",
     "EvidenceSummary",
     "HistoricalCivilization",
@@ -64,4 +63,5 @@ __all__ = [
     "save_dataset",
     "search_dataset",
     "summarize_claim_evidence",
+    "__version__",
 ]
