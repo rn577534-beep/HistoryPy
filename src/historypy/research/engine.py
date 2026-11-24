@@ -126,24 +126,54 @@ def _record_maps(dataset: HistoricalDataset) -> dict[str, dict[str, object]]:
     }
 
 
+def _range_overlaps(
+    start: HistoricalDate, end: HistoricalDate, period: HistoricalDate
+) -> bool | None:
+    if (
+        start.calendar == "unspecified"
+        or end.calendar != start.calendar
+        or period.calendar != start.calendar
+    ):
+        return None
+    start_lower, _ = start._comparison_bounds()
+    _, end_upper = end._comparison_bounds()
+    period_lower, period_upper = period._comparison_bounds()
+    if period_lower is None and period_upper is None:
+        return None
+    lower = start_lower or (-(10**9), 1, 1)
+    upper = end_upper or (10**9, 12, 31)
+    query_lower = period_lower or (-(10**9), 1, 1)
+    query_upper = period_upper or (10**9, 12, 31)
+    return lower <= query_upper and query_lower <= upper
+
+
 def _matches_period(record: object, period: HistoricalDate, include_indeterminate: bool) -> bool:
-    dates: tuple[HistoricalDate, ...]
     if isinstance(record, HistoricalEvent):
-        dates = (record.date,)
+        result = record.date.overlaps(period)
     elif isinstance(record, HistoricalPerson):
-        dates = tuple(item for item in (record.birth_date, record.death_date) if item)
+        if record.birth_date and record.death_date:
+            result = _range_overlaps(record.birth_date, record.death_date, period)
+        else:
+            dates = tuple(item for item in (record.birth_date, record.death_date) if item)
+            results = tuple(item.overlaps(period) for item in dates)
+            result = True if True in results else (None if None in results else False)
     elif isinstance(record, HistoricalCivilization):
-        dates = tuple(item for item in (record.start_date, record.end_date) if item)
+        if record.start_date and record.end_date:
+            result = _range_overlaps(record.start_date, record.end_date, period)
+        else:
+            dates = tuple(item for item in (record.start_date, record.end_date) if item)
+            results = tuple(item.overlaps(period) for item in dates)
+            result = True if True in results else (None if None in results else False)
     elif isinstance(record, HistoricalOrganization):
-        dates = tuple(item for item in (record.founded, record.dissolved) if item)
+        if record.founded and record.dissolved:
+            result = _range_overlaps(record.founded, record.dissolved, period)
+        else:
+            dates = tuple(item for item in (record.founded, record.dissolved) if item)
+            results = tuple(item.overlaps(period) for item in dates)
+            result = True if True in results else (None if None in results else False)
     else:
         return False
-    if not dates:
-        return include_indeterminate
-    overlaps = tuple(item.overlaps(period) for item in dates)
-    return any(value is True for value in overlaps) or (
-        include_indeterminate and any(value is None for value in overlaps)
-    )
+    return result is True or (result is None and include_indeterminate)
 
 
 def _matches_places(record: object, kind: str, requested: set[str]) -> bool:
