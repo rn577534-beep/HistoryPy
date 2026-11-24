@@ -24,7 +24,7 @@ from historypy.io import (
     load_dataset,
     save_dataset,
 )
-from historypy.research import (
+from historypy.research.geography import (\n    PlaceDistance,\n    great_circle_distance_km,\n    places_within_radius,\n)\nfrom historypy.research import (
     EntityMatchCandidate,
     EvidenceSummary,
     SearchHit,
@@ -54,7 +54,7 @@ __all__ = [
     "HistoricalPerson",
     "HistoricalPlace",
     "HistoricalRelationship",
-    "RelationshipGraph",
+    "RelationshipGraph",\n    "PlaceDistance",
     "SearchHit",
     "SourceMetadataAudit",
     "SourceRecord",
