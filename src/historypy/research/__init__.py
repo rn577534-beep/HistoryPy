@@ -11,15 +11,15 @@ from historypy.research.comparison import (
     MetricObservation,
     compare_metrics,
 )
-from historypy.research.entity_resolution import (
-    EntityMatchCandidate,
-    suggest_entity_matches,
-)
 from historypy.research.engine import (
     ResearchFacets,
     ResearchQuery,
     ResearchSearchResult,
     execute_research_query,
+)
+from historypy.research.entity_resolution import (
+    EntityMatchCandidate,
+    suggest_entity_matches,
 )
 from historypy.research.evidence import (
     EvidenceSummary,
