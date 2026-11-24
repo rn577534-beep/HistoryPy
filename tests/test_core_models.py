@@ -1,6 +1,8 @@
 import pytest
 
-from historypy import EvidenceLink, HistoricalDate, HistoricalEvent, SourceRecord
+from historypy import (
+    EvidenceLink, HistoricalClaim, HistoricalDate, HistoricalEvent, SourceRecord
+)
 
 
 def test_exact_date_display():
@@ -12,11 +14,54 @@ def test_exact_date_display():
 
 
 def test_date_range_overlap():
-    first = HistoricalDate(earliest="1900-01-01", latest="1910-12-31")
-    second = HistoricalDate(earliest="1910-01-01", latest="1920-12-31")
-    third = HistoricalDate(earliest="1921-01-01", latest="1922-01-01")
-    assert first.overlaps(second)
-    assert not first.overlaps(third)
+    first = HistoricalDate(
+        earliest="1900-01-01", latest="1910-12-31", calendar="gregorian"
+    )
+    second = HistoricalDate(
+        earliest="1910-01-01", latest="1920-12-31", calendar="gregorian"
+    )
+    third = HistoricalDate(
+        earliest="1921-01-01", latest="1922-01-01", calendar="gregorian"
+    )
+    assert first.overlaps(second) is True
+    assert first.overlaps(third) is False
+
+
+def test_bce_years_use_astronomical_numbering():
+    one_bce = HistoricalDate(
+        earliest_year=0, latest_year=0, precision="year", calendar="proleptic_gregorian"
+    )
+    forty_four_bce = HistoricalDate(
+        earliest_year=-43, latest_year=-43, precision="year",
+        calendar="proleptic_gregorian",
+    )
+    assert one_bce.display() == "1 BCE (proleptic_gregorian)"
+    assert forty_four_bce.display() == "44 BCE (proleptic_gregorian)"
+
+
+def test_bce_and_ce_interval_comparison():
+    bce = HistoricalDate(
+        earliest_year=-100, latest_year=0, calendar="proleptic_gregorian"
+    )
+    ce = HistoricalDate(
+        earliest_year=1, latest_year=100, calendar="proleptic_gregorian"
+    )
+    assert bce.overlaps(ce) is False
+
+
+def test_unknown_or_incompatible_dates_are_not_guessed():
+    unknown = HistoricalDate(original_expression="early medieval period")
+    known = HistoricalDate(earliest_year=900, latest_year=950)
+    different_calendar = HistoricalDate(
+        earliest_year=900, latest_year=950, calendar="Hijri"
+    )
+    assert unknown.overlaps(known) is None
+    assert known.overlaps(different_calendar) is None
+
+
+def test_rejects_mixed_date_bound_formats():
+    with pytest.raises(ValueError, match="not both"):
+        HistoricalDate(earliest="1900-01-01", earliest_year=1900)
 
 
 def test_rejects_reversed_date_range():
@@ -50,6 +95,13 @@ def test_evidence_link_preserves_contradiction():
         locator="folio 12",
     )
     assert link.relation == "contradicts"
+
+
+def test_claim_is_a_first_class_record():
+    claim = HistoricalClaim(
+        id="claim-001", statement="An illustrative research proposition"
+    )
+    assert claim.statement.startswith("An illustrative")
 
 
 def test_historical_event():
