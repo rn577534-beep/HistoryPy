@@ -221,6 +221,12 @@ class EvidenceLink:
     locator: str | None = None
     quotation: str | None = None
     interpretation_note: str | None = None
+    page: str | None = None
+    paragraph: str | None = None
+    archive_shelfmark: str | None = None
+    url_fragment: str | None = None
+    transcription_line: str | None = None
+    timecode: str | None = None
 
     def __post_init__(self) -> None:
         if not self.claim_id.strip() or not self.source_id.strip():
