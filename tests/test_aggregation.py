@@ -1,4 +1,5 @@
 import pytest
+from threading import Barrier
 
 from historypy.integrations import (
     ExternalRecord,
@@ -92,3 +93,18 @@ def test_aggregation_rejects_invalid_query_and_limit():
         search_all([GoodProvider()], " ")
     with pytest.raises(ValueError):
         search_all([GoodProvider()], "Bengal", limit_per_provider=0)
+
+
+def test_search_all_runs_independent_providers_concurrently():
+    barrier = Barrier(2)
+
+    class CoordinatedProvider:
+        def search(self, query, *, limit=10):
+            barrier.wait(timeout=2)
+            return (record("parallel", query, "Parallel result"),)
+
+    report = search_all(
+        [CoordinatedProvider(), CoordinatedProvider()], "history", max_workers=2
+    )
+    assert len(report.records) == 2
+    assert report.failures == ()
