@@ -85,9 +85,9 @@ def main() -> None:
         if result_ids(linear_hits) != result_ids(indexed_hits):
             raise RuntimeError(f"Indexed and linear results differ for query: {query!r}")
         linear_ms = median_ms(
-            lambda: search_dataset(dataset, query, limit=None), args.repeat
+            lambda query=query: search_dataset(dataset, query, limit=None), args.repeat
         )
-        indexed_ms = median_ms(lambda: index.search(query, limit=None), args.repeat)
+        indexed_ms = median_ms(lambda query=query: index.search(query, limit=None), args.repeat)
         query_results.append(
             {
                 "query": query,
