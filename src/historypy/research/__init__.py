@@ -1,12 +1,12 @@
 """Research utilities for evidence-aware historical analysis."""
 
-from historypy.research.bm25 import BM25SearchHit, BM25SearchIndex
 from historypy.research.audit_trail import (
     ResearchAction,
     append_research_action,
     content_hash,
     verify_research_audit_trail,
 )
+from historypy.research.bm25 import BM25SearchHit, BM25SearchIndex
 from historypy.research.comparison import (
     MetricComparison,
     MetricObservation,
