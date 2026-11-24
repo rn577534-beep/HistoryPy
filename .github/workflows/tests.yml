@@ -21,10 +21,6 @@ jobs:
         run: python -m pip install -e ".[dev]"
       - name: Run test suite
         run: pytest
-      - name: Diagnose BM25 import ordering
-        run: |
-          ruff check --fix src/historypy/research/bm25.py || true
-          git diff -- src/historypy/research/bm25.py
       - name: Lint
         run: ruff check .
       - name: Smoke-test synthetic search benchmark
