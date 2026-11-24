@@ -6,6 +6,7 @@ asserts historical truth; researchers explicitly select records for import.
 from __future__ import annotations
 
 import re
+from concurrent.futures import ThreadPoolExecutor
 from collections import defaultdict
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -60,25 +61,49 @@ class AggregationReport:
         return sum(result.error is None for result in self.results)
 
 
+def _search_one(
+    provider: SearchProvider, query: str, limit: int
+) -> ProviderSearchResult:
+    name = type(provider).__name__
+    try:
+        records = tuple(provider.search(query, limit=limit))
+        if any(not isinstance(item, ExternalRecord) for item in records):
+            raise TypeError("provider returned a non-ExternalRecord result")
+        return ProviderSearchResult(name, records)
+    except Exception as exc:  # noqa: BLE001 - isolate failures from independent providers.
+        return ProviderSearchResult(name, (), f"{type(exc).__name__}: {exc}")
+
+
 def search_all(
-    providers: Sequence[SearchProvider], query: str, *, limit_per_provider: int = 10
+    providers: Sequence[SearchProvider], query: str, *,
+    limit_per_provider: int = 10, max_workers: int | None = None,
 ) -> AggregationReport:
-    """Search providers independently; preserve successful results if one fails."""
+    """Search independent providers concurrently while preserving input order.
+
+    Worker count is bounded by provider count and eight by default. Set
+    max_workers=1 to force sequential execution.
+    """
     if not isinstance(query, str) or not query.strip():
         raise ValueError("query cannot be empty")
     if not 1 <= limit_per_provider <= 100:
         raise ValueError("limit_per_provider must be between 1 and 100")
-    results = []
-    for provider in providers:
-        name = type(provider).__name__
-        try:
-            records = tuple(provider.search(query, limit=limit_per_provider))
-            if any(not isinstance(item, ExternalRecord) for item in records):
-                raise TypeError("provider returned a non-ExternalRecord result")
-            results.append(ProviderSearchResult(name, records))
-        except Exception as exc:  # noqa: BLE001 - isolate failures from independent providers.
-            results.append(ProviderSearchResult(name, (), f"{type(exc).__name__}: {exc}"))
-    return AggregationReport(query.strip(), tuple(results))
+    if max_workers is not None and (
+        not isinstance(max_workers, int) or isinstance(max_workers, bool)
+        or max_workers < 1
+    ):
+        raise ValueError("max_workers must be a positive integer or None")
+    if not providers:
+        return AggregationReport(query.strip(), ())
+    workers = min(len(providers), max_workers or 8)
+    if workers == 1:
+        results = tuple(_search_one(provider, query, limit_per_provider) for provider in providers)
+    else:
+        with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="historypy-search") as pool:
+            results = tuple(pool.map(
+                lambda provider: _search_one(provider, query, limit_per_provider),
+                providers,
+            ))
+    return AggregationReport(query.strip(), results)
 
 
 def _normalized_title(record: ExternalRecord) -> str:
