@@ -91,7 +91,7 @@ def suggest_entity_matches(
 
     candidates: list[EntityMatchCandidate] = []
     for kind in dict.fromkeys(kinds):
-        records = list(_names_for(dataset, kind))
+        records = sorted(_names_for(dataset, kind), key=lambda item: item[0])
         for index, (left_id, left_label, left_names) in enumerate(records):
             for right_id, right_label, right_names in records[index + 1:]:
                 if left_id == right_id:
