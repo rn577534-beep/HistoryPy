@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from dataclasses import dataclass
 from collections.abc import Iterable
+from dataclasses import dataclass
 
 from historypy.core.dataset import HistoricalDataset
 from historypy.research.query import SearchHit, _searchable_records
@@ -17,7 +17,7 @@ class DatasetSearchIndex:
     postings: dict[str, tuple[int, ...]]
 
     @classmethod
-    def build(cls, dataset: HistoricalDataset) -> "DatasetSearchIndex":
+    def build(cls, dataset: HistoricalDataset) -> DatasetSearchIndex:
         records: list[tuple[str, str, str, str]] = []
         mutable: dict[str, set[int]] = defaultdict(set)
         for kind, record_id, label, searchable in _searchable_records(dataset):
