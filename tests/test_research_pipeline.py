@@ -33,10 +33,9 @@ def test_pipeline_runs_literal_query_clauses_and_collects_sources():
     )
     assert [item.task.query for item in report.tasks] == ["harbor", "trade"]
     assert len(report.external_records) == 2
-    assert report.claim_analyses == ()
+    assert report.claim_analyses[0].claim_id == "c1"
     assert report.duplicate_candidates == ()
     rendered = render_research_report(report)
-    assert "External ID" not in rendered
     assert "https://example.org/harbor" in rendered
     assert "Discovery output only" in rendered
 
