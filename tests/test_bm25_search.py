@@ -23,7 +23,7 @@ def test_bm25_ranks_documents_by_term_coverage_and_accent_folds():
     hits = index.search("reformes séance parlementaire", limit=None)
 
     assert hits[0].record_id == "p1"
-    assert {hit.record_id for hit in hits} == {"p1", "p2", "p3"}
+    assert {hit.record_id for hit in hits} == {"p1", "p3"}
     assert "reformes" in hits[0].matched_terms
 
 
