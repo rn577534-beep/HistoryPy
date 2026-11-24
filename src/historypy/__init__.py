@@ -55,6 +55,7 @@ from historypy.io import (
 )
 from historypy.research import (
     ClaimAssessment,
+    DatasetProvenanceReport,
     DatasetProfile,
     DatasetQualityReport,
     DatasetSearchIndex,
@@ -70,10 +71,13 @@ from historypy.research import (
     ResearchSearchResult,
     SearchHit,
     SourceMetadataAudit,
+    TimelineEntry,
+    TimelineResult,
     append_research_action,
     assess_claim,
     assess_dataset_quality,
     audit_dataset_sources,
+    audit_dataset_provenance,
     audit_source_record,
     claims_with_conflicting_evidence,
     compare_metrics,
@@ -87,16 +91,18 @@ from historypy.research import (
     render_claim_report,
     search_dataset,
     suggest_entity_matches,
+    timeline_for_dataset,
     summarize_claim_evidence,
     verify_research_audit_trail,
 )
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 __all__ = [
     "AggregationReport",
     "ClaimAssessment",
     "DatasetProfile",
+    "DatasetProvenanceReport",
     "DatasetQualityReport",
     "DatasetSearchIndex",
     "DuplicateCandidateGroup",
@@ -138,6 +144,8 @@ __all__ = [
     "SearchProvider",
     "SmithsonianSearch",
     "SourceMetadataAudit",
+    "TimelineEntry",
+    "TimelineResult",
     "SourceRecord",
     "ValidationIssue",
     "WikidataSearch",
@@ -146,6 +154,7 @@ __all__ = [
     "assess_claim",
     "assess_dataset_quality",
     "audit_dataset_sources",
+    "audit_dataset_provenance",
     "audit_source_record",
     "claims_with_conflicting_evidence",
     "compare_metadata",
@@ -172,6 +181,7 @@ __all__ = [
     "suggest_entity_matches",
     "summarize_claim_evidence",
     "temporal_graph",
+    "timeline_for_dataset",
     "to_source_record",
     "verify_research_audit_trail",
 ]
