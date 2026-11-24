@@ -3,14 +3,17 @@ from dataclasses import replace
 import pytest
 
 from historypy import (
-    HistoricalClaim, HistoricalDataset, HistoricalEvent, HistoricalDate,
-    HistoricalPerson, SourceRecord,
+    HistoricalClaim,
+    HistoricalDataset,
+    HistoricalDate,
+    HistoricalEvent,
+    HistoricalPerson,
 )
 from historypy.research.audit_trail import append_research_action, verify_research_audit_trail
 from historypy.research.comparison import MetricObservation, compare_metrics
+from historypy.research.profile import profile_dataset
 from historypy.research.quality import assess_dataset_quality
 from historypy.research.search_index import DatasetSearchIndex
-from historypy.research.profile import profile_dataset
 
 
 def test_hash_linked_audit_trail_and_tamper_detection():
