@@ -150,3 +150,10 @@ The JSON format declares the schema name and version. Unknown schema versions an
 Early development / pre-alpha. APIs may change. This repository does not yet ship a comprehensive historical dataset, a calendar-conversion engine, automatic source authentication, or a production research database.
 
 See [architecture](docs/architecture.md) and [contribution guidelines](CONTRIBUTING.md).
+
+
+## Automated checks
+
+The repository currently includes 44 test cases covering chronology, BCE date handling, entity validation, dataset references, graph traversal, evidence conflict summaries, and JSON round trips. GitHub Actions is configured to run the test suite and Ruff on Python 3.10–3.13.
+
+A configured workflow is not the same as a verified passing run. Check the Actions tab for the latest execution before treating a commit as release-ready.
