@@ -126,11 +126,16 @@ def test_rejects_duplicate_source_ids():
 def test_timeline_sorts_bce_before_ce_and_unknown_last():
     bce = HistoricalEvent(
         id="bce", title="BCE event",
-        date=HistoricalDate(earliest_year=-43, latest_year=-43),
+        date=HistoricalDate(
+            earliest_year=-43, latest_year=-43, calendar="proleptic_gregorian"
+        ),
     )
     ce = HistoricalEvent(
         id="ce", title="CE event",
-        date=HistoricalDate(earliest="0001-01-01", latest="0001-01-01"),
+        date=HistoricalDate(
+            earliest="0001-01-01", latest="0001-01-01",
+            calendar="proleptic_gregorian",
+        ),
     )
     unknown = HistoricalEvent(
         id="unknown", title="Undated event",
@@ -143,13 +148,39 @@ def test_timeline_sorts_bce_before_ce_and_unknown_last():
 
 def test_find_overlapping_events_omits_unknown_dates():
     first = HistoricalEvent(
-        id="a", title="A", date=HistoricalDate(earliest_year=100, latest_year=200)
+        id="a", title="A", date=HistoricalDate(
+            earliest_year=100, latest_year=200, calendar="proleptic_gregorian"
+        )
     )
     second = HistoricalEvent(
-        id="b", title="B", date=HistoricalDate(earliest_year=150, latest_year=250)
+        id="b", title="B", date=HistoricalDate(
+            earliest_year=150, latest_year=250, calendar="proleptic_gregorian"
+        )
     )
     unknown = HistoricalEvent(
         id="c", title="C", date=HistoricalDate(original_expression="uncertain")
     )
     pairs = find_overlapping_events([first, second, unknown])
     assert [(a.id, b.id) for a, b in pairs] == [("a", "b")]
+
+
+
+def test_unspecified_calendar_overlap_is_unknown():
+    first = HistoricalDate(earliest_year=100, latest_year=200)
+    second = HistoricalDate(earliest_year=150, latest_year=250)
+    assert first.overlaps(second) is None
+
+
+def test_timeline_rejects_mixed_calendars():
+    gregorian = HistoricalEvent(
+        id="g", title="Gregorian", date=HistoricalDate(
+            earliest="1900-01-01", latest="1900-01-01", calendar="gregorian"
+        )
+    )
+    hijri = HistoricalEvent(
+        id="h", title="Hijri", date=HistoricalDate(
+            earliest_year=1300, latest_year=1300, calendar="Hijri"
+        )
+    )
+    with pytest.raises(ValueError, match="one explicit calendar"):
+        sort_events([gregorian, hijri])
