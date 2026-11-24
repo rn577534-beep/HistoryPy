@@ -24,13 +24,17 @@ from historypy.graph import (
 )
 from historypy.integrations import (
     AggregationReport,
+    DuplicateCandidateGroup,
     EuropeanaSearch,
     ExternalRecord,
     HarvardArtMuseumsSearch,
     InternetArchiveSearch,
     LibraryOfCongressSearch,
     MediaWikiSearch,
+    MetadataConflict,
     ProviderError,
+    ProviderSearchResult,
+    SearchProvider,
     SmithsonianSearch,
     WikidataSearch,
     compare_metadata,
