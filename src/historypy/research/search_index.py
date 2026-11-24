@@ -46,7 +46,7 @@ class DatasetSearchIndex:
                     # list is already sorted and contains no duplicate index.
                     posting.append(index)
         postings = MappingProxyType({
-            gram: values.toreadonly() for gram, values in mutable.items()
+            gram: memoryview(values).toreadonly() for gram, values in mutable.items()
         })
         return cls(tuple(records), postings)
 
