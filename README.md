@@ -71,7 +71,7 @@ print(events_overlapping(dataset, period))
 | `historypy.chronology` | Date interval comparisons and event timeline utilities |
 | `historypy.graph` | Directed relationship graph, neighbors, paths, components |
 | `historypy.io` | Versioned JSON and lossless multi-table CSV bundle interchange |
-| `historypy.research.evidence` | Claim evidence retrieval and transparent conflict summaries |
+| `historypy.research.evidence` | Claim evidence retrieval and transparent conflict summaries |\n| `historypy.research.evidence_analysis` | Evidence relation counts, source-type coverage, and locator completeness |\n| `historypy.research.semantic` | Embedding-backed semantic retrieval using an explicitly supplied model |
 | `historypy.research.query` | Lexical dataset search and date-overlap event queries |
 | `historypy.research.entity_resolution` | Conservative possible-duplicate suggestions for human review |
 | `historypy.research.source_audit` | Bibliographic metadata completeness checks, not credibility scores |\n| `historypy.research.geography` | Great-circle distance and radius search for geocoded places |
@@ -271,7 +271,7 @@ Federated provider requests run concurrently by default (bounded to eight worker
 
 ## Development status
 
-Early development / pre-alpha. APIs may change. This repository does not yet ship a comprehensive historical dataset, a calendar-conversion engine, automatic source authentication, semantic search, entity resolution, or a production research database.
+Early development / pre-alpha. APIs may change. This repository does not yet ship a comprehensive historical dataset, a calendar-conversion engine, automatic source authentication, a bundled embedding model, or a production hosted research service. Semantic retrieval is available through a caller-supplied embedding model; entity matching remains a human-reviewed suggestion workflow.
 
 See [architecture](docs/architecture.md) and [contribution guidelines](CONTRIBUTING.md).
 
