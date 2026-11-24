@@ -131,7 +131,9 @@ def test_normalized_store_year_range_handles_bce_and_calendar(tmp_path):
         "chronology", -10, 10, kind="events", calendar="julian"
     )
     assert [item.record_id for item in julian] == ["open"]
-    assert store.query_year_range(\n        "chronology", -10, 10, calendar="gregorian"\n    ) == ()
+    assert store.query_year_range(
+        "chronology", -10, 10, calendar="gregorian"
+    ) == ()
     with_undated = store.query_year_range(
         "chronology", -10, 10, include_undated=True
     )
