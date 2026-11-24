@@ -29,7 +29,7 @@ def assess_claim(dataset: HistoricalDataset, claim_id: str) -> ClaimAssessment:
     contradict = summary.contradicting_source_ids
     if support and contradict:
         status: AssessmentStatus = "mixed"
-        explanation = "Recorded evidence includes both supporting and contradicting links."
+        explanation = "Recorded links are mixed; this classification is not proof either way."
     elif support:
         status = "supported"
         explanation = "At least one source is linked as supporting; this is not proof."
