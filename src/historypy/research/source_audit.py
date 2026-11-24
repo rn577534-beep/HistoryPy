@@ -21,7 +21,7 @@ class SourceMetadataAudit:
     @property
     def has_locator(self) -> bool:
         """Whether a URL or archival/catalogue locator is recorded."""
-        return "url" in self.present_fields or "archive_reference" in self.present_fields
+        return "url_or_archive_reference" in self.present_fields
 
 
 def audit_source_record(source: SourceRecord) -> SourceMetadataAudit:
