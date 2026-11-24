@@ -6,9 +6,9 @@ asserts historical truth; researchers explicitly select records for import.
 from __future__ import annotations
 
 import re
-from concurrent.futures import ThreadPoolExecutor
 from collections import defaultdict
 from collections.abc import Sequence
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import Protocol
 
