@@ -6,7 +6,7 @@ import os
 from urllib.parse import urlencode
 
 from historypy.integrations.historical_apis import (
-    ExternalRecord, ProviderError, _clean, _request_json, _retrieved_at,
+    ExternalRecord, _clean, _request_json, _retrieved_at,
 )
 
 
