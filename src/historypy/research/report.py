@@ -51,6 +51,33 @@ def render_claim_report(dataset: HistoricalDataset, claim_id: str) -> str:
         lines.append(f"- {source.title} (`{source.id}`)")
     if not other_ids:
         lines.append("- None recorded.")
+    lines.extend(["", "## Recorded quotations and citation locators", ""])
+    claim_links = tuple(link for link in dataset.evidence if link.claim_id == claim_id)
+    for link in claim_links:
+        source = sources[link.source_id]
+        lines.append(f"- **{source.title}** ({link.relation}; source ID: `{source.id}`)")
+        if link.quotation:
+            lines.append(f"  - Quotation: {link.quotation}")
+        locator_parts = [
+            f"locator: {link.locator}" if link.locator else None,
+            f"page: {link.page}" if link.page else None,
+            f"paragraph: {link.paragraph}" if link.paragraph else None,
+            f"archive shelfmark: {link.archive_shelfmark}" if link.archive_shelfmark else None,
+            f"URL fragment: {link.url_fragment}" if link.url_fragment else None,
+            f"transcription line: {link.transcription_line}" if link.transcription_line else None,
+            f"timecode: {link.timecode}" if link.timecode else None,
+        ]
+        recorded_locators = [part for part in locator_parts if part]
+        lines.append(
+            f"  - Citation location: {'; '.join(recorded_locators)}"
+            if recorded_locators else "  - Citation location: not recorded"
+        )
+        if source.url:
+            lines.append(f"  - Source URL: {source.url}")
+        if link.interpretation_note:
+            lines.append(f"  - Researcher note: {link.interpretation_note}")
+    if not claim_links:
+        lines.append("- No evidence links are recorded for this claim.")
     lines.extend(["", "## Scope and interpretation", "",
                   claim.scope_note or "No scope note supplied.",
                   "", claim.interpretation_note or "No interpretation note supplied.",
