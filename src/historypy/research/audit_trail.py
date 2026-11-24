@@ -5,10 +5,10 @@ not a digital signature and does not prove who authored an entry.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
-from hashlib import sha256
 import json
+from dataclasses import dataclass
 from datetime import datetime
+from hashlib import sha256
 
 
 def _canonical(payload: dict[str, object]) -> str:
