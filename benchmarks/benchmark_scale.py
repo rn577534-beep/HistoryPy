@@ -16,7 +16,13 @@ import statistics
 import time
 import tracemalloc
 
-from historypy import DatasetSearchIndex, HistoricalDataset, HistoricalPerson, __version__, search_dataset
+from historypy import (
+    DatasetSearchIndex,
+    HistoricalDataset,
+    HistoricalPerson,
+    __version__,
+    search_dataset,
+)
 
 
 def build_dataset(record_count: int) -> HistoricalDataset:
