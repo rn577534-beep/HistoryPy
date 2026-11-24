@@ -12,8 +12,8 @@ from historypy.integrations import (
     MediaWikiSearch,
     ProviderError,
     WikidataSearch,
+    historical_apis,
 )
-from historypy.integrations import historical_apis
 
 
 class FakeResponse:
