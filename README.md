@@ -507,3 +507,32 @@ print(analysis.locator_coverage)
 ~~~
 
 This report summarizes recorded support/contradiction/context/mention links, source-type metadata, and whether source locators were recorded. Source types and locator completeness do not prove reliability or independence. The analysis never resolves disputes automatically.
+
+
+## Intelligent historical research pipeline (0.9)
+
+The orchestration layer combines local lexical search, optional caller-supplied semantic retrieval, and opt-in federated provider discovery. Query clauses are split only where the researcher explicitly enters semicolons or new lines; HistoryPy does not invent subquestions or entities.
+
+```python
+from historypy import (
+    HistoricalDataset, ResearchPipeline, render_research_report,
+    MediaWikiSearch, WikidataSearch, LibraryOfCongressSearch,
+)
+
+pipeline = ResearchPipeline(
+    dataset,
+    providers=(MediaWikiSearch(), WikidataSearch(), LibraryOfCongressSearch()),
+)
+report = pipeline.run(
+    "Mughal Empire; Bengal trade",
+    include_semantic=False,  # set up a SemanticSearchIndex/embedder to enable it
+    include_external=True,
+)
+print(render_research_report(report))
+print(report.gaps)
+print(report.provider_failures)
+```
+
+The pipeline retains local, semantic, and external results as separate channels. It reports evidence coverage for locally matched claims, provider failures, duplicate candidates, metadata conflicts, and research gaps. Markdown reports include local record IDs and external URLs/retrieval timestamps where available. External records remain discovery leads and are not automatically imported. The pipeline does not synthesize historical narratives, infer source independence, or rank sources by credibility. Semantic retrieval requires the same caller-supplied embedding model used to build the index. External API calls are opt-in and subject to provider terms, rate limits, network availability, and credentials.
+
+The automated tests use fixture providers and do not constitute live provider validation or a benchmark of historical accuracy. Query speed and research completeness depend on the dataset, embedding model, providers, and environment; no fixed performance or accuracy guarantee is made.
