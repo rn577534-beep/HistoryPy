@@ -24,13 +24,20 @@ from historypy.io import (
     load_dataset,
     save_dataset,
 )
+from historypy.research import (
+    EvidenceSummary,
+    claims_with_conflicting_evidence,
+    evidence_for_claim,
+    summarize_claim_evidence,
+)
 
 __version__ = "0.1.0"
 
 __all__ = [
-    "EvidenceLink", "HistoricalClaim", "HistoricalCivilization", "HistoricalDataset",
+    "EvidenceLink", "EvidenceSummary", "HistoricalClaim", "HistoricalCivilization", "HistoricalDataset",
     "HistoricalDate", "HistoricalEvent", "HistoricalOrganization", "HistoricalPerson",
     "HistoricalPlace", "HistoricalRelationship", "RelationshipGraph", "SourceRecord",
     "ValidationIssue", "dataset_from_dict", "dataset_from_json", "dataset_to_dict",
-    "dataset_to_json", "load_dataset", "save_dataset", "__version__",
+    "dataset_to_json", "load_dataset", "save_dataset", "evidence_for_claim",
+    "summarize_claim_evidence", "claims_with_conflicting_evidence", "__version__",
 ]
