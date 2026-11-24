@@ -44,6 +44,10 @@ def audit_dataset_provenance(dataset: HistoricalDataset) -> DatasetProvenanceRep
                     usage[source_id] += 1
         records_without.append((kind, missing))
 
+    for link in dataset.evidence:
+        if link.source_id in usage:
+            usage[link.source_id] += 1
+
     relation_names = ("supports", "contradicts", "contextualizes", "mentions")
     relation_counts = tuple(sorted(
         (relation, sum(link.relation == relation for link in dataset.evidence))
