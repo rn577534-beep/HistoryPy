@@ -25,18 +25,21 @@ from historypy.io import (
     save_dataset,
 )
 from historypy.research import (
+    EntityMatchCandidate,
     EvidenceSummary,
     SearchHit,
     claims_with_conflicting_evidence,
     events_overlapping,
     evidence_for_claim,
     search_dataset,
+    suggest_entity_matches,
     summarize_claim_evidence,
 )
 
 __version__ = "0.1.0"
 
 __all__ = [
+    "EntityMatchCandidate",
     "EvidenceLink",
     "EvidenceSummary",
     "HistoricalCivilization",
@@ -64,4 +67,5 @@ __all__ = [
     "save_dataset",
     "search_dataset",
     "summarize_claim_evidence",
+    "suggest_entity_matches",
 ]
