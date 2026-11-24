@@ -46,7 +46,7 @@ def test_pipeline_reports_provider_failures_and_no_truth_claims():
         claims=(HistoricalClaim("c1", "A claim without evidence"),),
     )
     report = ResearchPipeline(dataset, providers=(BrokenProvider(),)).run(
-        "claim", include_semantic=False
+        "unmatched-term", include_semantic=False
     )
     assert report.provider_failures
     assert any("failed" in gap for gap in report.gaps)
