@@ -12,7 +12,7 @@ def test_great_circle_distance_known_city_pair():
     assert distance == pytest.approx(111.195, abs=0.01)
 
 
-def test_places_within_radius_sorts_and_omits_ung geocoded():
+def test_places_within_radius_sorts_and_omits_ungeocoded():
     dataset = HistoricalDataset(places=(
         HistoricalPlace(id="far", name="Far", latitude=23.0, longitude=91.0),
         HistoricalPlace(id="near", name="Near", latitude=23.7, longitude=90.4),
