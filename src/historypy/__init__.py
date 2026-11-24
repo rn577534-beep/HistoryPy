@@ -43,7 +43,10 @@ from historypy.integrations import (
     to_source_record,
 )
 from historypy.io import (
+    NormalizedSQLiteStore,
     SQLiteDatasetStore,
+    SourceUsage,
+    StoredRecord,
     dataset_from_dict,
     dataset_from_json,
     dataset_to_dict,
@@ -130,6 +133,7 @@ __all__ = [
     "MetadataConflict",
     "MetricComparison",
     "MetricObservation",
+    "NormalizedSQLiteStore",
     "PlaceDistance",
     "ProviderError",
     "ProviderSearchResult",
@@ -145,6 +149,8 @@ __all__ = [
     "SmithsonianSearch",
     "SourceMetadataAudit",
     "SourceRecord",
+    "SourceUsage",
+    "StoredRecord",
     "TimelineEntry",
     "TimelineResult",
     "ValidationIssue",
