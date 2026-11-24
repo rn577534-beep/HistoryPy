@@ -1,5 +1,3 @@
-import json
-
 import pytest
 
 from historypy import (
@@ -118,37 +116,7 @@ def test_collection_adapters_require_api_keys(monkeypatch):
         HarvardArtMuseumsSearch()
 
 
-class FakeResponse:
-    def __init__(self, payload):
-        self.payload = json.dumps(payload).encode("utf-8")
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args):
-        return None
-
-    def read(self):
-        return self.payload
-
-
 def test_smithsonian_adapter_normalizes_item_metadata(monkeypatch):
-    captured = {}
-
-    def fake_urlopen(request, timeout):
-        captured["url"] = request.full_url
-        return FakeResponse({
-            "response": {"rows": [{
-                "id": "edanmdm:test_1",
-                "content": {
-                    "descriptiveNonRepeating": {
-                        "record_ID": "test_1", "record_link": "https://si.edu/object/1"
-                    },
-                    "freetext": {"title": [{"content": "Bronze object"}]},
-                },
-            }]},
-        })
-
     monkeypatch.setattr(collection_apis, "_request_json", lambda url, headers=None: {
         "response": {"rows": [{
             "id": "edanmdm:test_1",
