@@ -21,15 +21,15 @@ from historypy.research.entity_resolution import (
     EntityMatchCandidate,
     suggest_entity_matches,
 )
-from historypy.research.evidence_analysis import (
-    ClaimEvidenceAnalysis,
-    analyze_claim_evidence,
-)
 from historypy.research.evidence import (
     EvidenceSummary,
     claims_with_conflicting_evidence,
     evidence_for_claim,
     summarize_claim_evidence,
+)
+from historypy.research.evidence_analysis import (
+    ClaimEvidenceAnalysis,
+    analyze_claim_evidence,
 )
 from historypy.research.geography import (
     PlaceDistance,
