@@ -73,3 +73,22 @@ length normalization. Query terms are accent-folded (for example, French
 query terms. Scores are ranking signals, not confidence or truth probabilities.
 The real-corpus benchmark compares BM25 with the existing all-terms trigram
 retriever so relevance changes can be measured rather than assumed.
+
+
+## Synthetic scale benchmark results
+
+On the GitHub Actions Python 3.12.16 Linux runner, the compact trigram index
+completed both requested synthetic scales with exact ordered result parity:
+
+| Records | Index build | Additional Python memory during build | Indexed query | Linear query | Observed speedup |
+|---:|---:|---:|---:|---:|---:|
+| 100,000 | 1.459 s | 44.325 MiB | 4.397 ms | 91.849 ms | 20.89× |
+| 1,000,000 | 14.581 s | 440.223 MiB | 57.124 ms | 899.139 ms | 15.74× |
+
+These are single-run observations from one selective synthetic query, not
+production guarantees. The 1M build's measured Python allocation peak was
+about 80% lower than the earlier set-based postings implementation
+(2,178.113 MiB on the same benchmark setup). The compact index uses packed
+32-bit posting lists; its current limit is 2^32 records. Query-time temporary
+allocations and pre-existing dataset memory are separate from index-build
+memory, and tracemalloc does not report total process RSS.
