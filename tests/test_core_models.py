@@ -3,6 +3,7 @@ import pytest
 from historypy import (
     EvidenceLink, HistoricalClaim, HistoricalDate, HistoricalEvent, SourceRecord
 )
+from historypy.chronology import find_overlapping_events, sort_events
 
 
 def test_exact_date_display():
@@ -120,3 +121,35 @@ def test_rejects_duplicate_source_ids():
             date=HistoricalDate(original_expression="unknown"),
             source_ids=("source-001", "source-001"),
         )
+
+
+def test_timeline_sorts_bce_before_ce_and_unknown_last():
+    bce = HistoricalEvent(
+        id="bce", title="BCE event",
+        date=HistoricalDate(earliest_year=-43, latest_year=-43),
+    )
+    ce = HistoricalEvent(
+        id="ce", title="CE event",
+        date=HistoricalDate(earliest="0001-01-01", latest="0001-01-01"),
+    )
+    unknown = HistoricalEvent(
+        id="unknown", title="Undated event",
+        date=HistoricalDate(original_expression="date unknown"),
+    )
+    assert [event.id for event in sort_events([unknown, ce, bce])] == [
+        "bce", "ce", "unknown"
+    ]
+
+
+def test_find_overlapping_events_omits_unknown_dates():
+    first = HistoricalEvent(
+        id="a", title="A", date=HistoricalDate(earliest_year=100, latest_year=200)
+    )
+    second = HistoricalEvent(
+        id="b", title="B", date=HistoricalDate(earliest_year=150, latest_year=250)
+    )
+    unknown = HistoricalEvent(
+        id="c", title="C", date=HistoricalDate(original_expression="uncertain")
+    )
+    pairs = find_overlapping_events([first, second, unknown])
+    assert [(a.id, b.id) for a, b in pairs] == [("a", "b")]
