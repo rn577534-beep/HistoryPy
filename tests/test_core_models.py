@@ -189,3 +189,8 @@ def test_timeline_rejects_mixed_calendars():
 def test_astronomical_year_bounds_must_be_integers():
     with pytest.raises(TypeError, match="earliest_year"):
         HistoricalDate(earliest_year="44 BCE")
+
+
+def test_iso_dates_require_canonical_format():
+    with pytest.raises(ValueError, match="canonical"):
+        HistoricalDate(earliest="19470814")
