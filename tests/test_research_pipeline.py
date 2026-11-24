@@ -1,6 +1,10 @@
 from historypy import (
-    HistoricalClaim, HistoricalDataset, SourceRecord, EvidenceLink,
-    ResearchPipeline, render_research_report,
+    EvidenceLink,
+    HistoricalClaim,
+    HistoricalDataset,
+    ResearchPipeline,
+    SourceRecord,
+    render_research_report,
 )
 from historypy.integrations import ExternalRecord
 
