@@ -1,10 +1,10 @@
 """BM25 lexical retrieval for historical datasets."""
 from __future__ import annotations
 
-from collections import Counter, abc, defaultdict
 import math
 import re
 import unicodedata
+from collections import Counter, abc, defaultdict
 from dataclasses import dataclass
 from types import MappingProxyType
 
@@ -41,7 +41,7 @@ class BM25SearchIndex:
 
     records: tuple[tuple[str, str, str], ...]
     term_frequencies: tuple[abc.Mapping[str, int], ...]
-    postings: collections.abc.Mapping[str, tuple[tuple[int, int], ...]]
+    postings: abc.Mapping[str, tuple[tuple[int, int], ...]]
     document_lengths: tuple[int, ...]
     average_document_length: float
     k1: float = 1.5
@@ -86,7 +86,7 @@ class BM25SearchIndex:
         self,
         query: str,
         *,
-        kinds: collections.abc.Iterable[str] | None = None,
+        kinds: abc.Iterable[str] | None = None,
         limit: int | None = 20,
     ) -> tuple[BM25SearchHit, ...]:
         """Return OR-matched results ordered by BM25 score, then stable IDs."""
