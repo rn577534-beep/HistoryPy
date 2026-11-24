@@ -127,10 +127,9 @@ def timeline_for_dataset(
             overlap = entry.date.overlaps(period)
             if overlap is False:
                 continue
-            if overlap is None:
-                if not include_indeterminate:
-                    excluded_indeterminate_count += 1
-                    continue
+            if overlap is None and not include_indeterminate:
+                excluded_indeterminate_count += 1
+                continue
         selected.append(entry)
     return TimelineResult(
         tuple(sorted(selected, key=_sort_key)), undated_count,
