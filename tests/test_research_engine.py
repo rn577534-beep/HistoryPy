@@ -1,6 +1,7 @@
 import pytest
 
 from historypy import (
+    DatasetSearchIndex,
     EvidenceLink,
     HistoricalClaim,
     HistoricalDate,
@@ -136,3 +137,15 @@ def test_invalid_query_filters_are_rejected():
         ResearchQuery(evidence_status="probably_true")
     with pytest.raises(ValueError, match="offset"):
         ResearchQuery(offset=-1)
+
+
+
+def test_structured_query_can_reuse_trigram_index():
+    dataset = build_dataset()
+    query = ResearchQuery(text="port treaty", kinds=("event", "claim"))
+    indexed = execute_research_query(
+        dataset, query, index=DatasetSearchIndex.build(dataset)
+    )
+    direct = execute_research_query(dataset, query)
+    assert indexed.hits == direct.hits
+    assert indexed.total == direct.total
