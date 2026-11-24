@@ -118,18 +118,18 @@ def timeline_for_dataset(
     for entry in candidates:
         if entry.date is None or not _has_bounds(entry.date):
             undated_count += 1
-            if period is not None:
-                excluded_indeterminate_count += 1
             if include_indeterminate:
                 selected.append(entry)
+            elif period is not None:
+                excluded_indeterminate_count += 1
             continue
         if period is not None:
             overlap = entry.date.overlaps(period)
             if overlap is False:
                 continue
             if overlap is None:
-                excluded_indeterminate_count += 1
                 if not include_indeterminate:
+                    excluded_indeterminate_count += 1
                     continue
         selected.append(entry)
     return TimelineResult(
