@@ -20,6 +20,7 @@ from historypy.core.models import (
     SourceRecord,
 )
 from historypy.research.query import SearchHit, _searchable_records, search_dataset
+from historypy.research.search_index import DatasetSearchIndex
 
 RecordKind = Literal[
     "person", "place", "civilization", "organization", "event", "claim", "source"
@@ -172,7 +173,11 @@ def _matches_period(record: object, period: HistoricalDate, include_indeterminat
         else:
             dates = tuple(item for item in (record.start_date, record.end_date) if item)
             results = tuple(item.overlaps(period) for item in dates)
-            result = True if True in results else (None if None in results else False)
+            result = (
+                True if True in results
+                else None if None in results or not dates
+                else False
+            )
     elif isinstance(record, HistoricalOrganization):
         if record.founded and record.dissolved:
             result = _range_overlaps(record.founded, record.dissolved, period)
@@ -211,7 +216,10 @@ def _matches_sources(
 
 
 def execute_research_query(
-    dataset: HistoricalDataset, query: ResearchQuery
+    dataset: HistoricalDataset,
+    query: ResearchQuery,
+    *,
+    index: DatasetSearchIndex | None = None,
 ) -> ResearchSearchResult:
     """Execute all query filters and return deterministic, faceted results.
 
@@ -220,10 +228,16 @@ def execute_research_query(
     """
     if not isinstance(query, ResearchQuery):
         raise TypeError("query must be a ResearchQuery")
+    if index is not None and not isinstance(index, DatasetSearchIndex):
+        raise TypeError("index must be a DatasetSearchIndex or None")
     dataset.require_valid()
     maps = _record_maps(dataset)
     if query.text and query.text.strip():
-        candidates = search_dataset(dataset, query.text, kinds=query.kinds, limit=None)
+        candidates = (
+            index.search(query.text, kinds=query.kinds, limit=None)
+            if index is not None
+            else search_dataset(dataset, query.text, kinds=query.kinds, limit=None)
+        )
     else:
         allowed = set(query.kinds) if query.kinds is not None else _ALLOWED_KINDS
         candidates = tuple(
