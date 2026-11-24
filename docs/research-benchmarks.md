@@ -120,3 +120,31 @@ are retrieval relevance against the dataset's gold document IDs, not proof of
 historical correctness, source independence, or general performance on other
 periods, languages, and archives. BM25 remains a lexical method; semantic
 retrieval and historian-reviewed cross-source evaluation are still future work.
+
+
+## First measured baseline (2026-11-24)
+
+Pinned-corpus CI run:
+https://github.com/rn577534-beep/HistoryPy/actions/runs/45460098472
+
+| Method / question group | Questions | Recall@10 | MRR@10 | Success@10 |
+|---|---:|---:|---:|---:|
+| BM25 — overall | 1,782 | 0.5564 | 0.4889 | — |
+| BM25 — single-hop (SH) | 897 | 0.8239 | 0.6717 | 0.8239 |
+| BM25 — multi-hop generic | 541 | 0.2865 | 0.3012 | 0.5379 |
+| BM25 — comparative multi-hop | 192 | 0.2839 | 0.2860 | 0.4583 |
+| BM25 — bridge-entity multi-hop | 152 | 0.2829 | 0.3342 | 0.5658 |
+| Trigram all-terms — overall | 1,782 | 0.0022 | 0.0015 | — |
+
+All 1,782 questions were evaluated; none were skipped. BM25's mean query
+evaluation time was 32.531 ms on the CI runner. Index build measurements were
+2,892.785 ms for the trigram index and 3,011.505 ms for BM25. These are
+single-run machine-specific timings, not latency guarantees.
+
+The results show a large improvement over strict substring matching. They
+also show the remaining weakness: multi-hop questions are materially harder
+than single-hop questions. Next retrieval experiments should compare query
+decomposition, entity-aware retrieval, and a hybrid semantic/BM25 reranker
+against the same pinned question set. Do not tune against the test questions
+and then present the same scores as an independent evaluation; preserve a
+held-out split for model selection.
