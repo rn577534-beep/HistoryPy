@@ -55,8 +55,8 @@ from historypy.io import (
 )
 from historypy.research import (
     ClaimAssessment,
-    DatasetProvenanceReport,
     DatasetProfile,
+    DatasetProvenanceReport,
     DatasetQualityReport,
     DatasetSearchIndex,
     EntityMatchCandidate,
@@ -76,8 +76,8 @@ from historypy.research import (
     append_research_action,
     assess_claim,
     assess_dataset_quality,
-    audit_dataset_sources,
     audit_dataset_provenance,
+    audit_dataset_sources,
     audit_source_record,
     claims_with_conflicting_evidence,
     compare_metrics,
@@ -91,8 +91,8 @@ from historypy.research import (
     render_claim_report,
     search_dataset,
     suggest_entity_matches,
-    timeline_for_dataset,
     summarize_claim_evidence,
+    timeline_for_dataset,
     verify_research_audit_trail,
 )
 
@@ -153,8 +153,8 @@ __all__ = [
     "append_research_action",
     "assess_claim",
     "assess_dataset_quality",
-    "audit_dataset_sources",
     "audit_dataset_provenance",
+    "audit_dataset_sources",
     "audit_source_record",
     "claims_with_conflicting_evidence",
     "compare_metadata",
