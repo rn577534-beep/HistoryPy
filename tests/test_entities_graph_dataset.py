@@ -147,3 +147,21 @@ def test_relationship_graph_rejects_missing_nodes_and_edges():
     graph = RelationshipGraph(("a",), ())
     with pytest.raises(KeyError, match="Unknown entity"):
         graph.neighbors("missing")
+
+
+def test_rejects_boolean_coordinates_and_confidence():
+    with pytest.raises(ValueError, match="latitude"):
+        HistoricalPlace(id="p", name="Place", latitude=True, longitude=0.0)
+    with pytest.raises(ValueError, match="confidence"):
+        HistoricalRelationship(
+            id="r", subject_id="a", predicate="related_to", object_id="b",
+            confidence=True,
+        )
+
+
+def test_dataset_detects_entity_id_collisions_across_types():
+    dataset = HistoricalDataset(
+        people=(HistoricalPerson(id="same-id", name="Person"),),
+        places=(HistoricalPlace(id="same-id", name="Place"),),
+    )
+    assert any(issue.code == "duplicate_entity_id" for issue in dataset.validate())
