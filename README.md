@@ -620,3 +620,21 @@ Conflicting labels are only those entered by a researcher; repeated accounts
 may depend on one another. HistoryPy does not infer source independence or
 decide which account is correct. Quotations and locators must be checked
 against the original source and its rights conditions.
+
+
+## BM25 ranked historical search
+
+For queries where every word should not be required to appear literally, use the
+BM25 index. It ranks partial-term matches and folds common accent differences:
+
+~~~python
+from historypy import BM25SearchIndex
+
+bm25 = BM25SearchIndex.build(dataset)
+for hit in bm25.search("réformes parlementaires", limit=10):
+    print(hit.score, hit.label, hit.record_id, hit.matched_terms)
+~~~
+
+BM25 scores are relative retrieval scores, not confidence estimates or
+historical-truth assessments. See docs/research-benchmarks.md for the measured
+comparison against the existing trigram search and the real historical corpus.
