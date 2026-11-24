@@ -1,7 +1,7 @@
 """BM25 lexical retrieval for historical datasets."""
 from __future__ import annotations
 
-import collections.abc
+from collections import Counter, abc, defaultdict
 import math
 import re
 import unicodedata
@@ -40,7 +40,7 @@ class BM25SearchIndex:
     """An in-memory BM25 index with accent-insensitive Unicode tokenization."""
 
     records: tuple[tuple[str, str, str], ...]
-    term_frequencies: tuple[collections.abc.Mapping[str, int], ...]
+    term_frequencies: tuple[abc.Mapping[str, int], ...]
     postings: collections.abc.Mapping[str, tuple[tuple[int, int], ...]]
     document_lengths: tuple[int, ...]
     average_document_length: float
@@ -58,11 +58,11 @@ class BM25SearchIndex:
 
         records = []
         frequencies = []
-        mutable_postings: dict[str, list[tuple[int, int]]] = collections.defaultdict(list)
+        mutable_postings: dict[str, list[tuple[int, int]]] = defaultdict(list)
         lengths = []
         for kind, record_id, label, searchable in _searchable_records(dataset):
             index = len(records)
-            counts = collections.Counter(_tokens(searchable))
+            counts = Counter(_tokens(searchable))
             records.append((kind, record_id, label))
             frequencies.append(MappingProxyType(dict(counts)))
             lengths.append(sum(counts.values()))
