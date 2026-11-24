@@ -536,3 +536,36 @@ print(report.provider_failures)
 The pipeline retains local, semantic, and external results as separate channels. It reports evidence coverage for locally matched claims, provider failures, duplicate candidates, metadata conflicts, and research gaps. Markdown reports include local record IDs and external URLs/retrieval timestamps where available. External records remain discovery leads and are not automatically imported. The pipeline does not synthesize historical narratives, infer source independence, or rank sources by credibility. Semantic retrieval requires the same caller-supplied embedding model used to build the index. External API calls are opt-in and subject to provider terms, rate limits, network availability, and credentials.
 
 The automated tests use fixture providers and do not constitute live provider validation or a benchmark of historical accuracy. Query speed and research completeness depend on the dataset, embedding model, providers, and environment; no fixed performance or accuracy guarantee is made.
+
+## Research infrastructure milestone (1.0)
+
+Version 1.0 consolidates the research workflow and adds a reproducible synthetic
+benchmark for lexical retrieval. It compares the baseline scan with the reusable
+trigram index, verifies that both return identical ordered record IDs, and
+reports median timings, index build cost, Python/runtime details, and corpus
+size as JSON.
+
+Run it from the repository root:
+
+```bash
+python benchmarks/benchmark_search.py --records 10000 --repeat 7
+```
+
+The benchmark uses generated fixture records, not a representative historical
+corpus. Its timings depend on hardware, Python, corpus shape, and query
+selectivity. They must not be interpreted as historical accuracy, source
+reliability, or a fixed latency promise. The smoke test in CI checks that the
+benchmark runs; it does not enforce machine-dependent speed thresholds.
+
+### Current release boundaries
+
+- HistoryPy is research infrastructure, not a populated or independently
+  verified global history knowledgebase.
+- Semantic search requires a caller-selected embedding model; no hosted model
+  is silently selected and no corpus is sent to a provider automatically.
+- External API adapters are tested with fixtures; live availability,
+  credentials, rights, and rate limits remain provider-dependent.
+- Search ranking is retrieval relevance only. It is not a truth or credibility
+  score, and human source review remains necessary.
+- The package remains pre-alpha while schemas, provider integrations, and
+  research workflows continue to evolve.
