@@ -66,6 +66,6 @@ __all__ = [
     "load_dataset",
     "save_dataset",
     "search_dataset",
-    "summarize_claim_evidence",
     "suggest_entity_matches",
+    "summarize_claim_evidence",
 ]
