@@ -1,4 +1,4 @@
-"""Reusable in-memory inverted index for repeated lexical dataset searches."""
+"""Reusable in-memory substring index for repeated lexical dataset searches."""
 from __future__ import annotations
 
 from collections import defaultdict
@@ -11,7 +11,7 @@ from historypy.research.query import SearchHit, _searchable_records
 
 @dataclass(frozen=True, slots=True)
 class DatasetSearchIndex:
-    """Immutable inverted index; rebuild after changing the source dataset."""
+    """Immutable inverted substring index; rebuild after changing the source dataset."""
 
     records: tuple[tuple[str, str, str], ...]
     postings: dict[str, tuple[int, ...]]
@@ -19,17 +19,24 @@ class DatasetSearchIndex:
     @classmethod
     def build(cls, dataset: HistoricalDataset) -> "DatasetSearchIndex":
         records: list[tuple[str, str, str]] = []
-        mutable: dict[str, list[int]] = defaultdict(list)
+        mutable: dict[str, set[int]] = defaultdict(set)
         for kind, record_id, label, searchable in _searchable_records(dataset):
             index = len(records)
             records.append((kind, record_id, label))
-            for token in set(searchable.casefold().split()):
-                mutable[token].append(index)
-        return cls(tuple(records), {key: tuple(value) for key, value in mutable.items()})
+            tokens = set(searchable.casefold().split())
+            for token in tokens:
+                for start in range(len(token)):
+                    for end in range(start + 1, len(token) + 1):
+                        mutable[token[start:end]].add(index)
+        return cls(
+            tuple(records),
+            {key: tuple(sorted(value)) for key, value in mutable.items()},
+        )
 
     def search(
         self, query: str, *, kinds: Iterable[str] | None = None, limit: int | None = 20
     ) -> tuple[SearchHit, ...]:
+        """Match every query term as a substring, like search_dataset()."""
         if not isinstance(query, str):
             raise TypeError("query must be a string")
         if limit is not None and (not isinstance(limit, int) or isinstance(limit, bool)):
