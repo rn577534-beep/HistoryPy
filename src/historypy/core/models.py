@@ -19,9 +19,17 @@ EvidenceRelation = Literal["supports", "contradicts", "contextualizes", "mention
 
 
 def _validate_iso_date(value: str, field_name: str) -> None:
+    if (
+        not isinstance(value, str)
+        or len(value) != 10
+        or value[4] != "-"
+        or value[7] != "-"
+        or not (value[:4] + value[5:7] + value[8:]).isdigit()
+    ):
+        raise ValueError(f"{field_name} must use canonical YYYY-MM-DD format")
     try:
         parsed = date.fromisoformat(value)
-    except (TypeError, ValueError) as exc:
+    except ValueError as exc:
         raise ValueError(f"{field_name} must be a valid ISO date (YYYY-MM-DD)") from exc
     if parsed.isoformat() != value:
         raise ValueError(f"{field_name} must use canonical YYYY-MM-DD format")
