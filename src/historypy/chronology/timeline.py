@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from datetime import date
 from itertools import combinations
-from typing import Iterable
 
 from historypy.core.models import HistoricalDate, HistoricalEvent
 
