@@ -187,3 +187,53 @@ def test_relationship_graph_can_be_built_from_dataset():
     )
     graph = RelationshipGraph.from_dataset(dataset)
     assert graph.neighbors("person") == ("place",)
+
+
+def test_dataset_detects_circular_hierarchies():
+    dataset = HistoricalDataset(
+        places=(
+            HistoricalPlace(id="north", name="North", parent_place_ids=("south",)),
+            HistoricalPlace(id="south", name="South", parent_place_ids=("north",)),
+        ),
+        civilizations=(
+            HistoricalCivilization(id="c1", name="First", predecessor_ids=("c2",)),
+            HistoricalCivilization(id="c2", name="Second", predecessor_ids=("c1",)),
+        ),
+        organizations=(
+            HistoricalOrganization(
+                id="o1", name="One", parent_organization_ids=("o2",)
+            ),
+            HistoricalOrganization(
+                id="o2", name="Two", parent_organization_ids=("o1",)
+            ),
+        ),
+    )
+    issues = [item for item in dataset.validate() if item.code == "hierarchy_cycle"]
+    assert {item.field for item in issues} == {
+        "parent_place_ids", "predecessor_ids", "parent_organization_ids"
+    }
+    assert len(issues) == 3
+
+
+def test_dataset_does_not_report_acyclic_hierarchies():
+    dataset = HistoricalDataset(
+        places=(
+            HistoricalPlace(id="country", name="Country"),
+            HistoricalPlace(
+                id="city", name="City", parent_place_ids=("country",)
+            ),
+        ),
+        civilizations=(
+            HistoricalCivilization(id="older", name="Older"),
+            HistoricalCivilization(
+                id="later", name="Later", predecessor_ids=("older",)
+            ),
+        ),
+        organizations=(
+            HistoricalOrganization(id="parent", name="Parent"),
+            HistoricalOrganization(
+                id="child", name="Child", parent_organization_ids=("parent",)
+            ),
+        ),
+    )
+    assert not any(item.code == "hierarchy_cycle" for item in dataset.validate())
