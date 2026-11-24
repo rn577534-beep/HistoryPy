@@ -1,6 +1,7 @@
 from benchmarks.benchmark_historian_relevance import (
     build_historypy_dataset,
     evaluate,
+    resolve_gold_ids,
 )
 from historypy import DatasetSearchIndex
 
@@ -35,8 +36,12 @@ def test_real_corpus_benchmark_loader_and_relevance_metrics():
         },
     ]
 
-    dataset = build_historypy_dataset(corpus)
-    report = evaluate(DatasetSearchIndex.build(dataset), questions, top_k=1)
+    dataset, id_map = build_historypy_dataset(corpus)
+    resolved_questions = [
+        {**row, "gold_ids": resolve_gold_ids(row, id_map)}
+        for row in questions
+    ]
+    report = evaluate(DatasetSearchIndex.build(dataset), resolved_questions, top_k=1)
 
     assert len(dataset.events) == 2
     assert report["evaluated_questions"] == 2
