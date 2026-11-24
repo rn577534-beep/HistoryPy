@@ -32,7 +32,7 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
             except json.JSONDecodeError as exc:
                 raise ValueError(f"{path}:{line_number}: invalid JSONL") from exc
             if not isinstance(value, dict):
-                raise ValueError(f"{path}:{line_number}: expected a JSON object")
+                raise TypeError(f"{path}:{line_number}: expected a JSON object")
             rows.append(value)
     return rows
 
