@@ -165,3 +165,16 @@ def test_dataset_detects_entity_id_collisions_across_types():
         places=(HistoricalPlace(id="same-id", name="Place"),),
     )
     assert any(issue.code == "duplicate_entity_id" for issue in dataset.validate())
+
+
+def test_relationship_graph_can_be_built_from_dataset():
+    person = HistoricalPerson(id="person", name="Person")
+    place = HistoricalPlace(id="place", name="Place")
+    relation = HistoricalRelationship(
+        id="r1", subject_id="person", predicate="associated_with", object_id="place"
+    )
+    dataset = HistoricalDataset(
+        people=(person,), places=(place,), relationships=(relation,)
+    )
+    graph = RelationshipGraph.from_dataset(dataset)
+    assert graph.neighbors("person") == ("place",)
