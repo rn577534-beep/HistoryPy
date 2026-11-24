@@ -43,14 +43,14 @@ class SQLiteDatasetStore:
         payload = dataset_to_json(dataset)
         with closing(self._connect()) as connection, connection:
             connection.execute(
-                    """INSERT INTO historypy_datasets(name, schema_version, payload)
-                       VALUES (?, ?, ?)
-                       ON CONFLICT(name) DO UPDATE SET
-                         schema_version=excluded.schema_version,
-                         payload=excluded.payload,
-                         updated_at=CURRENT_TIMESTAMP""",
-                    (name, _SCHEMA_VERSION, payload),
-                )
+                """INSERT INTO historypy_datasets(name, schema_version, payload)
+                   VALUES (?, ?, ?)
+                   ON CONFLICT(name) DO UPDATE SET
+                     schema_version=excluded.schema_version,
+                     payload=excluded.payload,
+                     updated_at=CURRENT_TIMESTAMP""",
+                (name, _SCHEMA_VERSION, payload),
+            )
 
     def load(self, name: str) -> HistoricalDataset:
         with closing(self._connect()) as connection:
@@ -75,6 +75,6 @@ class SQLiteDatasetStore:
     def delete(self, name: str) -> bool:
         with closing(self._connect()) as connection, connection:
             cursor = connection.execute(
-                    "DELETE FROM historypy_datasets WHERE name = ?", (name,)
-                )
+                "DELETE FROM historypy_datasets WHERE name = ?", (name,)
+            )
         return cursor.rowcount > 0
