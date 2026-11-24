@@ -44,8 +44,8 @@ from historypy.integrations import (
 )
 from historypy.io import (
     NormalizedSQLiteStore,
-    SQLiteDatasetStore,
     SourceUsage,
+    SQLiteDatasetStore,
     StoredRecord,
     dataset_from_dict,
     dataset_from_json,
