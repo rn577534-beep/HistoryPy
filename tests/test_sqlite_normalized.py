@@ -82,3 +82,21 @@ def test_normalized_store_validates_inputs(tmp_path):
         store.load("missing")
     with pytest.raises(KeyError):
         store.search_records("missing", "x")
+
+
+def test_normalized_store_reports_unused_sources(tmp_path):
+    store = NormalizedSQLiteStore(tmp_path / "history.db")
+    dataset = HistoricalDataset(sources=(
+        SourceRecord("used", "Used source", "archival"),
+        SourceRecord("unused", "Unused source", "other"),
+    ), events=(HistoricalEvent(
+        "e1", "Linked event",
+        HistoricalDate(earliest_year=100, latest_year=100, precision="year",
+                       calendar="gregorian"),
+        source_ids=("used",),
+    ),))
+    store.save("sources", dataset)
+    usage = store.source_usage("sources")
+    assert [(item.source_id, item.total_links) for item in usage] == [
+        ("unused", 0), ("used", 1)
+    ]
