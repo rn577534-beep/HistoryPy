@@ -1,8 +1,13 @@
 import pytest
 
 from historypy import (
-    EvidenceLink, HistoricalClaim, HistoricalDataset, HistoricalDate,
-    HistoricalEvent, HistoricalPlace, SourceRecord,
+    EvidenceLink,
+    HistoricalClaim,
+    HistoricalDataset,
+    HistoricalDate,
+    HistoricalEvent,
+    HistoricalPlace,
+    SourceRecord,
 )
 from historypy.io.csv_bundle import load_dataset_csv_bundle, save_dataset_csv_bundle
 
