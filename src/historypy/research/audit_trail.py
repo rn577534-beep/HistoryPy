@@ -59,10 +59,10 @@ def append_research_action(
     rationale: str, before: object | None = None, after: object | None = None,
 ) -> tuple[ResearchAction, ...]:
     """Return a new chain with one appended action; existing entries are untouched."""
-    if any(item.action_id == action_id for item in entries):
-        raise ValueError(f"Duplicate action_id: {action_id}")
     if not all(isinstance(item, ResearchAction) for item in entries):
         raise TypeError("entries must contain ResearchAction records")
+    if any(item.action_id == action_id for item in entries):
+        raise ValueError(f"Duplicate action_id: {action_id}")
     valid, errors = verify_research_audit_trail(entries)
     if not valid:
         raise ValueError(f"Cannot append to an invalid audit trail: {errors[0]}")
