@@ -106,7 +106,7 @@ def dataset_to_dict(dataset: HistoricalDataset) -> dict[str, Any]:
         "metadata": dict(dataset.metadata),
         "sources": [_record_to_dict(item) for item in dataset.sources],
         "claims": [
-            _record_to_dict(item, ("",)) for item in dataset.claims
+            _record_to_dict(item) for item in dataset.claims
         ],
         "events": [
             _record_to_dict(item, ("date",)) for item in dataset.events
