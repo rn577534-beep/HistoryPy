@@ -13,6 +13,7 @@ import json
 import platform
 import statistics
 import time
+import tracemalloc
 from collections.abc import Callable
 
 from historypy import (
@@ -59,6 +60,23 @@ def result_ids(hits: tuple) -> tuple[tuple[str, str], ...]:
     return tuple((hit.kind, hit.record_id) for hit in hits)
 
 
+def peak_traced_bytes(operation: Callable[[], object]) -> int:
+    """Measure additional peak Python allocations made by one operation."""
+    tracemalloc.start()
+    try:
+        baseline, _ = tracemalloc.get_traced_memory()
+        tracemalloc.reset_peak()
+        operation()
+        _, peak = tracemalloc.get_traced_memory()
+        return max(0, peak - baseline)
+    finally:
+        tracemalloc.stop()
+
+
+def mib(byte_count: int) -> float:
+    return round(byte_count / (1024 * 1024), 3)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--records", type=int, default=5000)
@@ -77,6 +95,9 @@ def main() -> None:
     build_started = time.perf_counter()
     index = DatasetSearchIndex.build(dataset)
     index_build_ms = (time.perf_counter() - build_started) * 1000
+    # Measure allocations in a separate build so tracemalloc overhead does not
+    # distort the wall-clock build-time measurement.
+    index_build_peak_bytes = peak_traced_bytes(lambda: DatasetSearchIndex.build(dataset))
 
     query_results = []
     for query in queries:
@@ -88,6 +109,12 @@ def main() -> None:
             lambda query=query: search_dataset(dataset, query, limit=None), args.repeat
         )
         indexed_ms = median_ms(lambda query=query: index.search(query, limit=None), args.repeat)
+        indexed_peak_bytes = peak_traced_bytes(
+            lambda query=query: index.search(query, limit=None)
+        )
+        linear_peak_bytes = peak_traced_bytes(
+            lambda query=query: search_dataset(dataset, query, limit=None)
+        )
         query_results.append(
             {
                 "query": query,
@@ -97,6 +124,8 @@ def main() -> None:
                 "observed_speedup": (
                     round(linear_ms / indexed_ms, 3) if indexed_ms else None
                 ),
+                "linear_search_peak_additional_mib": mib(linear_peak_bytes),
+                "trigram_index_search_peak_additional_mib": mib(indexed_peak_bytes),
                 "result_parity": True,
             }
         )
@@ -109,6 +138,11 @@ def main() -> None:
         "synthetic_record_count": args.records,
         "repeat": args.repeat,
         "index_build_ms": round(index_build_ms, 3),
+        "index_build_peak_additional_mib": mib(index_build_peak_bytes),
+        "memory_measurement": (
+            "Python allocations measured with tracemalloc; excludes pre-existing "
+            "dataset memory, native allocations, and process RSS."
+        ),
         "queries": query_results,
         "all_query_results_match": True,
         "interpretation": (
