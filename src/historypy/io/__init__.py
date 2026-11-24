@@ -11,16 +11,10 @@ from historypy.io.json import (
     load_dataset,
     save_dataset,
 )
+from historypy.io.sqlite import SQLiteDatasetStore
 
 __all__ = [
-    "SCHEMA_NAME",
-    "SCHEMA_VERSION",
-    "dataset_from_dict",
-    "dataset_from_json",
-    "dataset_to_dict",
-    "dataset_to_json",
-    "load_dataset",
-    "load_dataset_csv_bundle",
-    "save_dataset",
-    "save_dataset_csv_bundle",
+    "SCHEMA_NAME", "SCHEMA_VERSION", "SQLiteDatasetStore",
+    "dataset_from_dict", "dataset_from_json", "dataset_to_dict", "dataset_to_json",
+    "load_dataset", "load_dataset_csv_bundle", "save_dataset", "save_dataset_csv_bundle",
 ]
