@@ -11,7 +11,6 @@ from types import MappingProxyType
 from historypy.core.dataset import HistoricalDataset
 from historypy.research.query import _searchable_records
 
-
 _TOKEN_PATTERN = re.compile(r"[^\W_]+", re.UNICODE)
 
 
