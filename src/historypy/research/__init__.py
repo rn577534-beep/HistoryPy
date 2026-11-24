@@ -15,6 +15,12 @@ from historypy.research.entity_resolution import (
     EntityMatchCandidate,
     suggest_entity_matches,
 )
+from historypy.research.engine import (
+    ResearchFacets,
+    ResearchQuery,
+    ResearchSearchResult,
+    execute_research_query,
+)
 from historypy.research.evidence import (
     EvidenceSummary,
     claims_with_conflicting_evidence,
@@ -54,6 +60,9 @@ __all__ = [
     "PlaceDistance",
     "QualityFinding",
     "ResearchAction",
+    "ResearchFacets",
+    "ResearchQuery",
+    "ResearchSearchResult",
     "SearchHit",
     "SourceMetadataAudit",
     "append_research_action",
@@ -66,6 +75,7 @@ __all__ = [
     "content_hash",
     "events_overlapping",
     "evidence_for_claim",
+    "execute_research_query",
     "great_circle_distance_km",
     "places_within_radius",
     "profile_dataset",
