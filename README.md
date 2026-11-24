@@ -311,3 +311,44 @@ The two providers' official developer documentation and terms should be reviewed
 - [Harvard Art Museums API documentation](https://github.com/harvardartmuseums/api-docs)
 
 All six capabilities are research infrastructure, not a pre-verified historical knowledgebase. Researchers remain responsible for checking original sources, item-level rights, and competing interpretations.
+
+
+## Structured research query engine (0.4)
+
+The structured query engine combines transparent lexical search with optional record type, date period, place, source, event-tag, and evidence-status filters. Filters use AND semantics. Results are deterministically ordered and paginated; facets count the complete filtered result set before pagination.
+
+```python
+from historypy import (
+    HistoricalDate,
+    ResearchQuery,
+    execute_research_query,
+)
+
+query = ResearchQuery(
+    text="port treaty",
+    kinds=("event", "claim"),
+    period=HistoricalDate(
+        earliest_year=1200,
+        latest_year=1400,
+        calendar="gregorian",
+    ),
+    place_ids=("old-port",),
+    source_ids=("archive-source-1",),
+    tags=("trade",),
+    limit=25,
+    offset=0,
+)
+result = execute_research_query(dataset, query)
+
+for hit in result.hits:
+    print(hit.kind, hit.record_id, hit.label)
+
+print("Total:", result.total)
+print("Kinds:", result.facets.kind_counts)
+print("Evidence:", result.facets.evidence_status_counts)
+print("Tags:", result.facets.tag_counts)
+```
+
+Supported evidence statuses are `supported`, `contradicted`, `mixed`, and `insufficient`. They reflect only recorded evidence-link labels, not a machine judgment of historical truth or source credibility. Place filters apply to place records and records explicitly linked to those places. Source filters apply to records with recorded source links and claims with linked evidence. Tag filters apply to events. Date filters use explicit calendar compatibility; a person's birth-to-death interval and an institution's founding-to-dissolution interval are considered as ranges. Records with incomparable dates are excluded unless `include_indeterminate=True`.
+
+Search remains lexical substring retrieval, not semantic or vector search. Facets are descriptive counts, not quality scores. This release adds query composition and result navigation without introducing opaque ranking or automated historical conclusions.
