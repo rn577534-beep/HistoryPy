@@ -149,3 +149,22 @@ def test_structured_query_can_reuse_trigram_index():
     direct = execute_research_query(dataset, query)
     assert indexed.hits == direct.hits
     assert indexed.total == direct.total
+
+
+
+def test_undated_records_are_opt_in_for_period_queries():
+    dataset = build_dataset()
+    period = HistoricalDate(
+        earliest_year=500, latest_year=510, calendar="gregorian"
+    )
+    excluded = execute_research_query(
+        dataset, ResearchQuery(kinds=("person",), period=period)
+    )
+    included = execute_research_query(
+        dataset,
+        ResearchQuery(
+            kinds=("person",), period=period, include_indeterminate=True
+        ),
+    )
+    assert excluded.hits == ()
+    assert [hit.record_id for hit in included.hits] == ["p2"]
