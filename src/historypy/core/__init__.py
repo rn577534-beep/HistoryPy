@@ -9,11 +9,24 @@ from historypy.core.entities import (
     HistoricalRelationship,
 )
 from historypy.core.models import (
-    EvidenceLink, HistoricalClaim, HistoricalDate, HistoricalEvent, SourceRecord
+    EvidenceLink,
+    HistoricalClaim,
+    HistoricalDate,
+    HistoricalEvent,
+    SourceRecord,
 )
 
 __all__ = [
-    "EvidenceLink", "HistoricalClaim", "HistoricalCivilization", "HistoricalDataset",
-    "HistoricalDate", "HistoricalEvent", "HistoricalOrganization", "HistoricalPerson",
-    "HistoricalPlace", "HistoricalRelationship", "SourceRecord", "ValidationIssue",
+    "EvidenceLink",
+    "HistoricalCivilization",
+    "HistoricalClaim",
+    "HistoricalDataset",
+    "HistoricalDate",
+    "HistoricalEvent",
+    "HistoricalOrganization",
+    "HistoricalPerson",
+    "HistoricalPlace",
+    "HistoricalRelationship",
+    "SourceRecord",
+    "ValidationIssue",
 ]
