@@ -142,7 +142,32 @@ restored_again = dataset_from_json(payload)
 
 The JSON format declares a schema name and version. Unknown schema versions and fields are rejected. Import validates references by default; use `validate=False` only for deliberate repair workflows.
 
-## CSV bundle interchange\n\nCSV is inherently flat, while HistoryPy records contain nested dates, aliases, and references. The CSV bundle therefore stores each record collection in its own CSV table and encodes each cell as JSON, with a manifest carrying schema/version and dataset metadata. This is designed for lossless round-tripping and spreadsheet inspection; it is not a claim that arbitrary CSV files can be imported without a mapping.\n\n```python\nfrom historypy import save_dataset_csv_bundle, load_dataset_csv_bundle\n\nsave_dataset_csv_bundle(dataset, "research-csv-bundle")\nrestored = load_dataset_csv_bundle("research-csv-bundle")\n```\n\n## Geographic queries\n\n```python\nfrom historypy import places_within_radius\n\nnearby = places_within_radius(dataset, 23.7, 90.4, radius_km=50)\nfor place in nearby:\n    print(place.name, place.distance_km)\n```\n\nOnly places with coordinates are returned. Distances use a spherical Earth approximation; they do not express uncertainty in historical place locations.\n\n## Chronology notes
+## CSV bundle interchange\n\nCSV is inherently flat, while HistoryPy records contain nested dates, aliases, and references. The CSV bundle therefore stores each record collection in its own CSV table and encodes each cell as JSON, with a manifest carrying schema/version and dataset metadata. This is designed for lossless round-tripping and spreadsheet inspection; it is not a claim that arbitrary CSV files can be imported without a mapping.\n\n```python\nfrom historypy import save_dataset_csv_bundle, load_dataset_csv_bundle\n\nsave_dataset_csv_bundle(dataset, "research-csv-bundle")\nrestored = load_dataset_csv_bundle("research-csv-bundle")\n```\n\n## Geographic queries\n\n```python\nfrom historypy import places_within_radius\n\nnearby = places_within_radius(dataset, 23.7, 90.4, radius_km=50)\nfor place in nearby:\n    print(place.name, place.distance_km)\n```\n\nOnly places with coordinates are returned. Distances use a spherical Earth approximation; they do not express uncertainty in historical place locations.\n\n## Research audit trail
+
+`append_research_action()` returns a new immutable hash-linked sequence. Each action can record before/after content hashes, actor, timestamp, target, and rationale. `verify_research_audit_trail()` detects changed entries and broken links. This is tamper-evident, not a digital signature or proof of author identity.
+
+## Comparative metrics
+
+`MetricObservation` and `compare_metrics()` support transparent, unit-aware comparisons. Missing values stay `None`; observations with different units are kept in separate groups. Supply source IDs with each observation so researchers can trace reported figures.
+
+## Dataset quality and profiling
+
+`assess_dataset_quality()` reports validation errors and research gaps such as claims without linked evidence, events without source IDs, and incomplete source catalogue metadata. `profile_dataset()` counts records and coverage indicators. Neither function scores historical truth or source credibility.
+
+## Reusable search index
+
+Build `DatasetSearchIndex` once for repeated lexical searches. It preserves the substring matching behavior of `search_dataset()`. Rebuild the index after changing the dataset; the index is a snapshot, not a live view.
+
+```python
+from historypy import DatasetSearchIndex, assess_dataset_quality, profile_dataset
+
+index = DatasetSearchIndex.build(dataset)
+hits = index.search("ancient port", kinds=("place",))
+report = assess_dataset_quality(dataset)
+profile = profile_dataset(dataset)
+```
+
+## Chronology notes
 
 - ISO date bounds represent Gregorian calendar dates.
 - BCE/year-only dates use astronomical year numbering: 1 CE = 1, 1 BCE = 0, 2 BCE = -1.
