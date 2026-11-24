@@ -1,9 +1,9 @@
 """Transparent side-by-side metric comparisons for historical entities."""
 from __future__ import annotations
 
-from dataclasses import dataclass
 import math
 from collections.abc import Iterable
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True, slots=True)
