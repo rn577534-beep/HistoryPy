@@ -100,3 +100,53 @@ def test_normalized_store_reports_unused_sources(tmp_path):
     assert [(item.source_id, item.total_links) for item in usage] == [
         ("unused", 0), ("used", 1)
     ]
+
+
+def test_normalized_store_year_range_handles_bce_and_calendar(tmp_path):
+    store = NormalizedSQLiteStore(tmp_path / "history.db")
+    dataset = HistoricalDataset(events=(
+        HistoricalEvent(
+            "bce", "BCE record",
+            HistoricalDate(earliest_year=-500, latest_year=-400,
+                           precision="century", calendar="julian"),
+        ),
+        HistoricalEvent(
+            "ce", "CE record",
+            HistoricalDate(earliest_year=100, latest_year=150,
+                           precision="century", calendar="gregorian"),
+        ),
+        HistoricalEvent(
+            "open", "Open ended record",
+            HistoricalDate(earliest_year=0, precision="unknown", calendar="julian"),
+        ),
+        HistoricalEvent(
+            "undated", "Undated record",
+            HistoricalDate(original_expression="date unknown", calendar="unspecified"),
+        ),
+    ))
+    store.save("chronology", dataset)
+    bce = store.query_year_range("chronology", -450, -425, kind="events")
+    assert [item.record_id for item in bce] == ["bce"]
+    julian = store.query_year_range(
+        "chronology", -10, 10, kind="events", calendar="julian"
+    )
+    assert [item.record_id for item in julian] == ["open"]
+    assert store.query_year_range("chronology", -10, 10) == ()
+    with_undated = store.query_year_range(
+        "chronology", -10, 10, include_undated=True
+    )
+    assert {item.record_id for item in with_undated} == {"open", "undated"}
+
+
+def test_normalized_store_search_fallback_and_fts_cleanup(tmp_path):
+    store = NormalizedSQLiteStore(tmp_path / "history.db")
+    store.save("sample", make_dataset())
+    store._fts5_available = False
+    fallback = store.search_records("sample", "documented proposition")
+    assert [item.record_id for item in fallback] == ["c1"]
+    store._fts5_available = True
+    assert store.delete("sample")
+    with store._connect() as connection:
+        assert connection.execute(
+            "SELECT COUNT(*) FROM hp06_records_fts WHERE dataset_name = 'sample'"
+        ).fetchone()[0] == 0
