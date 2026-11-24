@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 from collections import deque
-from typing import Iterable, Literal
+from typing import TYPE_CHECKING, Iterable, Literal
 
 from historypy.core.entities import HistoricalRelationship
+
+if TYPE_CHECKING:
+    from historypy.core.dataset import HistoricalDataset
 
 Direction = Literal["outgoing", "incoming", "both"]
 
@@ -25,6 +28,18 @@ class RelationshipGraph:
                 raise ValueError(
                     f"Relationship {edge.id!r} references an entity absent from the graph"
                 )
+
+    @classmethod
+    def from_dataset(cls, dataset: HistoricalDataset) -> RelationshipGraph:
+        """Build a graph from every entity and relationship in a validated dataset."""
+        entity_ids = (
+            [item.id for item in dataset.events]
+            + [item.id for item in dataset.people]
+            + [item.id for item in dataset.places]
+            + [item.id for item in dataset.civilizations]
+            + [item.id for item in dataset.organizations]
+        )
+        return cls(entity_ids, dataset.relationships)
 
     @property
     def entity_ids(self) -> frozenset[str]:
