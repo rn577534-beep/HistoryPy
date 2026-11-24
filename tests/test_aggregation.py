@@ -1,5 +1,6 @@
-import pytest
 from threading import Barrier
+
+import pytest
 
 from historypy.integrations import (
     ExternalRecord,
