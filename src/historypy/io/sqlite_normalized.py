@@ -161,17 +161,21 @@ class NormalizedSQLiteStore:
     def _ensure_fts(connection: sqlite3.Connection) -> bool:
         """Create and initialize the optional FTS5 index when SQLite supports it."""
         try:
+            exists = connection.execute(
+                "SELECT 1 FROM sqlite_master WHERE type = 'table' "
+                "AND name = 'hp06_records_fts'"
+            ).fetchone() is not None
             connection.execute(
                 """CREATE VIRTUAL TABLE IF NOT EXISTS hp06_records_fts USING fts5(
                     dataset_name UNINDEXED, kind UNINDEXED, record_id UNINDEXED,
                     search_text, tokenize='unicode61'
                 )"""
             )
-            connection.execute("DELETE FROM hp06_records_fts")
-            connection.execute(
-                """INSERT INTO hp06_records_fts(dataset_name, kind, record_id, search_text)
-                   SELECT dataset_name, kind, record_id, search_text FROM hp06_records"""
-            )
+            if not exists:
+                connection.execute(
+                    """INSERT INTO hp06_records_fts(dataset_name, kind, record_id, search_text)
+                       SELECT dataset_name, kind, record_id, search_text FROM hp06_records"""
+                )
             return True
         except sqlite3.OperationalError:
             return False
@@ -332,7 +336,7 @@ class NormalizedSQLiteStore:
                            ON records.dataset_name = matches.dataset_name
                           AND records.kind = matches.kind
                           AND records.record_id = matches.record_id
-                         WHERE matches.dataset_name = ? AND hp06_records_fts MATCH ?"""
+                         WHERE matches.dataset_name = ? AND matches MATCH ?"""
                 params: list[Any] = [name, phrase]
                 if kind is not None:
                     sql += " AND records.kind = ?"
