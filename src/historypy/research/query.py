@@ -6,8 +6,8 @@ infer that similarly named records refer to the same person or place.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 from historypy.core.dataset import HistoricalDataset
 from historypy.core.models import HistoricalDate, HistoricalEvent
@@ -38,9 +38,7 @@ def _searchable_records(dataset: HistoricalDataset) -> Iterable[tuple[str, str, 
             (record.name, *record.languages, record.description)
         )
     for record in dataset.organizations:
-        yield "organization", record.id, record.name, " ".join(
-            (record.name, record.organization_type, record.description)
-        )
+        yield "organization", record.id, record.name, f"{record.name} {record.organization_type} {record.description}"
     for record in dataset.events:
         yield "event", record.id, record.title, " ".join(
             (record.title, record.summary, *record.tags, record.notes or "")
