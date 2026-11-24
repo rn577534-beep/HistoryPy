@@ -10,6 +10,7 @@ from historypy import (
 )
 from historypy.research.query import events_overlapping, search_dataset
 
+
 def test_search_dataset_matches_names_aliases_and_descriptions():
     dataset = HistoricalDataset(
         people=(HistoricalPerson(
@@ -27,6 +28,7 @@ def test_search_dataset_matches_names_aliases_and_descriptions():
     assert [hit.record_id for hit in search_dataset(dataset, "ancient port")] == ["place1"]
     assert [hit.record_id for hit in search_dataset(dataset, "letters", kinds=("source",))] == ["s1"]
 
+
 def test_search_is_case_insensitive_and_requires_all_terms():
     dataset = HistoricalDataset(people=(
         HistoricalPerson(id="p1", name="Queen Example"),
@@ -35,6 +37,7 @@ def test_search_is_case_insensitive_and_requires_all_terms():
     hits = search_dataset(dataset, "QUEEN example")
     assert [(hit.kind, hit.record_id) for hit in hits] == [("person", "p1")]
     assert search_dataset(dataset, "queen missing") == ()
+
 
 def test_search_empty_query_and_limit():
     dataset = HistoricalDataset(people=(
@@ -47,12 +50,14 @@ def test_search_empty_query_and_limit():
     with pytest.raises(TypeError, match="query"):
         search_dataset(dataset, None)  # type: ignore[arg-type]
 
+
 def test_search_results_have_stable_order():
     dataset = HistoricalDataset(people=(
         HistoricalPerson(id="z", name="Example"),
         HistoricalPerson(id="a", name="Example"),
     ))
     assert [hit.record_id for hit in search_dataset(dataset, "example")] == ["a", "z"]
+
 
 def test_events_overlapping_period_and_calendar_mismatch():
     dataset = HistoricalDataset(events=(
@@ -74,6 +79,7 @@ def test_events_overlapping_period_and_calendar_mismatch():
     assert [event.id for event in events_overlapping(
         dataset, period, include_indeterminate=True
     )] == ["inside", "unknown"]
+
 
 def test_events_overlapping_requires_historical_date():
     with pytest.raises(TypeError, match="period"):
