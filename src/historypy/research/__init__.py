@@ -1,6 +1,6 @@
 """Research utilities for evidence-aware historical analysis."""
 
-from historypy.research.entity_resolution import (
+from historypy.research.geography import (\n    PlaceDistance,\n    great_circle_distance_km,\n    places_within_radius,\n)\nfrom historypy.research.entity_resolution import (
     EntityMatchCandidate,
     suggest_entity_matches,
 )
@@ -18,7 +18,7 @@ from historypy.research.source_audit import (
 )
 
 __all__ = [
-    "EntityMatchCandidate",
+    "EntityMatchCandidate",\n    "PlaceDistance",\n    "great_circle_distance_km",\n    "places_within_radius",
     "EvidenceSummary",
     "SearchHit",
     "SourceMetadataAudit",
