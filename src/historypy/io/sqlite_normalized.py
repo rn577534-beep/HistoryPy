@@ -331,13 +331,14 @@ class NormalizedSQLiteStore:
             if self._fts5_available:
                 phrase = '"' + query.strip().replace('"', '""') + '"'
                 sql = """SELECT records.kind, records.record_id, records.payload_json
-                         FROM hp06_records_fts AS matches
+                         FROM hp06_records_fts
                          JOIN hp06_records AS records
-                           ON records.dataset_name = matches.dataset_name
-                          AND records.kind = matches.kind
-                          AND records.record_id = matches.record_id
-                         WHERE matches.dataset_name = ? AND matches MATCH ?"""
-                params: list[Any] = [name, phrase]
+                           ON records.dataset_name = hp06_records_fts.dataset_name
+                          AND records.kind = hp06_records_fts.kind
+                          AND records.record_id = hp06_records_fts.record_id
+                         WHERE hp06_records_fts MATCH ?
+                           AND hp06_records_fts.dataset_name = ?"""
+                params: list[Any] = [phrase, name]
                 if kind is not None:
                     sql += " AND records.kind = ?"
                     params.append(kind)
