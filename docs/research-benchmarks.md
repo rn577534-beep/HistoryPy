@@ -92,3 +92,31 @@ about 80% lower than the earlier set-based postings implementation
 32-bit posting lists; its current limit is 2^32 records. Query-time temporary
 allocations and pre-existing dataset memory are separate from index-build
 memory, and tracemalloc does not report total process RSS.
+
+
+### HistoriQA-ThirdRepublic measured results
+
+The pinned 3,386-document / 1,782-question run completed on GitHub Actions
+(Python 3.12). At k=10:
+
+| Method | Recall@10 | MRR@10 | Mean query time |
+|---|---:|---:|---:|
+| Trigram, all query terms required | 0.22% | 0.15% | 31.68 ms |
+| BM25, OR term matching | 55.64% | 48.89% | 20.21 ms |
+
+BM25 Recall@10 by question type:
+
+| Question type | Questions | Recall@10 | MRR@10 |
+|---|---:|---:|---:|
+| Single-hop | 897 | 82.39% | 67.17% |
+| Multi-hop generic | 541 | 28.65% | 30.12% |
+| Multi-hop comparative | 192 | 28.39% | 28.60% |
+| Multi-hop bridge-entity | 152 | 28.29% | 33.42% |
+
+This is a large improvement over the all-terms baseline on this particular
+French 1887 corpus. It also shows a remaining gap: multi-hop and cross-source
+questions are substantially harder than single-hop questions. These metrics
+are retrieval relevance against the dataset's gold document IDs, not proof of
+historical correctness, source independence, or general performance on other
+periods, languages, and archives. BM25 remains a lexical method; semantic
+retrieval and historian-reviewed cross-source evaluation are still future work.
