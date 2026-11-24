@@ -13,7 +13,12 @@ from historypy.core.entities import (
     HistoricalPerson,
     HistoricalPlace,
 )
-from historypy.core.models import HistoricalDate, HistoricalEvent, HistoricalClaim, SourceRecord
+from historypy.core.models import (
+    HistoricalClaim,
+    HistoricalDate,
+    HistoricalEvent,
+    SourceRecord,
+)
 from historypy.research.query import SearchHit, _searchable_records, search_dataset
 
 RecordKind = Literal[
@@ -156,7 +161,11 @@ def _matches_period(record: object, period: HistoricalDate, include_indeterminat
         else:
             dates = tuple(item for item in (record.birth_date, record.death_date) if item)
             results = tuple(item.overlaps(period) for item in dates)
-            result = True if True in results else (None if None in results else False)
+            result = (
+                True if True in results
+                else None if None in results or not dates
+                else False
+            )
     elif isinstance(record, HistoricalCivilization):
         if record.start_date and record.end_date:
             result = _range_overlaps(record.start_date, record.end_date, period)
