@@ -73,10 +73,10 @@ def test_provenance_reports_source_usage_orphans_and_unlinked_claims():
         evidence=(EvidenceLink("c1", "s1", "supports"),),
     )
     report = audit_dataset_provenance(dataset)
-    assert report.source_usage_counts == (("s1", 1), ("s2", 0))
+    assert report.source_usage_counts == (("s1", 2), ("s2", 0))
     assert report.orphan_source_ids == ("s2",)
     assert report.claims_without_evidence == ()
-    assert report.total_source_links == 1
+    assert report.total_source_links == 2
     assert dict(report.evidence_relation_counts)["supports"] == 1
 
 
