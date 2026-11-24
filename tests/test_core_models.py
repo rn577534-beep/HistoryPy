@@ -184,3 +184,8 @@ def test_timeline_rejects_mixed_calendars():
     )
     with pytest.raises(ValueError, match="one explicit calendar"):
         sort_events([gregorian, hijri])
+
+
+def test_astronomical_year_bounds_must_be_integers():
+    with pytest.raises(TypeError, match="earliest_year"):
+        HistoricalDate(earliest_year="44 BCE")
