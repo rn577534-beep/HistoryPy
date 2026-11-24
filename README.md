@@ -73,10 +73,11 @@ print(events_overlapping(dataset, period))
 | `historypy.io` | Versioned JSON import/export and file persistence |
 | `historypy.research.evidence` | Claim evidence retrieval and transparent conflict summaries |
 | `historypy.research.query` | Lexical dataset search and date-overlap event queries |
+| `historypy.research.entity_resolution` | Conservative possible-duplicate suggestions for human review |
 
 ## Research queries
 
-`search_dataset(dataset, query)` searches names, aliases, descriptions, titles, tags, claims, and source metadata. Every whitespace-separated query term must appear in the searchable text. Search is case-insensitive and deterministic, but lexical only: it does not perform semantic search, entity resolution, or historical inference.
+`search_dataset(dataset, query)` searches names, aliases, descriptions, titles, tags, claims, and source metadata. Every whitespace-separated query term must appear in the searchable text. Search is case-insensitive and deterministic, but lexical only: it does not perform semantic search or historical inference. `suggest_entity_matches()` can propose same-type person/place/civilization/organization records with similar names. Its similarity is not a probability of identity, and it never merges records; a researcher must review dates, places, sources, and context.
 
 `events_overlapping(dataset, period)` returns events whose bounded dates overlap the requested period. If the calendar or date bounds make comparison indeterminate, those events are excluded by default. Set `include_indeterminate=True` to include them explicitly; this does not mean they are confirmed matches.
 
@@ -114,7 +115,7 @@ for issue in issues:
     print(issue.code, issue.record_id, issue.message)
 ```
 
-Validation checks identifiers and references. It does not certify historical accuracy.
+Validation checks identifiers and references, including circular parent/predecessor hierarchies for places, civilizations, and organizations. It does not certify historical accuracy.
 
 ## JSON interchange
 
