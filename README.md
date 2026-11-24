@@ -70,11 +70,11 @@ print(events_overlapping(dataset, period))
 | `historypy.core.dataset` | Dataset collections and referential-integrity validation |
 | `historypy.chronology` | Date interval comparisons and event timeline utilities |
 | `historypy.graph` | Directed relationship graph, neighbors, paths, components |
-| `historypy.io` | Versioned JSON import/export and file persistence |
+| `historypy.io` | Versioned JSON and lossless multi-table CSV bundle interchange |
 | `historypy.research.evidence` | Claim evidence retrieval and transparent conflict summaries |
 | `historypy.research.query` | Lexical dataset search and date-overlap event queries |
 | `historypy.research.entity_resolution` | Conservative possible-duplicate suggestions for human review |
-| `historypy.research.source_audit` | Bibliographic metadata completeness checks, not credibility scores |
+| `historypy.research.source_audit` | Bibliographic metadata completeness checks, not credibility scores |\n| `historypy.research.geography` | Great-circle distance and radius search for geocoded places |
 
 ## Research queries
 
@@ -94,7 +94,7 @@ events = events_overlapping(dataset, period, include_indeterminate=False)
 
 ## Evidence workflow
 
-A claim and the evidence for it are separate records. An evidence link can be marked as `supports`, `contradicts`, `contextualizes`, or `mentions`.
+A claim and the evidence for it are separate records. An evidence link can be marked as `supports`, `contradicts`, `contextualizes`, or `mentions`. It can also store structured page, paragraph, archive shelfmark, URL fragment, transcription-line, and timecode locators in addition to its free-form locator.
 
 ```python
 from historypy import summarize_claim_evidence, claims_with_conflicting_evidence
@@ -142,7 +142,7 @@ restored_again = dataset_from_json(payload)
 
 The JSON format declares a schema name and version. Unknown schema versions and fields are rejected. Import validates references by default; use `validate=False` only for deliberate repair workflows.
 
-## Chronology notes
+## CSV bundle interchange\n\nCSV is inherently flat, while HistoryPy records contain nested dates, aliases, and references. The CSV bundle therefore stores each record collection in its own CSV table and encodes each cell as JSON, with a manifest carrying schema/version and dataset metadata. This is designed for lossless round-tripping and spreadsheet inspection; it is not a claim that arbitrary CSV files can be imported without a mapping.\n\n```python\nfrom historypy import save_dataset_csv_bundle, load_dataset_csv_bundle\n\nsave_dataset_csv_bundle(dataset, "research-csv-bundle")\nrestored = load_dataset_csv_bundle("research-csv-bundle")\n```\n\n## Geographic queries\n\n```python\nfrom historypy import places_within_radius\n\nnearby = places_within_radius(dataset, 23.7, 90.4, radius_km=50)\nfor place in nearby:\n    print(place.name, place.distance_km)\n```\n\nOnly places with coordinates are returned. Distances use a spherical Earth approximation; they do not express uncertainty in historical place locations.\n\n## Chronology notes
 
 - ISO date bounds represent Gregorian calendar dates.
 - BCE/year-only dates use astronomical year numbering: 1 CE = 1, 1 BCE = 0, 2 BCE = -1.
