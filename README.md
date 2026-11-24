@@ -437,3 +437,47 @@ period = store.query_year_range(
 Year-range queries use inclusive overlap and astronomical year numbering (1 CE = 1, 1 BCE = 0, 2 BCE = -1). BCE ranges are supported. Calendar filtering is exact when supplied; HistoryPy never converts calendars implicitly. Open-ended dates can match a range, while records with no normalized year bounds are excluded unless include_undated=True is passed. The store indexes year and calendar columns to accelerate these queries.
 
 FTS5 is an optional SQLite capability, not a mandatory dependency. The fallback remains available on SQLite builds without FTS5. Neither lexical search mode understands meaning or independently verifies historical claims. Query performance depends on dataset size, hardware, SQLite build, and query selectivity; no fixed response-time guarantee is made.
+
+
+## Semantic retrieval and evidence analysis (0.8)
+
+### Embedding-backed semantic search
+
+HistoryPy supports semantic ranking through a caller-supplied embedding function. It intentionally does not download a model, choose a paid provider, or send research text to an external service automatically. The embedder must return one finite, non-zero vector per input text and use the same model/vector space for indexing and querying.
+
+~~~python
+from historypy import SemanticSearchIndex
+
+# embed_texts must return one vector per input string from your chosen model.
+index = SemanticSearchIndex.build(
+    dataset,
+    embedder=embed_texts,
+    model_id="provider/model-name@version",
+    batch_size=64,
+)
+hits = index.search(
+    "What evidence connects this port to maritime trade?",
+    embedder=embed_texts,
+    kinds=("event", "claim", "place"),
+    limit=20,
+    min_similarity=0.25,
+)
+for hit in hits:
+    print(hit.kind, hit.record_id, hit.similarity, hit.label)
+~~~
+
+The model identifier is retained with the index so model provenance is visible. Rebuild the index after changing the dataset or embedding model. Similarity is a retrieval signal, not a probability, source-quality score, or measure of historical truth. The quality of results depends on the selected embedding model, its language coverage, domain suitability, and the research corpus. This feature has no mandatory model or network dependency; users control embedding generation, hosting, cost, and privacy.
+
+### Claim evidence coverage analysis
+
+~~~python
+from historypy import analyze_claim_evidence
+
+analysis = analyze_claim_evidence(dataset, "claim-001")
+print(analysis.assessment_status)
+print(analysis.relation_counts)
+print(analysis.source_type_counts)
+print(analysis.locator_coverage)
+~~~
+
+This report summarizes recorded support/contradiction/context/mention links, source-type metadata, and whether source locators were recorded. Source types and locator completeness do not prove reliability or independence. The analysis never resolves disputes automatically.
