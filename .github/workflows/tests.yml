@@ -24,4 +24,4 @@ jobs:
       - name: Lint
         run: ruff check .
       - name: Smoke-test synthetic search benchmark
-        run: python benchmarks/benchmark_search.py --records 1000 --repeat 3
+        run: python benchmarks/benchmark_search.py --records 10000 --repeat 3
