@@ -42,12 +42,12 @@ from historypy.research.query import SearchHit, events_overlapping, search_datas
 from historypy.research.report import render_claim_report
 from historypy.research.search_index import DatasetSearchIndex
 from historypy.research.provenance import DatasetProvenanceReport, audit_dataset_provenance
-from historypy.research.timeline import TimelineEntry, TimelineResult, timeline_for_dataset
 from historypy.research.source_audit import (
     SourceMetadataAudit,
     audit_dataset_sources,
     audit_source_record,
 )
+from historypy.research.timeline import TimelineEntry, TimelineResult, timeline_for_dataset
 from historypy.research.verification import ClaimAssessment, assess_claim
 
 __all__ = [
