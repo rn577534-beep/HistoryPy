@@ -16,6 +16,15 @@ from historypy.core.models import (
     SourceRecord,
 )
 from historypy.graph import RelationshipGraph
+from historypy.integrations import (
+    EuropeanaSearch,
+    ExternalRecord,
+    InternetArchiveSearch,
+    LibraryOfCongressSearch,
+    MediaWikiSearch,
+    ProviderError,
+    WikidataSearch,
+)
 from historypy.io import (
     dataset_from_dict,
     dataset_from_json,
@@ -61,12 +70,14 @@ __version__ = "0.2.0"
 
 __all__ = [
     "DatasetProfile", "DatasetQualityReport", "DatasetSearchIndex",
-    "EntityMatchCandidate", "EvidenceLink", "EvidenceSummary",
+    "EntityMatchCandidate", "EvidenceLink", "EvidenceSummary", "EuropeanaSearch",
+    "ExternalRecord", "InternetArchiveSearch", "LibraryOfCongressSearch", "MediaWikiSearch",
     "HistoricalCivilization", "HistoricalClaim", "HistoricalDataset",
     "HistoricalDate", "HistoricalEvent", "HistoricalOrganization",
     "HistoricalPerson", "HistoricalPlace", "HistoricalRelationship",
     "MetricComparison", "MetricObservation", "PlaceDistance", "QualityFinding",
-    "RelationshipGraph", "ResearchAction", "SearchHit", "SourceMetadataAudit",
+    "ProviderError", "RelationshipGraph", "ResearchAction", "SearchHit",
+    "SourceMetadataAudit",
     "SourceRecord", "ValidationIssue", "__version__", "append_research_action",
     "assess_dataset_quality", "audit_dataset_sources", "audit_source_record",
     "claims_with_conflicting_evidence", "compare_metrics", "content_hash",
@@ -75,5 +86,5 @@ __all__ = [
     "load_dataset", "load_dataset_csv_bundle", "places_within_radius",
     "profile_dataset", "save_dataset", "save_dataset_csv_bundle",
     "search_dataset", "suggest_entity_matches", "summarize_claim_evidence",
-    "verify_research_audit_trail",
+    "verify_research_audit_trail", "WikidataSearch",
 ]
