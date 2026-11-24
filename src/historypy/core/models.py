@@ -59,6 +59,14 @@ class HistoricalDate:
             _validate_iso_date(self.latest, "latest")
         if self.earliest and self.latest and self.earliest > self.latest:
             raise ValueError("earliest cannot be later than latest")
+        for field_name, year_value in (
+            ("earliest_year", self.earliest_year),
+            ("latest_year", self.latest_year),
+        ):
+            if year_value is not None and (
+                not isinstance(year_value, int) or isinstance(year_value, bool)
+            ):
+                raise TypeError(f"{field_name} must be an integer")
         if (self.earliest_year is not None or self.latest_year is not None) and (
             self.earliest is not None or self.latest is not None
         ):
