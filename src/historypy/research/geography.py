@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from math import asin, cos, radians, sin, sqrt
 
 from historypy.core.dataset import HistoricalDataset
-from historypy.core.entities import HistoricalPlace
 
 
 @dataclass(frozen=True, slots=True)
