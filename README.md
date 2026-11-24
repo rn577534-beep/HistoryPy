@@ -590,3 +590,33 @@ uses a selective synthetic query; it does not establish performance for broad
 queries, real historical corpora, retrieval relevance, or historical accuracy.
 The workflow is separate from the required fast test matrix because the
 million-record case is resource-intensive.
+
+
+## Comparing sources for the same event
+
+`compare_event_sources(dataset, event_id)` places the event's directly linked
+sources beside the quotations and evidence links attached to claims that name
+that event. Each excerpt retains its relation label and exact citation locator
+(page, paragraph, archive shelfmark, URL fragment, transcription line, or
+timecode). Sources linked to the event without a quotation are still listed so
+missing evidence can be identified.
+
+```python
+from historypy import compare_event_sources
+
+comparison = compare_event_sources(dataset, "event-001")
+for source in comparison.sources:
+    print(source.title, source.source_type, source.url)
+    for excerpt in source.evidence:
+        print(excerpt.relation, excerpt.quotation, excerpt.page, excerpt.locator)
+
+print("Evidence without locators:", comparison.evidence_missing_locators)
+print("Recorded support/contradiction labels:",
+      comparison.has_recorded_support_contradiction)
+```
+
+This is a side-by-side provenance view, not automatic source adjudication.
+Conflicting labels are only those entered by a researcher; repeated accounts
+may depend on one another. HistoryPy does not infer source independence or
+decide which account is correct. Quotations and locators must be checked
+against the original source and its rights conditions.
