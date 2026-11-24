@@ -1,5 +1,6 @@
 """Research utilities for evidence-aware historical analysis."""
 
+from historypy.research.bm25 import BM25SearchHit, BM25SearchIndex
 from historypy.research.audit_trail import (
     ResearchAction,
     append_research_action,
@@ -69,6 +70,8 @@ from historypy.research.timeline import TimelineEntry, TimelineResult, timeline_
 from historypy.research.verification import ClaimAssessment, assess_claim
 
 __all__ = [
+    "BM25SearchHit",
+    "BM25SearchIndex",
     "ClaimAssessment",
     "ClaimEvidenceAnalysis",
     "DatasetProfile",
