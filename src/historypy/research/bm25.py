@@ -41,7 +41,7 @@ class BM25SearchIndex:
     """An in-memory BM25 index with accent-insensitive Unicode tokenization."""
 
     records: tuple[tuple[str, str, str], ...]
-    term_frequencies: tuple[collections.abc.Mapping[str, int], ...]
+    term_frequencies: tuple[Mapping[str, int], ...]
     postings: collections.abc.Mapping[str, tuple[tuple[int, int], ...]]
     document_lengths: tuple[int, ...]
     average_document_length: float
