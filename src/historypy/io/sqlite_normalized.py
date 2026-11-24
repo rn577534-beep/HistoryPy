@@ -14,7 +14,7 @@ from typing import Any
 from historypy.core.dataset import HistoricalDataset
 from historypy.io.json import SCHEMA_NAME, SCHEMA_VERSION, dataset_from_dict, dataset_to_dict
 
-_STORE_SCHEMA_VERSION = 1
+_STORE_SCHEMA_VERSION = 2
 _RECORD_KINDS = (
     "sources", "claims", "events", "people", "places",
     "civilizations", "organizations", "relationships", "evidence",
@@ -96,6 +96,7 @@ class NormalizedSQLiteStore:
                     f"schema {_STORE_SCHEMA_VERSION}"
                 )
             self._migrate(connection, version)
+            self._fts5_available = self._ensure_fts(connection)
 
     def _connect(self) -> sqlite3.Connection:
         connection = sqlite3.connect(self.path, timeout=15)
@@ -149,6 +150,31 @@ class NormalizedSQLiteStore:
                 PRAGMA user_version = 1;
                 """
             )
+        if version < 2:
+            connection.execute(
+                "CREATE INDEX IF NOT EXISTS hp06_records_calendar_years "
+                "ON hp06_records(dataset_name, kind, calendar, start_year, end_year)"
+            )
+            connection.execute("PRAGMA user_version = 2")
+
+    @staticmethod
+    def _ensure_fts(connection: sqlite3.Connection) -> bool:
+        """Create and initialize the optional FTS5 index when SQLite supports it."""
+        try:
+            connection.execute(
+                """CREATE VIRTUAL TABLE IF NOT EXISTS hp06_records_fts USING fts5(
+                    dataset_name UNINDEXED, kind UNINDEXED, record_id UNINDEXED,
+                    search_text, tokenize='unicode61'
+                )"""
+            )
+            connection.execute("DELETE FROM hp06_records_fts")
+            connection.execute(
+                """INSERT INTO hp06_records_fts(dataset_name, kind, record_id, search_text)
+                   SELECT dataset_name, kind, record_id, search_text FROM hp06_records"""
+            )
+            return True
+        except sqlite3.OperationalError:
+            return False
 
     def save(self, name: str, dataset: HistoricalDataset) -> None:
         """Atomically replace one named dataset with normalized record rows."""
@@ -157,6 +183,10 @@ class NormalizedSQLiteStore:
         dataset.require_valid()
         payload = dataset_to_dict(dataset)
         with closing(self._connect()) as connection, connection:
+            if self._fts5_available:
+                connection.execute(
+                    "DELETE FROM hp06_records_fts WHERE dataset_name = ?", (name,)
+                )
             connection.execute("DELETE FROM hp06_datasets WHERE name = ?", (name,))
             connection.execute(
                 """INSERT INTO hp06_datasets
@@ -182,6 +212,13 @@ class NormalizedSQLiteStore:
                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
                         (name, kind, record_id, serialized, searchable, start, end, calendar),
                     )
+                    if self._fts5_available:
+                        connection.execute(
+                            """INSERT INTO hp06_records_fts
+                               (dataset_name, kind, record_id, search_text)
+                               VALUES (?, ?, ?, ?)""",
+                            (name, kind, record_id, searchable),
+                        )
                     source_ids = record.get("source_ids", [])
                     for source_id in source_ids:
                         connection.execute(
@@ -266,27 +303,100 @@ class NormalizedSQLiteStore:
         self, name: str, query: str, *, kind: str | None = None,
         limit: int = 50, offset: int = 0,
     ) -> tuple[StoredRecord, ...]:
-        """Search normalized record text with deterministic pagination."""
-        if not query.strip():
+        """Search with FTS5 when available; otherwise use safe substring matching.
+
+        FTS5 treats input as a quoted phrase. The fallback preserves the
+        original case-insensitive substring behavior.
+        """
+        if not isinstance(query, str) or not query.strip():
             raise ValueError("query cannot be empty")
         if kind is not None and kind not in _KIND_ALIASES:
             raise ValueError(f"Unsupported record kind: {kind}")
         if not 1 <= limit <= 1000 or offset < 0:
             raise ValueError("limit must be 1..1000 and offset cannot be negative")
         with closing(self._connect()) as connection:
-            if name not in {
-                row["name"] for row in connection.execute(
-                    "SELECT name FROM hp06_datasets"
-                ).fetchall()
-            }:
+            if connection.execute(
+                "SELECT 1 FROM hp06_datasets WHERE name = ?", (name,)
+            ).fetchone() is None:
+                raise KeyError(name)
+            rows = None
+            if self._fts5_available:
+                phrase = '"' + query.strip().replace('"', '""') + '"'
+                sql = """SELECT records.kind, records.record_id, records.payload_json
+                         FROM hp06_records_fts AS matches
+                         JOIN hp06_records AS records
+                           ON records.dataset_name = matches.dataset_name
+                          AND records.kind = matches.kind
+                          AND records.record_id = matches.record_id
+                         WHERE matches.dataset_name = ? AND hp06_records_fts MATCH ?"""
+                params: list[Any] = [name, phrase]
+                if kind is not None:
+                    sql += " AND records.kind = ?"
+                    params.append(kind)
+                sql += " ORDER BY records.kind, records.record_id LIMIT ? OFFSET ?"
+                params.extend((limit, offset))
+                try:
+                    rows = connection.execute(sql, params).fetchall()
+                except sqlite3.OperationalError:
+                    self._fts5_available = False
+            if rows is None:
+                sql = """SELECT kind, record_id, payload_json FROM hp06_records
+                         WHERE dataset_name = ? AND instr(search_text, ?) > 0"""
+                params = [name, query.casefold()]
+                if kind is not None:
+                    sql += " AND kind = ?"
+                    params.append(kind)
+                sql += " ORDER BY kind, record_id LIMIT ? OFFSET ?"
+                params.extend((limit, offset))
+                rows = connection.execute(sql, params).fetchall()
+        return tuple(
+            StoredRecord(row["kind"], row["record_id"], json.loads(row["payload_json"]))
+            for row in rows
+        )
+
+    def query_year_range(
+        self, name: str, start_year: int, end_year: int, *,
+        kind: str | None = None, calendar: str | None = None,
+        limit: int = 100, offset: int = 0, include_undated: bool = False,
+    ) -> tuple[StoredRecord, ...]:
+        """Return records whose stored year bounds overlap an inclusive range.
+
+        Years use astronomical numbering (1 CE=1, 1 BCE=0, 2 BCE=-1).
+        Calendar filtering is exact when supplied; calendars are never converted.
+        One-sided record bounds are treated as open-ended. Undated records are
+        excluded unless explicitly requested.
+        """
+        for field, value in (("start_year", start_year), ("end_year", end_year)):
+            if not isinstance(value, int) or isinstance(value, bool):
+                raise TypeError(f"{field} must be an integer")
+        if start_year > end_year:
+            raise ValueError("start_year cannot be greater than end_year")
+        if kind is not None and kind not in _KIND_ALIASES:
+            raise ValueError(f"Unsupported record kind: {kind}")
+        if calendar is not None and (not isinstance(calendar, str) or not calendar.strip()):
+            raise ValueError("calendar must be a non-empty string or None")
+        if not 1 <= limit <= 1000 or offset < 0:
+            raise ValueError("limit must be 1..1000 and offset cannot be negative")
+        with closing(self._connect()) as connection:
+            if connection.execute(
+                "SELECT 1 FROM hp06_datasets WHERE name = ?", (name,)
+            ).fetchone() is None:
                 raise KeyError(name)
             sql = """SELECT kind, record_id, payload_json FROM hp06_records
-                     WHERE dataset_name = ? AND instr(search_text, ?) > 0"""
-            params: list[Any] = [name, query.casefold()]
+                     WHERE dataset_name = ?"""
+            params: list[Any] = [name]
+            if not include_undated:
+                sql += " AND start_year IS NOT NULL AND end_year IS NOT NULL"
+            sql += " AND (start_year IS NULL OR start_year <= ?)"
+            sql += " AND (end_year IS NULL OR end_year >= ?)"
+            params.extend((end_year, start_year))
+            if calendar is not None:
+                sql += " AND calendar = ?"
+                params.append(calendar)
             if kind is not None:
                 sql += " AND kind = ?"
                 params.append(kind)
-            sql += " ORDER BY kind, record_id LIMIT ? OFFSET ?"
+            sql += " ORDER BY kind, start_year, end_year, record_id LIMIT ? OFFSET ?"
             params.extend((limit, offset))
             rows = connection.execute(sql, params).fetchall()
         return tuple(
