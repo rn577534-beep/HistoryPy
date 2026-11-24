@@ -167,6 +167,55 @@ report = assess_dataset_quality(dataset)
 profile = profile_dataset(dataset)
 ```
 
+
+## External historical and cultural-heritage APIs
+
+HistoryPy includes read-only metadata search adapters for several public providers. These adapters return normalized `ExternalRecord` metadata and short descriptions; they do not copy full articles or automatically declare imported statements to be historically true.
+
+| Provider | Access | Typical material |
+|---|---|---|
+| Wikipedia / MediaWiki | No API key | Article discovery and short search snippets |
+| Wikidata | No API key | Structured entity discovery and identifiers |
+| Library of Congress | No API key | Catalogues, photographs, manuscripts, and collection records |
+| Internet Archive | No API key | Archive catalogue metadata and item records |
+| Europeana | Free account and API key | Cultural heritage objects, digitized books, images, and museum/archive records |
+
+Example:
+
+```python
+from historypy import (
+    MediaWikiSearch,
+    WikidataSearch,
+    LibraryOfCongressSearch,
+    InternetArchiveSearch,
+)
+
+for provider in (
+    MediaWikiSearch(language="en"),
+    WikidataSearch(),
+    LibraryOfCongressSearch(),
+    InternetArchiveSearch(),
+):
+    for item in provider.search("Mughal Empire", limit=5):
+        print(item.provider, item.title, item.url, item.retrieved_at)
+```
+
+Europeana requires a free API key. Store it outside source code, for example in an environment variable:
+
+```bash
+export EUROPEANA_API_KEY="your-key"
+```
+
+```python
+from historypy import EuropeanaSearch
+
+items = EuropeanaSearch().search("Bengal manuscripts", limit=10)
+```
+
+Never commit API keys to Git, notebooks, issue reports, or published examples. Do not place secrets in URLs. The adapter sends the Europeana key in the `X-Api-Key` request header. Follow each provider's current rate limits, terms, attribution rules, and item-level rights metadata. A search result is a discovery lead, not a verified historical claim; researchers should preserve the provider URL, access time, rights statement, and source context before citing it. The adapters deliberately return metadata rather than full copyrighted text.
+
+The adapters use Python's standard library and do not add a mandatory third-party dependency. They use a descriptive User-Agent and a finite request timeout. They do not yet implement persistent caching, automatic retries, or bulk harvesting.
+
 ## Chronology notes
 
 - ISO date bounds represent Gregorian calendar dates.
