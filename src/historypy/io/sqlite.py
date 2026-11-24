@@ -41,9 +41,8 @@ class SQLiteDatasetStore:
             raise ValueError("dataset name cannot be empty")
         dataset.require_valid()
         payload = dataset_to_json(dataset)
-        with closing(self._connect()) as connection:
-            with connection:
-                connection.execute(
+        with closing(self._connect()) as connection, connection:
+            connection.execute(
                     """INSERT INTO historypy_datasets(name, schema_version, payload)
                        VALUES (?, ?, ?)
                        ON CONFLICT(name) DO UPDATE SET
@@ -74,9 +73,8 @@ class SQLiteDatasetStore:
         return tuple(row[0] for row in rows)
 
     def delete(self, name: str) -> bool:
-        with closing(self._connect()) as connection:
-            with connection:
-                cursor = connection.execute(
+        with closing(self._connect()) as connection, connection:
+            cursor = connection.execute(
                     "DELETE FROM historypy_datasets WHERE name = ?", (name,)
                 )
         return cursor.rowcount > 0
