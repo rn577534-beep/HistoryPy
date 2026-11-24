@@ -65,6 +65,7 @@ from historypy.research.source_comparison import (
     EventSourceEntry,
     SourceEvidenceExcerpt,
     compare_event_sources,
+    render_event_source_comparison,
 )
 from historypy.research.timeline import TimelineEntry, TimelineResult, timeline_for_dataset
 from historypy.research.verification import ClaimAssessment, assess_claim
@@ -119,6 +120,7 @@ __all__ = [
     "places_within_radius",
     "profile_dataset",
     "render_claim_report",
+    "render_event_source_comparison",
     "render_research_report",
     "search_dataset",
     "suggest_entity_matches",
