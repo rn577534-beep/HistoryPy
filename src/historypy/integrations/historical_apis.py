@@ -166,7 +166,7 @@ class EuropeanaSearch:
                 external_id=str(item.get("id", "")),
                 title=_clean(item.get("title")) or "Untitled",
                 description=_clean(item.get("dcDescription")),
-                url=_clean(item.get guid := "guid") if False else _clean(item.get("guid")),
+                url=_clean(item.get("guid")),
                 creator=_clean(item.get("dcCreator")),
                 date=_clean(item.get("year")),
                 language=_clean(item.get("language")),
