@@ -150,8 +150,10 @@ def render_event_source_comparison(
     lines = [
         f"# Source comparison: {comparison.event_title}",
         "",
-        "This report presents recorded evidence side by side. It does not "
-        "rank source credibility or decide historical truth.",
+        (
+            "This report presents recorded evidence side by side. It does not "
+            "rank source credibility or decide historical truth."
+        ),
         "",
     ]
     for source in comparison.sources:
@@ -196,8 +198,10 @@ def render_event_source_comparison(
     lines.extend([
         "## Audit summary",
         f"- Evidence links: {comparison.evidence_count}",
-        f"- Evidence links missing a citation location: "
-        f"{comparison.evidence_missing_locators}",
+        (
+            f"- Evidence links missing a citation location: "
+            f"{comparison.evidence_missing_locators}"
+        ),
         f"- Recorded supporting and contradicting labels both present: "
         f"{'yes' if comparison.has_recorded_support_contradiction else 'no'}",
         "",
