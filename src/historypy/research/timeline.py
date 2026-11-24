@@ -50,6 +50,10 @@ def _combine_interval(start: HistoricalDate | None, end: HistoricalDate | None) 
     )
 
 
+def _has_bounds(value: HistoricalDate) -> bool:
+    return any((value.earliest, value.latest, value.earliest_year is not None, value.latest_year is not None))
+
+
 def _sort_key(entry: TimelineEntry) -> tuple[object, ...]:
     value = entry.date
     if value is None:
@@ -112,9 +116,11 @@ def timeline_for_dataset(
     undated_count = 0
     excluded_indeterminate_count = 0
     for entry in candidates:
-        if entry.date is None:
+        if entry.date is None or not _has_bounds(entry.date):
             undated_count += 1
-            if include_indeterminate and period is None:
+            if period is not None:
+                excluded_indeterminate_count += 1
+            if include_indeterminate:
                 selected.append(entry)
             continue
         if period is not None:
