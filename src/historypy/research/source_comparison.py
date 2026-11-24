@@ -202,10 +202,14 @@ def render_event_source_comparison(
             f"- Evidence links missing a citation location: "
             f"{comparison.evidence_missing_locators}"
         ),
-        f"- Recorded supporting and contradicting labels both present: "
-        f"{'yes' if comparison.has_recorded_support_contradiction else 'no'}",
+        (
+            f"- Recorded supporting and contradicting labels both present: "
+            f"{'yes' if comparison.has_recorded_support_contradiction else 'no'}"
+        ),
         "",
-        "These relation labels and excerpts are researcher-entered records. "
-        "They do not establish source independence or prove a claim.",
+        (
+            "These relation labels and excerpts are researcher-entered records. "
+            "They do not establish source independence or prove a claim."
+        ),
     ])
     return "\n".join(lines)
