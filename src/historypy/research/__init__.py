@@ -1,6 +1,6 @@
 """Research utilities for evidence-aware historical analysis."""
 
-from historypy.research.geography import (\n    PlaceDistance,\n    great_circle_distance_km,\n    places_within_radius,\n)\nfrom historypy.research.entity_resolution import (
+from historypy.research.entity_resolution import (
     EntityMatchCandidate,
     suggest_entity_matches,
 )
@@ -10,6 +10,11 @@ from historypy.research.evidence import (
     evidence_for_claim,
     summarize_claim_evidence,
 )
+from historypy.research.geography import (
+    PlaceDistance,
+    great_circle_distance_km,
+    places_within_radius,
+)
 from historypy.research.query import SearchHit, events_overlapping, search_dataset
 from historypy.research.source_audit import (
     SourceMetadataAudit,
@@ -18,8 +23,9 @@ from historypy.research.source_audit import (
 )
 
 __all__ = [
-    "EntityMatchCandidate",\n    "PlaceDistance",\n    "great_circle_distance_km",\n    "places_within_radius",
+    "EntityMatchCandidate",
     "EvidenceSummary",
+    "PlaceDistance",
     "SearchHit",
     "SourceMetadataAudit",
     "audit_dataset_sources",
@@ -27,6 +33,8 @@ __all__ = [
     "claims_with_conflicting_evidence",
     "events_overlapping",
     "evidence_for_claim",
+    "great_circle_distance_km",
+    "places_within_radius",
     "search_dataset",
     "suggest_entity_matches",
     "summarize_claim_evidence",
