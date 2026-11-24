@@ -216,6 +216,52 @@ Never commit API keys to Git, notebooks, issue reports, or published examples. D
 
 The adapters use Python's standard library and do not add a mandatory third-party dependency. They use a descriptive User-Agent and a finite request timeout. They do not yet implement persistent caching, automatic retries, or bulk harvesting.
 
+
+## Federated historical data discovery
+
+Search multiple configured providers with one query. A provider failure is isolated, so successful responses remain available:
+
+```python
+from historypy import (
+    MediaWikiSearch,
+    WikidataSearch,
+    LibraryOfCongressSearch,
+    InternetArchiveSearch,
+    search_all,
+    find_duplicate_candidates,
+    compare_metadata,
+    to_source_record,
+)
+
+report = search_all(
+    [
+        MediaWikiSearch(),
+        WikidataSearch(),
+        LibraryOfCongressSearch(),
+        InternetArchiveSearch(),
+    ],
+    "Mughal Empire",
+    limit_per_provider=5,
+)
+
+for provider_result in report.results:
+    print(provider_result.provider, provider_result.error)
+    for item in provider_result.records:
+        print(item.title, item.url, item.license)
+
+# Candidate groups and metadata disagreements are review aids only.
+duplicates = find_duplicate_candidates(report.records)
+conflicts = compare_metadata(report.records)
+
+# Import only a result selected by a researcher.
+selected = report.records[0]
+source = to_source_record(selected, source_id="selected-source-001")
+```
+
+Six aggregation capabilities are provided: federated search, per-provider failure isolation, conservative exact duplicate candidates, field-level metadata conflict reports, explicit conversion of selected records into `SourceRecord`, and automated tests/documentation. Duplicate candidates are not merged. Similar titles do not prove identity. Conflicting dates or creators are not automatically reconciled. The imported source preserves provider identity, external ID, retrieval timestamp, rights statement, URL, and language in its metadata/notes.
+
+Search is currently sequential, has no persistent cache or automatic retry, and uses each provider's own public API limits. Respect upstream terms, rate limits, and attribution requirements. Do not bulk harvest unless the provider permits it.
+
 ## Chronology notes
 
 - ISO date bounds represent Gregorian calendar dates.
