@@ -16,9 +16,9 @@ import time
 from collections.abc import Callable
 
 from historypy import (
+    DatasetSearchIndex,
     HistoricalDataset,
     HistoricalPerson,
-    DatasetSearchIndex,
     __version__,
     search_dataset,
 )
