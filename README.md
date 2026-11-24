@@ -414,3 +414,26 @@ for usage in store.source_usage("ancient-world"):
 ```
 
 Search currently uses indexed dataset/kind selection plus case-insensitive substring matching over normalized record text. It is not full-text ranking or semantic/vector search. Pagination is deterministic by record kind and ID. SQLite FTS5 and external embedding providers are not required.
+
+
+## Normalized research database (0.7)
+
+The normalized SQLite store maintains indexed record and source-reference tables. When the SQLite build provides FTS5, the store maintains a full-text index for phrase search; otherwise it automatically falls back to the dependency-free case-insensitive substring search. FTS5 uses token-based phrase matching, so punctuation and partial-token behavior can differ from the fallback. Search results are deterministically ordered and paginated.
+
+~~~python
+from historypy import NormalizedSQLiteStore
+
+store = NormalizedSQLiteStore("history.db")
+store.save("project", dataset)
+
+matches = store.search_records(
+    "project", "Mughal administration", kind="claims", limit=25
+)
+period = store.query_year_range(
+    "project", 1526, 1707, calendar="gregorian", limit=100
+)
+~~~
+
+Year-range queries use inclusive overlap and astronomical year numbering (1 CE = 1, 1 BCE = 0, 2 BCE = -1). BCE ranges are supported. Calendar filtering is exact when supplied; HistoryPy never converts calendars implicitly. Open-ended dates can match a range, while records with no normalized year bounds are excluded unless include_undated=True is passed. The store indexes year and calendar columns to accelerate these queries.
+
+FTS5 is an optional SQLite capability, not a mandatory dependency. The fallback remains available on SQLite builds without FTS5. Neither lexical search mode understands meaning or independently verifies historical claims. Query performance depends on dataset size, hardware, SQLite build, and query selectivity; no fixed response-time guarantee is made.
