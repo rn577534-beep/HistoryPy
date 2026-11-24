@@ -36,7 +36,14 @@ from historypy.research.geography import (
     great_circle_distance_km,
     places_within_radius,
 )
-from historypy.research.pipeline import (\n    ResearchPipeline,\n    ResearchReport,\n    ResearchTask,\n    ResearchTaskResult,\n    render_research_report,\n)\nfrom historypy.research.profile import DatasetProfile, profile_dataset
+from historypy.research.pipeline import (
+    ResearchPipeline,
+    ResearchReport,
+    ResearchTask,
+    ResearchTaskResult,
+    render_research_report,
+)
+from historypy.research.profile import DatasetProfile, profile_dataset
 from historypy.research.provenance import DatasetProvenanceReport, audit_dataset_provenance
 from historypy.research.quality import (
     DatasetQualityReport,
@@ -70,7 +77,11 @@ __all__ = [
     "QualityFinding",
     "ResearchAction",
     "ResearchFacets",
+    "ResearchPipeline",
     "ResearchQuery",
+    "ResearchReport",
+    "ResearchTask",
+    "ResearchTaskResult",
     "ResearchSearchResult",
     "SearchHit",
     "SemanticSearchHit",
@@ -95,6 +106,7 @@ __all__ = [
     "places_within_radius",
     "profile_dataset",
     "render_claim_report",
+    "render_research_report",
     "search_dataset",
     "suggest_entity_matches",
     "summarize_claim_evidence",
