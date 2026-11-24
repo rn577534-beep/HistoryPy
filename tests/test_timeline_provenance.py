@@ -72,3 +72,15 @@ def test_provenance_reports_source_usage_orphans_and_unlinked_claims():
     assert report.claims_without_evidence == ()
     assert report.total_source_links == 1
     assert dict(report.evidence_relation_counts)["supports"] == 1
+
+
+def test_provenance_counts_sources_used_only_by_evidence():
+    dataset = HistoricalDataset(
+        sources=(SourceRecord("s1", "Archive", "archival"),),
+        claims=(HistoricalClaim("c1", "A proposition"),),
+        evidence=(EvidenceLink("c1", "s1", "contradicts"),),
+    )
+    report = audit_dataset_provenance(dataset)
+    assert report.source_usage_counts == (("s1", 1),)
+    assert report.orphan_source_ids == ()
+    assert report.linked_source_count == 1
