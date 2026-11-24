@@ -10,8 +10,9 @@ HistoryPy is an evidence-aware Python toolkit for organizing and analyzing histo
 2. **Dataset integrity** — in-memory collections with stable identifiers and referential-integrity diagnostics.
 3. **Chronology** — bounded dates, BCE/CE astronomical year numbering, calendar labels, event ordering, and overlap detection.
 4. **Knowledge graph** — directed, typed relationships, graph traversal, shortest paths, and connected components.
-5. **Research tools (planned)** — source comparison, entity resolution, geographic analysis, network measures, and conflict-aware claim assessment.
-6. **Interfaces (planned)** — JSON/CSV interchange, command-line tools, APIs, notebooks, and visual research interfaces.
+5. **Research tools** — evidence retrieval and transparent summaries of supporting, contradicting, contextualizing, and mentioning sources. These summaries do not assign a truth score.
+6. **Interchange** — versioned JSON serialization, validation on import, and UTF-8 file persistence.
+7. **Future interfaces and analysis** — source comparison, entity resolution, geographic analysis, network measures, CSV interchange, command-line tools, APIs, notebooks, and visual research interfaces.
 
 ## Evidence model
 
@@ -31,7 +32,15 @@ HistoricalDataset.validate() reports duplicate IDs and broken references without
 
 ## Graph analysis
 
-RelationshipGraph provides deterministic neighbor lookup, predicate filtering, breadth-first shortest paths, and weakly connected components. It treats relationships as directed unless callers request incoming or bidirectional traversal. The current graph layer does not infer missing edges or score historical truth.
+RelationshipGraph provides deterministic neighbor lookup, predicate filtering, breadth-first shortest paths, and weakly connected components. It treats relationships as directed unless callers request incoming or bidirectional traversal. Graph construction from a HistoricalDataset requires valid references. The graph layer does not infer missing edges or score historical truth.
+
+## Evidence analysis
+
+The research.evidence module retrieves all evidence links for a claim and summarizes source IDs by relation. It can identify claims with both supporting and contradicting links. These are transparent descriptive summaries, not credibility rankings: source independence, provenance, author expertise, genre, bias, and context still require scholarly assessment.
+
+## Data interchange
+
+The JSON format uses the schema identifier historypy.dataset and a numeric schema version. Import rejects unknown fields and unsupported versions. Referential integrity is checked by default; validation can be bypassed explicitly for repair workflows. Future incompatible changes require a version increment and migration documentation.
 
 ## Data governance
 
@@ -39,4 +48,4 @@ Every imported dataset should record its source and maintainer, license and perm
 
 ## Current implementation
 
-The early 0.1.x codebase includes dependency-light core records, basic chronology operations, entity records, dataset validation, a relationship graph, and automated tests. It does not yet include a comprehensive historical dataset, calendar-conversion engine, geospatial index, or automatic source authentication.
+The early 0.1.x codebase includes dependency-light core records, chronology operations, entity records, dataset validation, relationship graph analysis, evidence summaries, versioned JSON import/export, an example dataset builder, and automated tests. It does not yet include a comprehensive historical dataset, calendar-conversion engine, geospatial index, or automatic source authentication.
