@@ -43,6 +43,12 @@ def test_normalized_store_search_and_pagination(tmp_path):
         for i in range(8)
     ))
     store.save("timeline", dataset)
+    if store._fts5_available:
+        phrase_hits = store.search_records(
+            "timeline", "Archive event", kind="events", limit=20
+        )
+        assert store._fts5_available
+        assert len(phrase_hits) == 8
     first = store.search_records("timeline", "archive", kind="events", limit=3)
     second = store.search_records("timeline", "archive", kind="events", limit=3, offset=3)
     assert [row.record_id for row in first] == ["e0", "e1", "e2"]
