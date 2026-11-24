@@ -85,6 +85,26 @@ class HistoricalDataset:
         all_entity_ids = (
             person_ids | place_ids | civilization_ids | organization_ids | event_ids
         )
+        entity_records = (
+            ("event", self.events),
+            ("person", self.people),
+            ("place", self.places),
+            ("civilization", self.civilizations),
+            ("organization", self.organizations),
+        )
+        first_entity_kind: dict[str, str] = {}
+        for kind, records in entity_records:
+            for record in records:
+                previous_kind = first_entity_kind.get(record.id)
+                if previous_kind is not None and previous_kind != kind:
+                    issues.append(ValidationIssue(
+                        "duplicate_entity_id",
+                        f"Entity id {record.id!r} is shared by {previous_kind} and {kind}",
+                        record.id,
+                    ))
+                else:
+                    first_entity_kind[record.id] = kind
+
 
         def check_sources(record: object, record_id: str, source_refs: tuple[str, ...]) -> None:
             for source_id in source_refs:
