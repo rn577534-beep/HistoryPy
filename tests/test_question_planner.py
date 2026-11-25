@@ -1,3 +1,5 @@
+import pytest
+
 from historypy import (
     AliasAssertion,
     AliasRegistry,
@@ -200,8 +202,6 @@ def test_question_planner_bounds_endpoint_pair_hypotheses():
 
 
 def test_question_planner_rejects_malformed_predicate_lexicon():
-    import pytest
-
     with pytest.raises(TypeError, match="tuple or list"):
         plan_research_question(
             _dataset(),
