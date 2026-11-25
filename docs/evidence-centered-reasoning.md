@@ -354,3 +354,37 @@ coverage instead of treating a relationship's source list as a complete
 citation. Relationships without linked claims are explicitly reported as
 evidence gaps; legacy relationship records remain valid with an empty
 `claim_ids` tuple.
+
+
+### Verified aliases in entity-aware hybrid retrieval
+
+The citation-backed registry can now be supplied when building
+`EntityAwareSearchIndex`. Only verified registry assertions are promoted to
+verified alias matches; legacy entity `aliases` remain marked unverified.
+The provenance travels with the hybrid hit:
+
+```python
+from historypy import (
+    BM25SearchIndex,
+    DatasetSearchIndex,
+    EntityAwareSearchIndex,
+    HybridSearchIndex,
+)
+
+entity_index = EntityAwareSearchIndex.build(
+    dataset,
+    alias_registry=alias_registry,
+)
+hybrid = HybridSearchIndex(
+    DatasetSearchIndex.build(dataset),
+    BM25SearchIndex.build(dataset),
+    entity_index=entity_index,
+)
+for hit in hybrid.search("Augusta Ada"):
+    for alias in hit.matched_entity_evidence:
+        print(alias.review_status, alias.alias_id, alias.source_id, alias.locator)
+```
+
+This keeps the alias assertion ID, review state, language, source ID, and
+locator available after retrieval. Fuzzy suggestions remain review-only and
+are never silently promoted into verified alias assertions.
