@@ -27,7 +27,10 @@ from historypy import (
 )
 
 
-def evaluate(\n    index: Any, questions: list[dict[str, Any]], top_k: int,\n    embedder=None, decompose: bool = False,\n):
+def evaluate(
+    index: Any, questions: list[dict[str, Any]], top_k: int,
+    embedder=None, decompose: bool = False,
+):
     groups: dict[str, dict[str, float]] = defaultdict(
         lambda: {"n": 0, "recall": 0.0, "mrr": 0.0, "success": 0.0}
     )
