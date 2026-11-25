@@ -17,11 +17,39 @@ HistoryPy is designed to help researchers represent historical information witho
 
 Requires Python 3.10 or newer.
 
+### Install directly from GitHub
+
+The current development version can be installed without cloning the repository:
+
 ```bash
+python -m pip install "git+https://github.com/rn577534-beep/HistoryPy.git@feat/evidence-centered-reasoning"
+```
+
+This requires Git to be installed and available on your PATH. To verify the installation:
+
+```bash
+python -c "import historypy; print(historypy.__version__)"
+```
+
+### Install from a local clone (contributors)
+
+```bash
+git clone --branch feat/evidence-centered-reasoning --single-branch https://github.com/rn577534-beep/HistoryPy.git
+cd HistoryPy
 python -m pip install -e ".[dev]"
 pytest
 ruff check .
 ```
+
+### Optional semantic-search dependencies
+
+Install the optional embedding-model dependencies from a local clone with:
+
+```bash
+python -m pip install ".[semantic]"
+```
+
+The semantic extra installs `sentence-transformers`; the base installation does not download an embedding model automatically.
 
 ## Quick start
 
