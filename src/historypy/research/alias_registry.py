@@ -49,7 +49,7 @@ def _iso_date(value: str, field_name: str) -> None:
 def _normalize_alias(value: str) -> str:
     folded = unicodedata.normalize("NFKD", value.casefold())
     plain = "".join(char for char in folded if not unicodedata.combining(char))
-    return " ".join(re.findall(r"[^\\W_]+", plain, flags=re.UNICODE))
+    return " ".join(re.findall(r"[^\W_]+", plain, flags=re.UNICODE))
 
 
 @dataclass(frozen=True, slots=True)
@@ -144,6 +144,8 @@ class AliasRegistry:
             raise ValueError("registry_version and dataset_version cannot be empty")
         self.dataset = dataset
         self.assertions = tuple(assertions)
+        if any(not isinstance(item, AliasAssertion) for item in self.assertions):
+            raise TypeError("assertions must contain AliasAssertion records")
         self.registry_version = registry_version
         self.dataset_version = dataset_version
         ids = [item.alias_id for item in self.assertions]
@@ -156,8 +158,6 @@ class AliasRegistry:
                 self._entities[(kind, entity.id)] = entity.name
         index: dict[str, list[AliasAssertion]] = {}
         for item in self.assertions:
-            if not isinstance(item, AliasAssertion):
-                raise TypeError("assertions must contain AliasAssertion records")
             if (item.entity_kind, item.entity_id) not in self._entities:
                 raise ValueError(
                     f"Unknown {item.entity_kind} entity id: {item.entity_id}"
