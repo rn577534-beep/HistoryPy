@@ -140,6 +140,7 @@ def plan_research_question(
     limit: int = 10,
     direction: Literal["outgoing", "incoming", "both"] = "both",
     max_path_queries: int = 40,
+    max_explored_states: int = 10000,
 ) -> QuestionPlan:
     """Extract exact entity mentions and propose paths without asserting intent.
 
@@ -277,6 +278,7 @@ def plan_research_question(
             max_hops=max_hops,
             direction=direction,
             limit=limit,
+            max_explored_states=max_explored_states,
         )
         for start_kind, start_id in entity_ids
         for end_kind, end_id in entity_ids
