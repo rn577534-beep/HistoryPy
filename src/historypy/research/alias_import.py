@@ -28,7 +28,7 @@ def _alias_values(raw: Any) -> tuple[str, ...]:
         values = tuple(
             item if isinstance(item, str) else item.get("value")
             for item in raw
-            if isinstance(item, str) or isinstance(item, dict)
+            if isinstance(item, (str, dict))
         )
     else:
         return ()
