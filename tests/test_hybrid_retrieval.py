@@ -105,3 +105,15 @@ def test_entity_alias_matches_contribute_to_hybrid_ranking():
     person = next(hit for hit in hits if hit.record_id == "p1")
     assert person.entity_rank == 1
     assert person.matched_entity_aliases == ("Iskandar",)
+
+def test_question_decomposition_supports_french_multi_hop_and_comparison():
+    result = decompose_research_question(
+        "Qui était Alexandre et quand a-t-il assiégé Tyr?"
+    )
+    assert result.parts == (
+        "Qui était Alexandre", "quand a-t-il assiégé Tyr"
+    )
+    comparison = decompose_research_question(
+        "Comparer Athènes par rapport à Sparte"
+    )
+    assert comparison.parts == ("Comparer Athènes", "Sparte")
