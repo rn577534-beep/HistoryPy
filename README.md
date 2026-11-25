@@ -897,3 +897,30 @@ Verified aliases are returned by default. Candidate and disputed aliases require
 an explicit opt-in, rejected aliases are excluded, and homonyms remain ambiguous.
 Every alias assertion retains its source, locator, license, language, and review
 status. The registry never merges entity records.
+
+
+### Bounded multi-hop relationship paths
+
+When the researcher already knows the canonical endpoint IDs, HistoryPy can
+enumerate sourced relationship paths without guessing entities from prose:
+
+```python
+from historypy import RelationshipPathQuery, find_relationship_paths
+
+report = find_relationship_paths(
+    dataset,
+    RelationshipPathQuery(
+        "person-001", "place-001",
+        max_hops=3,
+        predicates=("member_of", None, "located_in"),
+    ),
+)
+for path in report.paths:
+    print(path.entity_ids, path.source_ids)
+    print(path.relationships_missing_sources)
+```
+
+Each step retains its relationship ID, predicate, original direction, source
+IDs, and validity dates. Unsourced edges are flagged. Paths are structural
+hypotheses, not automatic historical conclusions; time-window compatibility
+and free-text question planning remain explicit future steps.
