@@ -196,10 +196,22 @@ class SourceRecord:
     language: str | None = None
     archive_reference: str | None = None
     notes: str | None = None
+    derived_from_source_ids: tuple[str, ...] = ()
+    shared_evidence_group_ids: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.id.strip() or not self.title.strip():
             raise ValueError("Source id and title cannot be empty")
+        if any(not value.strip() for value in self.derived_from_source_ids):
+            raise ValueError("derived_from_source_ids cannot contain empty identifiers")
+        if len(set(self.derived_from_source_ids)) != len(self.derived_from_source_ids):
+            raise ValueError("derived_from_source_ids must not contain duplicates")
+        if any(not value.strip() for value in self.shared_evidence_group_ids):
+            raise ValueError("shared_evidence_group_ids cannot contain empty identifiers")
+        if len(set(self.shared_evidence_group_ids)) != len(self.shared_evidence_group_ids):
+            raise ValueError("shared_evidence_group_ids must not contain duplicates")
+        if self.id in self.derived_from_source_ids:
+            raise ValueError("A source cannot derive from itself")
         if self.source_type not in {
             "primary", "secondary", "tertiary", "archaeological", "oral",
             "epigraphic", "numismatic", "archival", "other",
