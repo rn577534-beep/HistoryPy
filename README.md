@@ -861,3 +861,39 @@ A cluster means the cited sources have a recorded shared origin or derivation pa
 Sources without a recorded relationship remain **unknown**, not independent.
 Research reports show these groups and add a caution when dependence is known or
 unknown; this does not change the claim's evidence status or assign a truth score.
+
+
+### Versioned multilingual alias registry
+
+For citation-backed aliases with researcher review metadata, use the separate
+registry rather than treating every legacy string alias as verified:
+
+```python
+from historypy import AliasAssertion, AliasRegistry
+
+registry = AliasRegistry(
+    dataset,
+    [AliasAssertion(
+        alias_id="alias-001",
+        entity_kind="person",
+        entity_id="person-001",
+        alias="Jeanne d’Arc",
+        language="fr",
+        alias_type="historical_name",
+        source_id="source-001",
+        locator="page 14",
+        license="CC-BY-4.0",
+        review_status="verified",
+        reviewer="researcher-id",
+        reviewed_at="2026-01-10",
+    )],
+    registry_version="aliases-1.0",
+    dataset_version="dataset-2026-01",
+)
+print(registry.resolve("Jeanne d'Arc", language="fr"))
+```
+
+Verified aliases are returned by default. Candidate and disputed aliases require
+an explicit opt-in, rejected aliases are excluded, and homonyms remain ambiguous.
+Every alias assertion retains its source, locator, license, language, and review
+status. The registry never merges entity records.
