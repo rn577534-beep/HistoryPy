@@ -153,6 +153,7 @@ class HistoricalRelationship:
     valid_to: HistoricalDate | None = None
     confidence: float | None = None
     notes: str | None = None
+    claim_ids: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not all(value.strip() for value in (
@@ -164,6 +165,7 @@ class HistoricalRelationship:
         ):
             raise ValueError("confidence must be a number between 0.0 and 1.0")
         _validate_ids(self.source_ids, "source_ids")
+        _validate_ids(self.claim_ids, "claim_ids")
         if self.valid_from and self.valid_to:
             if (
                 self.valid_from.calendar == self.valid_to.calendar
