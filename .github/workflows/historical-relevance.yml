@@ -5,11 +5,18 @@ on:
     branches: [main]
     paths:
       - "benchmarks/benchmark_historian_relevance.py"
+      - "src/historypy/research/hybrid.py"
+      - "src/historypy/examples/titanic_inquiry_comparison.py"
+      - "docs/source-comparison-case-study.md"
       - "benchmarks/benchmark_hybrid_retrieval.py"
       - "docs/hybrid-retrieval.md"
       - "docs/research-benchmarks.md"
       - ".github/workflows/historical-relevance.yml"
   workflow_dispatch:
+
+concurrency:
+  group: historypy-historiqa-relevance
+  cancel-in-progress: true
 
 jobs:
   historiqa:
