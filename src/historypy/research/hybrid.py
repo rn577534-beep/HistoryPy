@@ -10,6 +10,7 @@ import unicodedata
 from collections import defaultdict
 from collections.abc import Iterable
 from dataclasses import dataclass
+from difflib import SequenceMatcher
 
 from historypy.core.dataset import HistoricalDataset
 from historypy.research.bm25 import BM25SearchIndex
@@ -117,6 +118,7 @@ class HybridSearchIndex:
         kinds: Iterable[str] | None = None,
         limit: int = 20,
         decompose: bool = False,
+        entity_fuzzy_threshold: float | None = None,
     ) -> tuple[HybridSearchHit, ...]:
         if not isinstance(query, str) or not query.strip():
             raise ValueError("query cannot be empty")
@@ -124,6 +126,8 @@ class HybridSearchIndex:
             raise ValueError("embedder is required when a semantic index is configured")
         if not isinstance(limit, int) or isinstance(limit, bool) or limit < 0:
             raise ValueError("limit must be a non-negative integer")
+        if entity_fuzzy_threshold is not None and not 0.0 <= entity_fuzzy_threshold <= 1.0:
+            raise ValueError("entity_fuzzy_threshold must be between 0 and 1")
         if limit == 0:
             return ()
         parts = decompose_research_question(query).parts if decompose else (query.strip(),)
@@ -161,6 +165,18 @@ class HybridSearchIndex:
                     )
                     matched_aliases[key].add(entity.matched_alias)
                     scores[key] += 1.0 / (self.rrf_k + rank)
+                if entity_fuzzy_threshold is not None:
+                    suggestions = self.entity_index.suggest(
+                        part, kinds=allowed, threshold=entity_fuzzy_threshold
+                    )
+                    for rank, entity in enumerate(suggestions, start=1):
+                        key = (entity.kind, entity.record_id)
+                        labels.setdefault(key, entity.canonical_name)
+                        ranks[key]["entity"] = min(
+                            rank, ranks[key].get("entity", rank)
+                        )
+                        matched_aliases[key].add(entity.matched_alias)
+                        scores[key] += 1.0 / (self.rrf_k + rank)
         ordered = sorted(scores, key=lambda key: (-scores[key], key[0], key[1]))
         return tuple(
             HybridSearchHit(
@@ -184,6 +200,27 @@ class EntityAliasMatch:
     record_id: str
     canonical_name: str
     matched_alias: str
+    ambiguity_count: int = 1
+
+    @property
+    def ambiguous(self) -> bool:
+        return self.ambiguity_count > 1
+
+
+@dataclass(frozen=True, slots=True)
+class EntityAliasSuggestion:
+    """A fuzzy alias candidate; it is never an automatic identity merge."""
+
+    kind: str
+    record_id: str
+    canonical_name: str
+    matched_alias: str
+    similarity: float
+    ambiguity_count: int = 1
+
+    @property
+    def ambiguous(self) -> bool:
+        return self.ambiguity_count > 1
 
 
 class EntityAwareSearchIndex:
@@ -234,6 +271,77 @@ class EntityAwareSearchIndex:
                     entity for entity in entities
                     if allowed is None or entity.kind in allowed
                 )
+        ambiguity_counts: dict[str, int] = {}
+        for alias, entities in self._aliases.items():
+            ambiguity_counts[alias] = sum(
+                1 for entity in entities
+                if allowed is None or entity.kind in allowed
+            )
         return tuple(sorted(
-            matches, key=lambda item: (item.kind, item.record_id, item.matched_alias)
+            (
+                EntityAliasMatch(
+                    item.kind, item.record_id, item.canonical_name,
+                    item.matched_alias, ambiguity_counts.get(
+                        _normalize_phrase(item.matched_alias), 1
+                    )
+                )
+                for item in matches
+            ),
+            key=lambda item: (item.kind, item.record_id, item.matched_alias)
         ))
+
+    def suggest(
+        self,
+        query: str,
+        *,
+        kinds: Iterable[str] | None = None,
+        threshold: float = 0.88,
+        limit: int = 10,
+    ) -> tuple[EntityAliasSuggestion, ...]:
+        """Suggest spelling-near aliases without merging or asserting identity.
+
+        Transliteration and historical name changes must be recorded as explicit
+        aliases. Fuzzy matching is only a review queue for typographic variants.
+        """
+        if not 0.0 <= threshold <= 1.0:
+            raise ValueError("threshold must be between 0 and 1")
+        if not isinstance(limit, int) or isinstance(limit, bool) or limit < 1:
+            raise ValueError("limit must be a positive integer")
+        query_tokens = _normalize_phrase(query).split()
+        query_tokens = [token for token in query_tokens if len(token) >= 4]
+        if not query_tokens:
+            return ()
+        allowed = set(kinds) if kinds is not None else None
+        best: dict[tuple[str, str], EntityAliasSuggestion] = {}
+        for alias, entities in self._aliases.items():
+            alias_tokens = [token for token in alias.split() if len(token) >= 4]
+            if not alias_tokens:
+                continue
+            similarity = max(
+                SequenceMatcher(None, query_token, alias_token).ratio()
+                for query_token in query_tokens
+                for alias_token in alias_tokens
+            )
+            if similarity < threshold:
+                continue
+            eligible = [
+                entity for entity in entities
+                if allowed is None or entity.kind in allowed
+            ]
+            ambiguity = len({(item.kind, item.record_id) for item in eligible})
+            for entity in eligible:
+                key = (entity.kind, entity.record_id)
+                candidate = EntityAliasSuggestion(
+                    entity.kind, entity.record_id, entity.canonical_name,
+                    entity.matched_alias, similarity, max(1, ambiguity)
+                )
+                previous = best.get(key)
+                if previous is None or (
+                    candidate.similarity, candidate.matched_alias
+                ) > (previous.similarity, previous.matched_alias):
+                    best[key] = candidate
+        ordered = sorted(
+            best.values(),
+            key=lambda item: (-item.similarity, item.kind, item.record_id)
+        )
+        return tuple(ordered[:limit])
