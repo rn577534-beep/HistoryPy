@@ -978,3 +978,23 @@ Relationship records may link to claim records with `claim_ids=(...)`.
 The multi-hop workflow then reports claim-level evidence coverage for each
 hop. Missing claim links remain visible evidence gaps; source IDs alone are
 not a substitute for locators, quotations, and claim-level evidence review.
+
+
+Verified aliases can also participate in hybrid entity retrieval without
+losing provenance:
+
+```python
+entity_index = EntityAwareSearchIndex.build(
+    dataset, alias_registry=verified_alias_registry
+)
+hybrid = HybridSearchIndex(
+    DatasetSearchIndex.build(dataset),
+    BM25SearchIndex.build(dataset),
+    entity_index=entity_index,
+)
+for hit in hybrid.search("Augusta Ada"):
+    print(hit.matched_entity_evidence)
+```
+
+Legacy aliases remain unverified; only reviewed registry assertions carry
+verified status, alias IDs, source references, and citation locators.
