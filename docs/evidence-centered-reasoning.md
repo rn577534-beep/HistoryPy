@@ -324,6 +324,9 @@ researcher confirms the predicate sequence.
 
 Each returned path includes:
 - Per-hop source records and source-genealogy audits.
+- Explicit `HistoricalRelationship.claim_ids` links to claim records.
+- Per-hop `ClaimEvidenceAnalysis`, including support/contradiction coverage,
+  source genealogy, and locator completeness.
 - A path-wide source-genealogy audit, so dependencies crossing hop boundaries
   are not missed.
 - A temporal intersection review: `compatible`, `incompatible`, or
@@ -333,3 +336,15 @@ Each returned path includes:
 
 Example output paths are structural hypotheses only. This workflow does not
 write a historical answer, infer causality, or treat a connected path as proof.
+
+
+### Claim-level evidence obligations for relationship hops
+
+A relationship can now carry `claim_ids` in addition to `source_ids`. The
+dataset validator checks these references. During multi-hop review, HistoryPy
+loads the linked claims and runs the existing claim evidence analysis for each
+hop. This exposes the underlying evidence links, source genealogy, and locator
+coverage instead of treating a relationship's source list as a complete
+citation. Relationships without linked claims are explicitly reported as
+evidence gaps; legacy relationship records remain valid with an empty
+`claim_ids` tuple.
