@@ -322,15 +322,15 @@ def test_temporal_policy_requires_explicit_unknown_date_behavior():
     selection = select_paths_by_temporal_policy(
         report.path_reviews, policy="exclude_incompatible"
     )
-    assert len(selection.selected_reviews) == 2
+    assert len(selection.selected_reviews) == 4
     assert len(selection.excluded_unknown) == 0
 
     strict = select_paths_by_temporal_policy(
         report.path_reviews, policy="compatible_only"
     )
-    assert len(strict.selected_reviews) == 1
-    assert len(strict.excluded_unknown) == 1
-    assert strict.excluded_unknown[0].temporal_status == "unknown"
+    assert len(strict.selected_reviews) == 2
+    assert len(strict.excluded_unknown) == 2
+    assert all(row.temporal_status == "unknown" for row in strict.excluded_unknown)
 
 
 def test_temporal_policy_excludes_known_conflicts_but_retains_unknown_by_choice():
@@ -343,5 +343,5 @@ def test_temporal_policy_excludes_known_conflicts_but_retains_unknown_by_choice(
         report.path_reviews, policy="exclude_incompatible"
     )
     assert all(row.temporal_status != "incompatible" for row in selection.selected_reviews)
-    assert len(selection.excluded_incompatible) == 1
+    assert len(selection.excluded_incompatible) == 2
     assert selection.excluded_unknown == ()
