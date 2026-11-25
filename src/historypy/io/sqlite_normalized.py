@@ -86,9 +86,17 @@ class NormalizedSQLiteStore:
     bounded substring search. It does not require optional SQLite extensions.
     """
 
-    def __init__(self, path: str | Path):
+    def __init__(self, path: str | Path, *, journal_mode: str = "DELETE"):
         self.path = str(path)
+        requested_mode = journal_mode.upper()
+        if requested_mode not in {"DELETE", "WAL"}:
+            raise ValueError("journal_mode must be DELETE or WAL")
         with closing(self._connect()) as connection, connection:
+            if requested_mode == "WAL":
+                connection.execute("PRAGMA journal_mode = WAL")
+            self.journal_mode = str(
+                connection.execute("PRAGMA journal_mode").fetchone()[0]
+            ).upper()
             version = connection.execute("PRAGMA user_version").fetchone()[0]
             if version > _STORE_SCHEMA_VERSION:
                 raise ValueError(
@@ -99,10 +107,10 @@ class NormalizedSQLiteStore:
             self._fts5_available = self._ensure_fts(connection)
 
     def _connect(self) -> sqlite3.Connection:
-        connection = sqlite3.connect(self.path, timeout=15)
+        connection = sqlite3.connect(self.path, timeout=30)
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA foreign_keys = ON")
-        connection.execute("PRAGMA busy_timeout = 15000")
+        connection.execute("PRAGMA busy_timeout = 30000")
         return connection
 
     @staticmethod
@@ -179,6 +187,25 @@ class NormalizedSQLiteStore:
             return True
         except sqlite3.OperationalError:
             return False
+
+    def checkpoint_wal(self, *, mode: str = "PASSIVE") -> tuple[int, int, int]:
+        """Checkpoint the WAL and return SQLite's (busy, log, checkpointed) counts."""
+        checkpoint_mode = mode.upper()
+        if checkpoint_mode not in {"PASSIVE", "FULL", "RESTART", "TRUNCATE"}:
+            raise ValueError("mode must be PASSIVE, FULL, RESTART, or TRUNCATE")
+        if self.journal_mode != "WAL":
+            raise RuntimeError("WAL checkpoint requires journal_mode='WAL'")
+        with closing(self._connect()) as connection:
+            row = connection.execute(
+                f"PRAGMA wal_checkpoint({checkpoint_mode})"
+            ).fetchone()
+        return tuple(int(value) for value in row)
+
+    def integrity_check(self) -> tuple[str, ...]:
+        """Run SQLite's full integrity_check and return its diagnostic rows."""
+        with closing(self._connect()) as connection:
+            rows = connection.execute("PRAGMA integrity_check").fetchall()
+        return tuple(str(row[0]) for row in rows)
 
     def save(self, name: str, dataset: HistoricalDataset) -> None:
         """Atomically replace one named dataset with normalized record rows."""
