@@ -132,3 +132,15 @@ def test_import_rejects_invalid_wikidata_revision_identifier():
             registry_version="v1",
             dataset_version="d1",
         )
+
+
+def test_import_does_not_add_source_for_unselected_language_only():
+    dataset, registry = import_wikidata_alias_candidates(
+        _dataset(),
+        [{"id": "Q7186", "aliases": {"de": ["Maria Skłodowska"]}}],
+        {"Q7186": ("person", "p1")},
+        registry_version="v1",
+        dataset_version="d1",
+    )
+    assert dataset.sources == ()
+    assert registry.assertions == ()
