@@ -483,3 +483,34 @@ improvement. Broad search remains materially slower than selective search.
 
 The benchmark run is synthetic and single-writer. It is not a long-running
 production workload or a physical crash/power-loss test.
+
+
+## SQLite streaming writer revalidation (2026-11-25)
+
+The latest completed SQLite workflow on commit
+[81125dc](https://github.com/rn577534-beep/HistoryPy/commit/81125dc24ba1289b1f2e1a516d3e760feb9d91b1)
+repeated the synthetic writer benchmark for 100,000 and 1,000,000 records in
+both DELETE and WAL modes
+([workflow run](https://github.com/rn577534-beep/HistoryPy/actions/runs/45531375803)).
+All four jobs passed; FTS5 was available, SQLite integrity checks returned
+`ok`, and search results were verified after closing and reopening the store.
+
+| Records | Journal | Save time | Additional traced Python memory | Process peak RSS | Selective query | Broad query (top 1,000) |
+|---:|---|---:|---:|---:|---:|---:|
+| 100,000 | DELETE | 15.167 s | 17.171 MiB | 94.695 MiB | 2.211 ms | 198.137 ms |
+| 100,000 | WAL | 11.699 s | 17.171 MiB | 94.559 MiB | 2.279 ms | 150.048 ms |
+| 1,000,000 | DELETE | 156.713 s | 137.338 MiB | 648.090 MiB | 7.012 ms | 2,010.292 ms |
+| 1,000,000 | WAL | 128.640 s | 137.338 MiB | 648.062 MiB | 6.990 ms | 1,486.954 ms |
+
+The million-record database occupied 845.113 MiB; the 100,000-record database
+occupied 84.637 MiB. The WAL run's PASSIVE checkpoint returned `(0, 0, 0)`.
+These are single-run hosted-runner measurements, not guaranteed throughput.
+They show that this particular run's WAL saves and broad queries were faster,
+but the earlier run had a different result; choose journal mode based on the
+application's read/write concurrency and repeat tests on deployment hardware.
+Peak RSS includes the in-memory source dataset and Python runtime; it is not
+the SQLite index's isolated memory footprint.
+
+The latest standard CI run for the same commit passed all tests and Ruff on
+Python 3.10–3.13:
+https://github.com/rn577534-beep/HistoryPy/actions/runs/45531375694.
