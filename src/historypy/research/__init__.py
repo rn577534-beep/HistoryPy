@@ -32,6 +32,11 @@ from historypy.research.evidence_analysis import (
     ClaimEvidenceAnalysis,
     analyze_claim_evidence,
 )
+from historypy.research.geography import (
+    PlaceDistance,
+    great_circle_distance_km,
+    places_within_radius,
+)
 from historypy.research.hybrid import (
     DecomposedQuery,
     EntityAliasMatch,
@@ -39,11 +44,6 @@ from historypy.research.hybrid import (
     HybridSearchHit,
     HybridSearchIndex,
     decompose_research_question,
-)
-from historypy.research.geography import (
-    PlaceDistance,
-    great_circle_distance_km,
-    places_within_radius,
 )
 from historypy.research.pipeline import (
     ResearchPipeline,
