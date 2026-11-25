@@ -302,6 +302,7 @@ plan_report = pipeline.run_question(
     max_hops=3,
     limit=10,
     direction="both",
+    max_path_queries=40,
 )
 
 for review in plan_report.path_reviews:
@@ -319,11 +320,13 @@ assertions only. Candidate, disputed, and rejected aliases are not promoted.
 Homonyms remain separate candidates and are explicitly marked ambiguous.
 Predicate lexicons are researcher-supplied; detected predicate phrases are
 candidate slots, not automatic ontology assertions. Endpoint pairs generate
-bounded path hypotheses, and path searches remain unfiltered until the
-researcher confirms the predicate sequence.
+bounded path hypotheses (40 by default, configurable up to 200), and path
+searches remain unfiltered until the researcher confirms the predicate sequence.
 
 Each returned path includes:
-- Per-hop source records and source-genealogy audits.
+- Per-hop source records, merged from relationship source IDs and linked
+  claim-evidence source IDs, with source-genealogy audits.
+- Exact `EvidenceLink` records (locator, quotation, relation, and source ID).
 - Explicit `HistoricalRelationship.claim_ids` links to claim records.
 - Per-hop `ClaimEvidenceAnalysis`, including support/contradiction coverage,
   source genealogy, and locator completeness.
