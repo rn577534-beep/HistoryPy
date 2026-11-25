@@ -151,3 +151,54 @@ print(analysis.source_independence.unknown_source_ids)
 The integration test uses two reports in one shared-evidence group and a third
 source with no genealogy metadata. The expected result is one known dependent
 cluster plus one unknown source—not three independent confirmations.
+
+
+## 9. Implemented multilingual alias registry slice
+
+`historypy.research.alias_registry` adds a separate, versioned registry without
+silently rewriting legacy entity aliases:
+
+- `AliasAssertion` records typed entity IDs, exact alias text, BCP-47-style
+  language tags, optional ISO 15924 script codes, alias type, source ID,
+  locator, license, optional validity dates, and review provenance.
+- Verified assertions require a reviewer and review date.
+- Every assertion requires a source record, exact locator, and license.
+- `AliasRegistry` checks entity/source references against the dataset and
+  rejects duplicate alias assertion IDs.
+- Exact lookup returns verified assertions by default. Candidate and disputed
+  records are opt-in; rejected records are never returned.
+- Homonyms remain separate results with an explicit ambiguity count.
+- Versioned `to_dict` / `from_dict` interchange rejects unknown schema fields.
+- No fuzzy match, identity merge, or automatic promotion to verified status.
+
+Example:
+
+```python
+from historypy import AliasAssertion, AliasRegistry
+
+registry = AliasRegistry(
+    dataset,
+    [AliasAssertion(
+        alias_id="alias-fr-001",
+        entity_kind="person",
+        entity_id="person-001",
+        alias="Jeanne d’Arc",
+        language="fr",
+        alias_type="historical_name",
+        source_id="source-001",
+        locator="page 14",
+        license="CC-BY-4.0",
+        review_status="verified",
+        reviewer="researcher-id",
+        reviewed_at="2026-01-10",
+    )],
+    registry_version="aliases-1.0",
+    dataset_version="dataset-2026-01",
+)
+matches = registry.resolve("Jeanne d'Arc", language="fr")
+```
+
+The registry is intentionally separate from the lightweight legacy alias
+index. Integration into retrieval will preserve each alias assertion's review
+state and citation rather than flattening verified, candidate, and disputed
+forms into one undifferentiated string list.
