@@ -1,8 +1,8 @@
 import pytest
 
 from historypy import (
-    HistoricalDate,
     HistoricalDataset,
+    HistoricalDate,
     HistoricalPerson,
     HistoricalRelationship,
     SourceRecord,
