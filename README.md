@@ -992,9 +992,13 @@ hybrid = HybridSearchIndex(
     BM25SearchIndex.build(dataset),
     entity_index=entity_index,
 )
-for hit in hybrid.search("Augusta Ada"):
+for hit in hybrid.search("Augusta Ada", entity_language="en"):
     print(hit.matched_entity_evidence)
 ```
 
 Legacy aliases remain unverified; only reviewed registry assertions carry
 verified status, alias IDs, source references, and citation locators.
+
+
+Use `entity_language="fr"`, `"en"`, or another valid language tag to scope
+verified registry aliases while keeping canonical entity-name matching.
