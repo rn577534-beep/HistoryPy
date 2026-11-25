@@ -437,3 +437,39 @@ print(len(strict.excluded_unknown))  # unknown paths are reported, not hidden
 ```
 
 The policy is mandatory. `all` retains every path; `exclude_incompatible` removes only known conflicts and retains unknown dates; `compatible_only` excludes both incompatible and unknown paths. Excluded records remain available in `TemporalPathSelection`, so the caller can audit what was filtered. No policy converts unknown into compatible.
+
+
+## 13. Importing multilingual alias candidates without auto-verification
+
+The Wikidata alias importer provides a reproducible way to seed Bengali, English, and French review queues. It requires an explicit QID-to-canonical-entity mapping supplied by the researcher. It imports alias strings only, preserves the Wikidata item URL and language/script metadata, and marks every row as `candidate` with CC0-1.0 metadata. It never marks an alias verified and never merges entities.
+
+```python
+from historypy import import_wikidata_alias_candidates
+
+export_data = {
+    "entities": [
+        {
+            "id": "Q7186",
+            "aliases": {
+                "bn": [{"value": "মারি কুরি"}],
+                "en": [{"value": "Madame Curie"}],
+                "fr": [{"value": "Marie Skłodowska"}],
+            },
+        }
+    ]
+}
+
+updated_dataset, candidates = import_wikidata_alias_candidates(
+    dataset,
+    export_data,
+    {"Q7186": ("person", "person-marie-curie")},
+    registry_version="wikidata-candidates-1",
+    dataset_version="history-dataset-1",
+)
+
+# Candidate rows are review-only; default resolve() will not return them.
+print(candidates.resolve("Madame Curie"))
+print(candidates.resolve("Madame Curie", include_unverified=True))
+```
+
+The importer's mapping is the identity boundary: unmatched QIDs are ignored, and a mapped target must already exist in the dataset. The source locator points to the Wikidata item's language-specific alias section. Wikidata data is useful for candidate discovery, not sufficient by itself to establish historical usage or a disputed identity. A researcher must verify each candidate against suitable independent authority, scholarly, or primary sources before changing its review status.
