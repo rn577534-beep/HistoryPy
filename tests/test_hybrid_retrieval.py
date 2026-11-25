@@ -117,3 +117,7 @@ def test_question_decomposition_supports_french_multi_hop_and_comparison():
         "Comparer Athènes par rapport à Sparte"
     )
     assert comparison.parts == ("Comparer Athènes", "Sparte")
+    feminine = decompose_research_question(
+        "Athènes comparée à Sparte"
+    )
+    assert feminine.parts == ("Athènes", "Sparte")
