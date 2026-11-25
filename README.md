@@ -693,3 +693,8 @@ canonical-name/alias lookup for people and places, and reciprocal-rank fusion
 across trigram and BM25 indexes with optional caller-supplied semantic vectors.
 See [the retrieval guide](docs/hybrid-retrieval.md). Retrieval ranking is not
 historical truth, and alias matches never automatically merge entities.
+
+
+## Source comparison case study
+
+See [the Titanic inquiry comparison](docs/source-comparison-case-study.md) for a worked example preserving two official reports' differing lifeboat-capacity and survivor totals with citation locators. The example deliberately does not adjudicate which figure is historically final.
