@@ -12,13 +12,22 @@ import statistics
 from pathlib import Path
 from typing import Any
 
-from benchmark_historian_relevance import (
-    build_historypy_dataset,
-    load_jsonl,
-    resolve_gold_ids,
-)
-from benchmark_hotpotqa_retrieval import load_hotpotqa
-from benchmark_hybrid_retrieval import stratified_holdout, split_summary
+if __package__:
+    from .benchmark_historian_relevance import (
+        build_historypy_dataset,
+        load_jsonl,
+        resolve_gold_ids,
+    )
+    from .benchmark_hotpotqa_retrieval import load_hotpotqa
+    from .benchmark_hybrid_retrieval import stratified_holdout, split_summary
+else:
+    from benchmark_historian_relevance import (
+        build_historypy_dataset,
+        load_jsonl,
+        resolve_gold_ids,
+    )
+    from benchmark_hotpotqa_retrieval import load_hotpotqa
+    from benchmark_hybrid_retrieval import stratified_holdout, split_summary
 
 from historypy import BM25SearchIndex, DatasetSearchIndex, HybridSearchIndex
 
