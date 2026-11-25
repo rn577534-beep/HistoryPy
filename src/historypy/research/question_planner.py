@@ -414,18 +414,11 @@ def execute_question_plan(
             path_independence = analyze_source_set_independence(
                 dataset, path_evidence_source_ids
             )
+            temporal_status, temporal_note = _temporal_review(path)
             reviews.append(QuestionPathReview(
                 path=path,
                 hops=tuple(hop_reviews),
                 evidence_source_ids=path_evidence_source_ids,
-                source_independence=path_independence,
-            temporal_status, temporal_note = _temporal_review(path)
-            path_independence = analyze_source_set_independence(
-                dataset, path.source_ids
-            )
-            reviews.append(QuestionPathReview(
-                path=path,
-                hops=tuple(hop_reviews),
                 source_independence=path_independence,
                 temporal_status=temporal_status,
                 temporal_note=temporal_note,
