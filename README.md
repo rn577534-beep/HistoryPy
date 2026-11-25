@@ -469,7 +469,7 @@ FTS5 is an optional SQLite capability, not a mandatory dependency. The fallback 
 
 ### Embedding-backed semantic search
 
-HistoryPy supports semantic ranking through a caller-supplied embedding function. It intentionally does not download a model, choose a paid provider, or send research text to an external service automatically. The embedder must return one finite, non-zero vector per input text and use the same model/vector space for indexing and querying.
+HistoryPy supports semantic ranking through a caller-supplied embedding function. The core package intentionally does not download a model, choose a paid provider, or send research text to an external service automatically. An optional benchmark adapter is provided for a public multilingual Sentence Transformers model. The embedder must return one finite, non-zero vector per input text and use the same model/vector space for indexing and querying.
 
 ~~~python
 from historypy import SemanticSearchIndex
@@ -561,8 +561,10 @@ benchmark runs; it does not enforce machine-dependent speed thresholds.
 
 - HistoryPy is research infrastructure, not a populated or independently
   verified global history knowledgebase.
-- Semantic search requires a caller-selected embedding model; no hosted model
-  is silently selected and no corpus is sent to a provider automatically.
+- Semantic search requires an explicitly supplied embedder; an optional
+  multilingual Sentence Transformers adapter is available for reproducible
+  evaluation, but the core package does not send corpus text to a provider
+  automatically.
 - External API adapters are tested with fixtures; live availability,
   credentials, rights, and rate limits remain provider-dependent.
 - Search ranking is retrieval relevance only. It is not a truth or credibility
@@ -698,3 +700,117 @@ historical truth, and alias matches never automatically merge entities.
 ## Source comparison case study
 
 See [the Titanic inquiry comparison](docs/source-comparison-case-study.md) for a worked example preserving two official reports' differing lifeboat-capacity and survivor totals with citation locators. The example deliberately does not adjudicate which figure is historically final.
+
+
+## Held-out French and English multi-hop retrieval
+
+The HistoriQA-ThirdRepublic benchmark now uses a deterministic, question-type-
+stratified 80/20 held-out question split (seed 2026). It reports Trigram,
+BM25, lexical RRF, and decomposed RRF separately on held-out questions. The
+split is a question evaluation split, not a model-training split.
+
+An English HotpotQA adapter is also included:
+
+~~~bash
+python benchmarks/benchmark_hotpotqa_retrieval.py --data hotpot_dev_distractor_v1.json --top-k 10
+~~~
+
+The GitHub Actions workflow downloads a pinned copy and verifies its checksum.
+HotpotQA is a general English Wikipedia multi-hop dataset, not a history-only
+corpus; its metrics are reported separately from the French historical corpus.
+See docs/hybrid-retrieval.md and docs/research-benchmarks.md.
+
+## Entity aliases, ambiguity, and cautious spelling suggestions
+
+Researcher-supplied aliases support historical names and transliterations.
+Fuzzy suggestions only surface possible spelling variants for human review;
+they never merge records or assert identity.
+
+~~~python
+from historypy import EntityAwareSearchIndex
+
+entities = EntityAwareSearchIndex.build(dataset)
+exact_matches = entities.resolve("Alexandre")
+review_candidates = entities.suggest("Alexandre", threshold=0.88)
+
+for candidate in review_candidates:
+    print(candidate.canonical_name, candidate.matched_alias,
+          candidate.similarity, candidate.ambiguous)
+~~~
+
+When used in hybrid retrieval, pass an explicit threshold to opt in to fuzzy
+entity candidates. Ambiguous aliases return every matching entity with an
+ambiguity count; do not treat a name match as proof that two records refer to
+the same person or place.
+
+## Citation completeness and source dependence
+
+Each SourceRecord can optionally record researcher-known source dependencies
+and shared evidence groups:
+
+~~~python
+SourceRecord(
+    id="later_report",
+    title="Later report",
+    source_type="secondary",
+    derived_from_source_ids=("original_report",),
+    shared_evidence_group_ids=("witness-interview-17",),
+)
+~~~
+
+The provenance audit reports direct derivation and shared-evidence pairs.
+Unrecorded dependencies remain unknown; the audit does not infer independence.
+
+~~~python
+from historypy import audit_citation_completeness, audit_dataset_provenance
+
+citations = audit_citation_completeness(dataset)
+print(citations.complete_citation_coverage)
+print(citations.missing_locator_indices)
+print(citations.missing_quotation_indices)
+print(citations.missing_source_url_indices)
+
+provenance = audit_dataset_provenance(dataset)
+print(provenance.potential_source_dependency_pairs)
+~~~
+
+Citation completeness requires a locator, quotation, and source URL for an
+evidence link. It is a traceability measure, not a guarantee that the quotation
+is authentic or that the source is reliable.
+
+## SQLite WAL and durability diagnostics
+
+The normalized SQLite store supports opt-in WAL mode, concurrent writers,
+explicit WAL checkpoints, and database integrity checks:
+
+~~~python
+from historypy import NormalizedSQLiteStore
+
+store = NormalizedSQLiteStore("history.sqlite", journal_mode="WAL")
+store.save("research", dataset)
+print(store.checkpoint_wal(mode="PASSIVE"))
+print(store.integrity_check())
+~~~
+
+The scale workflow tests DELETE and WAL modes at 100k and 1m synthetic records,
+including reopen parity and broad/selective query timings. These tests do not
+replace physical power-loss and filesystem fault-injection testing.
+
+## Optional real semantic model benchmark
+
+Install the optional dependency and run the multilingual semantic benchmark:
+
+~~~bash
+python -m pip install ".[semantic]"
+python benchmarks/benchmark_hybrid_retrieval.py \
+  --corpus corpus_dataset.jsonl \
+  --questions question_dataset.jsonl \
+  --semantic-embedder benchmark_semantic_embedder:embed_texts \
+  --semantic-model-id sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+~~~
+
+The adapter uses CPU execution and loads the model lazily. The model is an
+evaluation choice, not a historical source-quality or truth estimator. The
+semantic workflow stores a machine-readable report as a GitHub Actions
+artifact; report metrics, not the mere presence of the model, determine whether
+semantic fusion is useful.
