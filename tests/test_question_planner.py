@@ -127,6 +127,8 @@ def test_ambiguous_canonical_names_are_not_collapsed():
     dataset = HistoricalDataset(
         sources=dataset.sources,
         people=dataset.people + (duplicate,),
+        claims=dataset.claims,
+        evidence=dataset.evidence,
         relationships=dataset.relationships,
     )
     plan = plan_research_question(dataset, "Alex Morgan")
