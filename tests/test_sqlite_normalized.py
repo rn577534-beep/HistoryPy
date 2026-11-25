@@ -208,3 +208,27 @@ def test_normalized_store_rolls_back_interrupted_replacement(tmp_path):
     reopened = NormalizedSQLiteStore(database, journal_mode="WAL")
     assert reopened.load("stable") == original
     assert reopened.integrity_check() == ("ok",)
+
+
+def test_normalized_store_wal_backup_and_maintenance(tmp_path):
+    database = tmp_path / "source.db"
+    backup = tmp_path / "backup.db"
+    store = NormalizedSQLiteStore(database, journal_mode="WAL")
+    original = make_dataset()
+    store.save("archive", original)
+
+    before = store.maintenance_stats()
+    assert before.journal_mode == "WAL"
+    assert before.page_count > 0
+    assert before.allocated_bytes == before.page_count * before.page_size_bytes
+    assert before.reclaimable_bytes == before.free_pages * before.page_size_bytes
+
+    store.optimize()
+    assert store.backup_to(backup) == ("ok",)
+
+    copied = NormalizedSQLiteStore(backup)
+    assert copied.load("archive") == original
+    assert copied.integrity_check() == ("ok",)
+
+    with pytest.raises(ValueError, match="must differ"):
+        store.backup_to(database)
