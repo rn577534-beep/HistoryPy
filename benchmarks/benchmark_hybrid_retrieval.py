@@ -6,6 +6,7 @@ An external embedding model is opt-in; no model or network provider is selected.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib
 import json
 import time
@@ -77,17 +78,67 @@ def evaluate(
     }
 
 
+def stratified_holdout(
+    questions: list[dict[str, Any]],
+    *,
+    test_fraction: float = 0.2,
+    seed: int = 2026,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Create a deterministic question-type-stratified holdout.
+
+    Gold labels are never used to select the split. For every category with at
+    least two questions, at least one remains in each partition.
+    """
+    if not 0.0 < test_fraction < 1.0:
+        raise ValueError("test_fraction must be between 0 and 1")
+    groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in questions:
+        groups[str(row.get("question_type") or "unspecified")].append(row)
+    train: list[dict[str, Any]] = []
+    test: list[dict[str, Any]] = []
+    for category, rows in sorted(groups.items()):
+        ordered = sorted(
+            rows,
+            key=lambda row: hashlib.sha256(
+                f"{seed}|{category}|{row.get('id') or row.get('question_id') or row.get('question')}".encode("utf-8")
+            ).hexdigest(),
+        )
+        if len(ordered) < 2:
+            train.extend(ordered)
+            continue
+        test_count = min(
+            len(ordered) - 1,
+            max(1, round(len(ordered) * test_fraction)),
+        )
+        test.extend(ordered[:test_count])
+        train.extend(ordered[test_count:])
+    return train, test
+
+
+def split_summary(
+    questions: list[dict[str, Any]],
+) -> dict[str, int]:
+    counts: dict[str, int] = defaultdict(int)
+    for row in questions:
+        counts[str(row.get("question_type") or "unspecified")] += 1
+    return dict(sorted(counts.items()))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--corpus", type=Path, required=True)
     parser.add_argument("--questions", type=Path, required=True)
     parser.add_argument("--top-k", type=int, default=10)
+    parser.add_argument("--test-fraction", type=float, default=0.2)
+    parser.add_argument("--split-seed", type=int, default=2026)
     parser.add_argument("--semantic-embedder", help="Optional module:callable embedder")
     parser.add_argument("--semantic-model-id", help="Stable ID of the embedding model")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     if args.top_k < 1:
         parser.error("--top-k must be positive")
+    if not 0.0 < args.test_fraction < 1.0:
+        parser.error("--test-fraction must be between 0 and 1")
 
     corpus = load_jsonl(args.corpus)
     questions = load_jsonl(args.questions)
@@ -100,6 +151,17 @@ def main() -> None:
     trigram = DatasetSearchIndex.build(dataset)
     bm25 = BM25SearchIndex.build(dataset)
     hybrid = HybridSearchIndex(trigram, bm25)
+    train_questions, held_out_questions = stratified_holdout(
+        questions, test_fraction=args.test_fraction, seed=args.split_seed
+    )
+    held_out_methods = {
+        "trigram_all_terms": evaluate(trigram, held_out_questions, args.top_k),
+        "bm25": evaluate(bm25, held_out_questions, args.top_k),
+        "hybrid_trigram_bm25_rrf": evaluate(hybrid, held_out_questions, args.top_k),
+        "hybrid_trigram_bm25_decomposed_rrf": evaluate(
+            hybrid, held_out_questions, args.top_k, decompose=True
+        ),
+    }
     report: dict[str, Any] = {
         "dataset": "HistoriQA-ThirdRepublic",
         "corpus_records": len(corpus),
@@ -115,6 +177,20 @@ def main() -> None:
                 hybrid, questions, args.top_k, decompose=True
             ),
         },
+        "question_split": {
+            "strategy": "deterministic question-type-stratified SHA-256 holdout",
+            "seed": args.split_seed,
+            "test_fraction_requested": args.test_fraction,
+            "train_questions": len(train_questions),
+            "held_out_questions": len(held_out_questions),
+            "train_by_question_type": split_summary(train_questions),
+            "held_out_by_question_type": split_summary(held_out_questions),
+            "note": (
+                "No retriever is trained on question labels; the holdout measures "
+                "unseen questions against the same searchable corpus."
+            ),
+        },
+        "held_out_methods": held_out_methods,
         "semantic_model_id": None,
         "limitations": [
             "French-language 1887 corpus only; not a global historical benchmark.",
@@ -140,6 +216,15 @@ def main() -> None:
         )
         report["methods"]["hybrid_trigram_bm25_semantic_decomposed_rrf"] = evaluate(
             hybrid_semantic, questions, args.top_k, embedder, decompose=True
+        )
+        report["held_out_methods"]["semantic"] = evaluate(
+            semantic, held_out_questions, args.top_k, embedder
+        )
+        report["held_out_methods"]["hybrid_trigram_bm25_semantic_rrf"] = evaluate(
+            hybrid_semantic, held_out_questions, args.top_k, embedder
+        )
+        report["held_out_methods"]["hybrid_trigram_bm25_semantic_decomposed_rrf"] = evaluate(
+            hybrid_semantic, held_out_questions, args.top_k, embedder, decompose=True
         )
     rendered = json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True)
     if args.output:
