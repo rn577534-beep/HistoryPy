@@ -107,7 +107,7 @@ def main() -> None:
         }
         rendered = json.dumps(report, indent=2, sort_keys=True)
         if args.output:
-            args.output.write_text(rendered + "\\n", encoding="utf-8")
+            args.output.write_text(rendered + "\n", encoding="utf-8")
         print(rendered)
 
 
