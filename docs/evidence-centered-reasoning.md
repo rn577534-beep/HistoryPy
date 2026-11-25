@@ -380,11 +380,12 @@ hybrid = HybridSearchIndex(
     BM25SearchIndex.build(dataset),
     entity_index=entity_index,
 )
-for hit in hybrid.search("Augusta Ada"):
+for hit in hybrid.search("Augusta Ada", entity_language="en"):
     for alias in hit.matched_entity_evidence:
         print(alias.review_status, alias.alias_id, alias.source_id, alias.locator)
 ```
 
-This keeps the alias assertion ID, review state, language, source ID, and
-locator available after retrieval. Fuzzy suggestions remain review-only and
+The optional `entity_language` filter scopes verified aliases by language
+tag while retaining canonical-name matches. This keeps the alias assertion ID,
+review state, language, source ID, and locator available after retrieval. Fuzzy suggestions remain review-only and
 are never silently promoted into verified alias assertions.
