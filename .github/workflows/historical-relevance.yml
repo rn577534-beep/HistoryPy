@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - "benchmarks/benchmark_historian_relevance.py"
+      - "benchmarks/benchmark_hybrid_retrieval.py"
+      - "docs/hybrid-retrieval.md"
       - "docs/research-benchmarks.md"
       - ".github/workflows/historical-relevance.yml"
   workflow_dispatch:
@@ -35,9 +37,13 @@ jobs:
             --questions question_dataset.jsonl \
             --top-k 10 \
             --output historical-relevance-report.json
+      - name: Run hybrid retrieval comparison
+        run: python benchmarks/benchmark_hybrid_retrieval.py --corpus corpus_dataset.jsonl --questions question_dataset.jsonl --top-k 10 --output hybrid-retrieval-report.json
       - name: Upload benchmark report
         uses: actions/upload-artifact@v4
         with:
           name: historiqa-relevance-report
-          path: historical-relevance-report.json
+          path: |
+            historical-relevance-report.json
+            hybrid-retrieval-report.json
           if-no-files-found: error
