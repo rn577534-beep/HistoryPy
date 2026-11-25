@@ -83,6 +83,24 @@ def _record_id(kind: str, record: Mapping[str, Any], index: int) -> str:
     return str(record["id"])
 
 
+@dataclass(frozen=True, slots=True)
+class SQLiteMaintenanceStats:
+    """SQLite page and journal statistics for operational monitoring."""
+
+    page_count: int
+    free_pages: int
+    page_size_bytes: int
+    journal_mode: str
+
+    @property
+    def allocated_bytes(self) -> int:
+        return self.page_count * self.page_size_bytes
+
+    @property
+    def reclaimable_bytes(self) -> int:
+        return self.free_pages * self.page_size_bytes
+
+
 class NormalizedSQLiteStore:
     """Store dataset records in indexed relational tables.
 
@@ -211,6 +229,46 @@ class NormalizedSQLiteStore:
         with closing(self._connect()) as connection:
             rows = connection.execute("PRAGMA integrity_check").fetchall()
         return tuple(str(row[0]) for row in rows)
+
+    def maintenance_stats(self) -> SQLiteMaintenanceStats:
+        """Return page counts and journal mode without modifying the database."""
+        with closing(self._connect()) as connection:
+            page_count = int(connection.execute("PRAGMA page_count").fetchone()[0])
+            free_pages = int(connection.execute("PRAGMA freelist_count").fetchone()[0])
+            page_size = int(connection.execute("PRAGMA page_size").fetchone()[0])
+            journal_mode = str(
+                connection.execute("PRAGMA journal_mode").fetchone()[0]
+            ).upper()
+        return SQLiteMaintenanceStats(
+            page_count, free_pages, page_size, journal_mode
+        )
+
+    def optimize(self) -> None:
+        """Ask SQLite to apply low-risk planner/statistics optimizations."""
+        with closing(self._connect()) as connection, connection:
+            connection.execute("PRAGMA optimize")
+
+    def backup_to(self, destination: str | Path) -> tuple[str, ...]:
+        """Create a consistent SQLite online backup and verify its integrity.
+
+        The destination may be an existing database; SQLite's backup API
+        replaces its contents from the source snapshot. It must not be this
+        store's own database path.
+        """
+        target_path = Path(destination)
+        if target_path.resolve() == Path(self.path).resolve():
+            raise ValueError("backup destination must differ from source database")
+        with closing(self._connect()) as source:
+            with closing(sqlite3.connect(str(target_path))) as target:
+                source.backup(target)
+        with closing(sqlite3.connect(str(target_path))) as verification:
+            rows = verification.execute("PRAGMA integrity_check").fetchall()
+        diagnostics = tuple(str(row[0]) for row in rows)
+        if diagnostics != ("ok",):
+            raise sqlite3.DatabaseError(
+                f"SQLite backup integrity check failed: {diagnostics}"
+            )
+        return diagnostics
 
     def save(self, name: str, dataset: HistoricalDataset) -> None:
         """Atomically replace one named dataset with normalized record rows."""
