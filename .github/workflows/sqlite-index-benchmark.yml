@@ -1,0 +1,30 @@
+name: SQLite persistent index benchmark
+
+on:
+  workflow_dispatch:
+    inputs:
+      records:
+        description: Number of synthetic records
+        required: true
+        type: choice
+        options:
+          - "100000"
+          - "1000000"
+        default: "100000"
+
+permissions:
+  contents: read
+
+jobs:
+  sqlite-benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install package
+        run: python -m pip install -e .
+      - name: Benchmark persistent SQLite index
+        run: python benchmarks/benchmark_sqlite_store.py --records ${{ inputs.records }}
