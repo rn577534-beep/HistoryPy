@@ -152,6 +152,8 @@ def test_execution_attaches_per_hop_sources_and_temporal_conflict():
     assert direct.temporal_status == "compatible"
     assert direct.hops[0].source_records[0].id == "s3"
     assert direct.hops[0].claim_ids == ("c3",)
+    assert direct.hops[0].evidence_links[0].locator == "page 4"
+    assert direct.hops[0].evidence_links[0].quotation == "Evidence D"
     assert direct.hops[0].claim_analyses[0].locator_coverage == 1.0
 
     indirect = next(
