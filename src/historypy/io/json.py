@@ -213,13 +213,14 @@ def dataset_from_dict(
         ),
         civilizations=records(
             "civilizations", HistoricalCivilization,
-            tuple_fields=("region_place_ids", "predecessor_ids", "languages", "source_ids"),
+            tuple_fields=("region_place_ids", "predecessor_ids", "languages", "source_ids", "aliases"),
             date_fields=("start_date", "end_date"),
         ),
         organizations=records(
             "organizations", HistoricalOrganization,
             tuple_fields=(
-                "place_ids", "member_person_ids", "parent_organization_ids", "source_ids"
+                "place_ids", "member_person_ids", "parent_organization_ids", "source_ids",
+                "aliases",
             ),
             date_fields=("founded", "dissolved"),
         ),
