@@ -1,9 +1,15 @@
 from historypy import (
-    HistoricalDataset, HistoricalPerson, HistoricalPlace, HistoricalEvent, HistoricalDate
+    HistoricalDataset,
+    HistoricalDate,
+    HistoricalEvent,
+    HistoricalPerson,
+    HistoricalPlace,
 )
 from historypy.research.bm25 import BM25SearchIndex
 from historypy.research.hybrid import (
-    EntityAwareSearchIndex, HybridSearchIndex, decompose_research_question,
+    EntityAwareSearchIndex,
+    HybridSearchIndex,
+    decompose_research_question,
 )
 from historypy.research.search_index import DatasetSearchIndex
 
