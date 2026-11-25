@@ -184,3 +184,15 @@ def test_research_pipeline_exposes_integrated_multi_hop_question_workflow():
     )
     assert report.plan.question == "Ada Lovelace and Mary Somerville"
     assert report.path_reviews
+
+
+
+def test_question_planner_bounds_endpoint_pair_hypotheses():
+    plan = plan_research_question(
+        _dataset(),
+        "Ada Lovelace, Charles Babbage, and Mary Somerville",
+        max_path_queries=2,
+    )
+    assert len(plan.path_queries) == 2
+    assert plan.path_queries_truncated
+    assert any("endpoint pairs were omitted" in warning for warning in plan.warnings)
