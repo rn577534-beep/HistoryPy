@@ -10,8 +10,8 @@ from historypy import (
     HistoricalOrganization,
     HistoricalPerson,
     HistoricalPlace,
-    SQLiteMaintenanceStats,
     SourceRecord,
+    SQLiteMaintenanceStats,
 )
 from historypy.io.sqlite_normalized import NormalizedSQLiteStore
 
