@@ -171,6 +171,18 @@ class SourceDependencyRegistry:
             sources=tuple(source_map[source.id] for source in self.dataset.sources),
         )
 
+    def audit_source_set(self, source_ids: tuple[str, ...] | list[str]):
+        """Run source-independence analysis with verified registry assertions applied."""
+        from historypy.research.source_independence import analyze_source_set_independence
+
+        return analyze_source_set_independence(self.apply_verified(), source_ids)
+
+    def audit_claim(self, claim_id: str):
+        """Audit one claim using only verified genealogy assertions."""
+        from historypy.research.source_independence import analyze_claim_source_independence
+
+        return analyze_claim_source_independence(self.apply_verified(), claim_id)
+
     def to_dict(self) -> dict[str, object]:
         """Return a deterministic JSON-compatible registry payload."""
         return {
