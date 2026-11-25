@@ -473,3 +473,42 @@ print(candidates.resolve("Madame Curie", include_unverified=True))
 ```
 
 The importer's mapping is the identity boundary: unmatched QIDs are ignored, and a mapped target must already exist in the dataset. The source locator points to the Wikidata item's language-specific alias section. When the export contains a valid lastrevid, the importer pins the source URL, source ID, and locator to that exact revision; otherwise it labels the source as current so the snapshot limitation remains visible. Wikidata data is useful for candidate discovery, not sufficient by itself to establish historical usage or a disputed identity. A researcher must verify each candidate against suitable independent authority, scholarly, or primary sources before changing its review status.
+
+
+## 14. Researcher-reviewed source genealogy assertions
+
+Source genealogy can now be curated in a separate, versioned registry instead of writing unreviewed dependency metadata directly into source records. Each assertion records the two related source IDs, dependency type, a citation source ID and locator, license, review state, and optional reviewer/date. Supported types include direct derivation, shared witness, shared archive record, syndication, and shared dataset.
+
+```python
+from historypy import (
+    SourceDependencyAssertion,
+    SourceDependencyRegistry,
+    analyze_source_set_independence,
+)
+
+registry = SourceDependencyRegistry(
+    dataset,
+    [SourceDependencyAssertion(
+        assertion_id="genealogy-001",
+        source_id="report-2",
+        related_source_id="witness-1",
+        dependency_type="derived_from",
+        evidence_source_id="archive-catalogue",
+        locator="entry 42",
+        license="CC-BY-4.0",
+        review_status="verified",
+        reviewer="historian-1",
+        reviewed_at="2026-11-25",
+    )],
+    registry_version="genealogy-1",
+    dataset_version="history-dataset-1",
+)
+
+# Only verified assertions change the derived dataset.
+annotated_dataset = registry.apply_verified()
+report = analyze_source_set_independence(
+    annotated_dataset, ["report-2", "witness-1"]
+)
+```
+
+Shared-witness, shared-archive, syndication, and shared-dataset assertions require an explicit shared group ID. Candidate, disputed, and rejected assertions remain review data and are not applied. The original dataset is never mutated. Keep the registry alongside the dataset so reviewers can inspect the citation and decision behind every applied dependency edge. This metadata audit identifies recorded dependence; it does not rate credibility or determine historical truth.
