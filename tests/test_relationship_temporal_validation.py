@@ -1,6 +1,6 @@
 import pytest
 
-from historypy import HistoricalClaim, HistoricalDate, HistoricalDataset, HistoricalRelationship
+from historypy import HistoricalClaim, HistoricalDataset, HistoricalDate, HistoricalRelationship
 
 
 def _year(value):
