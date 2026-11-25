@@ -279,3 +279,57 @@ datasets differ in domain and annotation; the macro-average weights each
 language equally. No external semantic model is silently selected. A report
 must be generated with the actual corpus files before any numerical performance
 claim is made.
+
+
+## 12. Reviewable free-text multi-hop question planning
+
+`historypy.research.question_planner` connects free-text questions to the
+existing entity, relationship, source-genealogy, and temporal models without
+pretending that extraction is historical adjudication.
+
+```python
+from historypy import AliasRegistry, ResearchPipeline
+
+pipeline = ResearchPipeline(dataset)
+
+# Optional: pass a citation-backed registry. Only verified aliases are used.
+plan_report = pipeline.run_question(
+    "How was Ada Lovelace connected to Charles Babbage?",
+    alias_registry=alias_registry,
+    predicate_lexicon={
+        "collaborated_with": ("connected to", "worked with"),
+    },
+    max_hops=3,
+    limit=10,
+    direction="both",
+)
+
+for review in plan_report.path_reviews:
+    print(review.path.entity_ids)
+    print(review.temporal_status, review.temporal_note)
+    print(review.source_independence.status)
+    for hop in review.hops:
+        print(hop.relationship_id, hop.predicate)
+        print([source.id for source in hop.source_records])
+        print(hop.source_independence.status)
+```
+
+The planner uses exact canonical entity names and exact **verified** alias
+assertions only. Candidate, disputed, and rejected aliases are not promoted.
+Homonyms remain separate candidates and are explicitly marked ambiguous.
+Predicate lexicons are researcher-supplied; detected predicate phrases are
+candidate slots, not automatic ontology assertions. Endpoint pairs generate
+bounded path hypotheses, and path searches remain unfiltered until the
+researcher confirms the predicate sequence.
+
+Each returned path includes:
+- Per-hop source records and source-genealogy audits.
+- A path-wide source-genealogy audit, so dependencies crossing hop boundaries
+  are not missed.
+- A temporal intersection review: `compatible`, `incompatible`, or
+  `unknown`. Missing dates or incomparable calendars remain unknown.
+- Explicit warnings for ambiguous entities, missing source references,
+  unknown source dependence, truncated searches, and temporal gaps.
+
+Example output paths are structural hypotheses only. This workflow does not
+write a historical answer, infer causality, or treat a connected path as proof.
