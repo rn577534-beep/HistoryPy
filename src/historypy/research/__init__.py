@@ -71,7 +71,7 @@ from historypy.research.source_audit import (
     audit_dataset_sources,
     audit_source_record,
 )
-from historypy.research.source_independence import (
+from historypy.research.source_comparison import (
     ClaimSourceIndependenceReport,
     DatasetSourceIndependenceReport,
     DependencyCluster,
@@ -98,10 +98,10 @@ __all__ = [
     "ClaimSourceIndependenceReport",
     "DatasetProfile",
     "DatasetProvenanceReport",
-    "DatasetSourceIndependenceReport",
-    "DependencyCluster",
     "DatasetQualityReport",
     "DatasetSearchIndex",
+    "DatasetSourceIndependenceReport",
+    "DependencyCluster",
     "DecomposedQuery",
     "EntityAliasMatch",
     "EntityAliasSuggestion",
@@ -139,8 +139,8 @@ __all__ = [
     "assess_dataset_quality",
     "audit_citation_completeness",
     "audit_dataset_provenance",
-    "audit_source_independence",
     "audit_dataset_sources",
+    "audit_source_independence",
     "audit_source_record",
     "claims_with_conflicting_evidence",
     "compare_event_sources",
