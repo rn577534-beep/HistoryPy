@@ -42,6 +42,7 @@ from historypy.research.geography import (
 from historypy.research.hybrid import (
     DecomposedQuery,
     EntityAliasMatch,
+    EntityAliasSuggestion,
     EntityAwareSearchIndex,
     HybridSearchHit,
     HybridSearchIndex,
@@ -92,6 +93,7 @@ __all__ = [
     "DatasetSearchIndex",
     "DecomposedQuery",
     "EntityAliasMatch",
+    "EntityAliasSuggestion",
     "EntityAwareSearchIndex",
     "EntityMatchCandidate",
     "EventSourceComparison",
