@@ -94,6 +94,14 @@ def import_wikidata_alias_candidates(
         if not isinstance(aliases_by_language, dict):
             raise TypeError(f"aliases for {qid} must be a language mapping")
         entity_kind, entity_id = entity_mapping[qid]
+        candidate_aliases = tuple(
+            (language, alias)
+            for language, raw_aliases in aliases_by_language.items()
+            if language in allowed_languages
+            for alias in _alias_values(raw_aliases)
+        )
+        if not candidate_aliases:
+            continue
         revision = item.get("lastrevid")
         if revision is not None and (
             not isinstance(revision, int) or isinstance(revision, bool) or revision < 1
@@ -129,31 +137,28 @@ def import_wikidata_alias_candidates(
         else:
             source_additions[source_id] = source
 
-        for language, raw_aliases in aliases_by_language.items():
-            if language not in allowed_languages:
-                continue
-            for alias in _alias_values(raw_aliases):
-                identity = chr(31).join((
-                    qid, revision_label, entity_kind, entity_id, language, alias,
-                ))
-                alias_id = "wd-" + hashlib.sha256(identity.encode("utf-8")).hexdigest()[:24]
-                assertions[alias_id] = AliasAssertion(
-                    alias_id=alias_id,
-                    entity_kind=entity_kind,
-                    entity_id=entity_id,
-                    alias=alias,
-                    language=language,
-                    alias_type="other",
-                    source_id=source_id,
-                    locator=f"{qid}/{revision_label}/aliases/{language}",
-                    license="CC0-1.0",
-                    review_status="candidate",
-                    script=_SCRIPT_BY_LANGUAGE[language],
-                    note=(
-                        "Imported from Wikidata alias data. Candidate only: verify "
-                        "historical usage and entity identity against independent sources."
-                    ),
-                )
+        for language, alias in candidate_aliases:
+            identity = chr(31).join((
+                qid, revision_label, entity_kind, entity_id, language, alias,
+            ))
+            alias_id = "wd-" + hashlib.sha256(identity.encode("utf-8")).hexdigest()[:24]
+            assertions[alias_id] = AliasAssertion(
+                alias_id=alias_id,
+                entity_kind=entity_kind,
+                entity_id=entity_id,
+                alias=alias,
+                language=language,
+                alias_type="other",
+                source_id=source_id,
+                locator=f"{qid}/{revision_label}/aliases/{language}",
+                license="CC0-1.0",
+                review_status="candidate",
+                script=_SCRIPT_BY_LANGUAGE[language],
+                note=(
+                    "Imported from Wikidata alias data. Candidate only: verify "
+                    "historical usage and entity identity against independent sources."
+                ),
+            )
 
     updated_dataset = replace(
         dataset,
