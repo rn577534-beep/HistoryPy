@@ -10,6 +10,7 @@ from historypy.research import (
     claims_with_conflicting_evidence,
     evidence_for_claim,
     summarize_claim_evidence,
+    audit_citation_completeness,
 )
 
 
@@ -52,3 +53,32 @@ def test_claims_with_conflicting_evidence_only_returns_conflicts():
 def test_evidence_lookup_requires_a_known_claim():
     with pytest.raises(KeyError, match="Unknown claim"):
         evidence_for_claim(evidence_dataset(), "missing")
+
+
+def test_citation_completeness_requires_locator_quotation_and_source_url():
+    dataset = HistoricalDataset(
+        sources=(
+            SourceRecord("s1", "Linked source", "primary", url="https://example.org/source"),
+            SourceRecord("s2", "No URL source", "secondary"),
+        ),
+        claims=(HistoricalClaim("c1", "A claim"),),
+        evidence=(
+            EvidenceLink(
+                "c1", "s1", "supports",
+                quotation="Recorded quotation", page="12",
+            ),
+            EvidenceLink(
+                "c1", "s2", "contradicts",
+                quotation="Another quotation",
+            ),
+        ),
+    )
+    report = audit_citation_completeness(dataset)
+    assert report.total_evidence_links == 2
+    assert report.links_with_locator == 1
+    assert report.links_with_quotation == 2
+    assert report.links_with_source_url == 1
+    assert report.links_with_locator_quotation_and_url == 1
+    assert report.missing_locator_indices == (1,)
+    assert report.missing_source_url_indices == (1,)
+    assert report.complete_citation_coverage == 0.5
