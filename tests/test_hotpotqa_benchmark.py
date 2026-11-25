@@ -1,10 +1,11 @@
 import json
 import runpy
+import sys
 from pathlib import Path
 
-benchmark = runpy.run_path(
-    str(Path(__file__).parents[1] / "benchmarks" / "benchmark_hotpotqa_retrieval.py")
-)
+benchmark_dir = Path(__file__).parents[1] / "benchmarks"
+sys.path.insert(0, str(benchmark_dir))
+benchmark = runpy.run_path(str(benchmark_dir / "benchmark_hotpotqa_retrieval.py"))
 load_hotpotqa = benchmark["load_hotpotqa"]
 
 
