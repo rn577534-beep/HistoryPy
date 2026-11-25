@@ -121,6 +121,7 @@ class HybridSearchIndex:
         limit: int = 20,
         decompose: bool = False,
         entity_fuzzy_threshold: float | None = None,
+        entity_language: str | None = None,
     ) -> tuple[HybridSearchHit, ...]:
         if not isinstance(query, str) or not query.strip():
             raise ValueError("query cannot be empty")
@@ -130,6 +131,13 @@ class HybridSearchIndex:
             raise ValueError("limit must be a non-negative integer")
         if entity_fuzzy_threshold is not None and not 0.0 <= entity_fuzzy_threshold <= 1.0:
             raise ValueError("entity_fuzzy_threshold must be between 0 and 1")
+        if entity_language is not None and (
+            not isinstance(entity_language, str)
+            or not re.fullmatch(
+                r"[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*", entity_language
+            )
+        ):
+            raise ValueError("entity_language must be a valid language tag")
         if limit == 0:
             return ()
         if decompose:
@@ -165,7 +173,9 @@ class HybridSearchIndex:
                     ranks[key][method] = min(rank, ranks[key].get(method, rank))
                     scores[key] += 1.0 / (self.rrf_k + rank)
             if self.entity_index is not None:
-                entity_hits = self.entity_index.resolve(part, kinds=allowed)
+                entity_hits = self.entity_index.resolve(
+                    part, kinds=allowed, language=entity_language
+                )
                 entity_ranks: dict[tuple[str, str], int] = {}
                 for entity in entity_hits:
                     key = (entity.kind, entity.record_id)
@@ -324,7 +334,11 @@ class EntityAwareSearchIndex:
         })
 
     def resolve(
-        self, query: str, *, kinds: Iterable[str] | None = None
+        self,
+        query: str,
+        *,
+        kinds: Iterable[str] | None = None,
+        language: str | None = None,
     ) -> tuple[EntityAliasMatch, ...]:
         """Find exact full-name/alias phrases present in the query.
 
@@ -333,6 +347,11 @@ class EntityAwareSearchIndex:
         normalized = _normalize_phrase(query)
         if not normalized:
             return ()
+        if language is not None and (
+            not isinstance(language, str)
+            or not re.fullmatch(r"[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*", language)
+        ):
+            raise ValueError("language must be a valid language tag")
         allowed = set(kinds) if kinds is not None else None
         matches: dict[tuple[str, str, str], EntityAliasMatch] = {}
         for alias, entities in self._aliases.items():
@@ -340,7 +359,15 @@ class EntityAwareSearchIndex:
                 continue
             eligible = [
                 entity for entity in entities
-                if allowed is None or entity.kind in allowed
+                if (allowed is None or entity.kind in allowed)
+                and (
+                    language is None
+                    or entity.match_type == "canonical_name"
+                    or (
+                        entity.language is not None
+                        and entity.language.casefold() == language.casefold()
+                    )
+                )
             ]
             ambiguity_count = len({
                 (entity.kind, entity.record_id) for entity in eligible
