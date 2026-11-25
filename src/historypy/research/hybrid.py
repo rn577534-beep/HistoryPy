@@ -90,8 +90,14 @@ class HybridSearchIndex:
     ) -> None:
         if rrf_k < 1:
             raise ValueError("rrf_k must be positive")
-        if len(trigram.records) != len(bm25.records):
-            raise ValueError("retrieval indexes must contain the same record count")
+        trigram_ids = tuple((row[0], row[1]) for row in trigram.records)
+        bm25_ids = tuple((row[0], row[1]) for row in bm25.records)
+        if trigram_ids != bm25_ids:
+            raise ValueError("retrieval indexes must contain the same ordered records")
+        if semantic is not None:
+            semantic_ids = tuple((row[0], row[1]) for row in semantic.records)
+            if semantic_ids != trigram_ids:
+                raise ValueError("semantic index must contain the same ordered records")
         self.trigram = trigram
         self.bm25 = bm25
         self.semantic = semantic
@@ -109,6 +115,8 @@ class HybridSearchIndex:
     ) -> tuple[HybridSearchHit, ...]:
         if not isinstance(query, str) or not query.strip():
             raise ValueError("query cannot be empty")
+        if self.semantic is not None and embedder is None:
+            raise ValueError("embedder is required when a semantic index is configured")
         if not isinstance(limit, int) or isinstance(limit, bool) or limit < 0:
             raise ValueError("limit must be a non-negative integer")
         if limit == 0:
