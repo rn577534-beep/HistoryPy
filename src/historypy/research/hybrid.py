@@ -13,6 +13,7 @@ from dataclasses import dataclass, replace
 from difflib import SequenceMatcher
 
 from historypy.core.dataset import HistoricalDataset
+from historypy.research.alias_registry import AliasRegistry
 from historypy.research.bm25 import BM25SearchIndex
 from historypy.research.search_index import DatasetSearchIndex
 from historypy.research.semantic import EmbeddingBatch, SemanticSearchIndex
@@ -266,7 +267,7 @@ class EntityAwareSearchIndex:
         cls,
         dataset: HistoricalDataset,
         *,
-        alias_registry=None,
+        alias_registry: AliasRegistry | None = None,
     ) -> EntityAwareSearchIndex:
         """Build an entity index; only verified registry assertions gain verified status."""
         if alias_registry is not None and alias_registry.dataset != dataset:
