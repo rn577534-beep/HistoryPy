@@ -1,6 +1,10 @@
 from historypy import (
-    EvidenceLink, HistoricalClaim, HistoricalDataset, HistoricalDate,
-    HistoricalEvent, SourceRecord,
+    EvidenceLink,
+    HistoricalClaim,
+    HistoricalDataset,
+    HistoricalDate,
+    HistoricalEvent,
+    SourceRecord,
 )
 from historypy.research.source_comparison import render_event_source_comparison
 
