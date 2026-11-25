@@ -841,3 +841,23 @@ evaluation choice, not a historical source-quality or truth estimator. The
 semantic workflow stores a machine-readable report as a GitHub Actions
 artifact; report metrics, not the mere presence of the model, determine whether
 semantic fusion is useful.
+
+
+### Source independence inside claim analysis
+
+The normal claim evidence analysis now includes the conservative source-genealogy report:
+
+```python
+from historypy import analyze_claim_evidence
+
+analysis = analyze_claim_evidence(dataset, "claim-001")
+print(analysis.assessment_status)  # support/contradiction coverage only
+print(analysis.source_independence.status)
+print(analysis.source_independence.dependent_clusters)
+print(analysis.source_independence.unknown_source_ids)
+```
+
+A cluster means the cited sources have a recorded shared origin or derivation path.
+Sources without a recorded relationship remain **unknown**, not independent.
+Research reports show these groups and add a caution when dependence is known or
+unknown; this does not change the claim's evidence status or assign a truth score.
