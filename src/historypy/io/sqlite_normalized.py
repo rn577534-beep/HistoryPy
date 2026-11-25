@@ -228,41 +228,41 @@ class NormalizedSQLiteStore:
                 ),
             )
             for kind, index, record in iter_dataset_records(dataset):
-                    record_id = _record_id(kind, record, index)
-                    start, end, calendar = _year_bounds(record)
-                    serialized = json.dumps(
-                        record, ensure_ascii=False, sort_keys=True, separators=(",", ":")
-                    )
-                    searchable = " ".join(_strings(record)).casefold()
+                record_id = _record_id(kind, record, index)
+                start, end, calendar = _year_bounds(record)
+                serialized = json.dumps(
+                    record, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+                )
+                searchable = " ".join(_strings(record)).casefold()
+                connection.execute(
+                    """INSERT INTO hp06_records
+                       (dataset_name, kind, record_id, payload_json, search_text,
+                        start_year, end_year, calendar)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (name, kind, record_id, serialized, searchable, start, end, calendar),
+                )
+                if self._fts5_available:
                     connection.execute(
-                        """INSERT INTO hp06_records
-                           (dataset_name, kind, record_id, payload_json, search_text,
-                            start_year, end_year, calendar)
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                        (name, kind, record_id, serialized, searchable, start, end, calendar),
+                        """INSERT INTO hp06_records_fts
+                           (dataset_name, kind, record_id, search_text)
+                           VALUES (?, ?, ?, ?)""",
+                        (name, kind, record_id, searchable),
                     )
-                    if self._fts5_available:
-                        connection.execute(
-                            """INSERT INTO hp06_records_fts
-                               (dataset_name, kind, record_id, search_text)
-                               VALUES (?, ?, ?, ?)""",
-                            (name, kind, record_id, searchable),
-                        )
-                    source_ids = record.get("source_ids", [])
-                    for source_id in source_ids:
-                        connection.execute(
-                            """INSERT INTO hp06_source_links
-                               (dataset_name, source_id, record_kind, record_id, relation)
-                               VALUES (?, ?, ?, ?, 'record')""",
-                            (name, source_id, kind, record_id),
-                        )
-                    if kind == "evidence":
-                        connection.execute(
-                            """INSERT INTO hp06_source_links
-                               (dataset_name, source_id, record_kind, record_id, relation)
-                               VALUES (?, ?, 'evidence', ?, ?)""",
-                            (name, record["source_id"], record_id, record["relation"]),
-                        )
+                source_ids = record.get("source_ids", [])
+                for source_id in source_ids:
+                    connection.execute(
+                        """INSERT INTO hp06_source_links
+                           (dataset_name, source_id, record_kind, record_id, relation)
+                           VALUES (?, ?, ?, ?, 'record')""",
+                        (name, source_id, kind, record_id),
+                    )
+                if kind == "evidence":
+                    connection.execute(
+                        """INSERT INTO hp06_source_links
+                           (dataset_name, source_id, record_kind, record_id, relation)
+                           VALUES (?, ?, 'evidence', ?, ?)""",
+                        (name, record["source_id"], record_id, record["relation"]),
+                    )
 
     def load(self, name: str) -> HistoricalDataset:
         """Rebuild and validate a dataset from its normalized rows."""
