@@ -6,6 +6,10 @@ on:
     paths:
       - "benchmarks/benchmark_hotpotqa_retrieval.py"
       - "benchmarks/benchmark_hybrid_retrieval.py"
+      - "src/historypy/research/hybrid.py"
+      - "src/historypy/research/bm25.py"
+      - "src/historypy/research/search_index.py"
+      - "src/historypy/research/semantic.py"
       - "tests/test_hotpotqa_benchmark.py"
       - ".github/workflows/english-multihop.yml"
   workflow_dispatch:
