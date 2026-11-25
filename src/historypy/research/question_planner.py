@@ -667,7 +667,7 @@ __all__ = [
     "QuestionPathReview",
     "QuestionPlan",
     "TemporalPathSelection",
-    "select_paths_by_temporal_policy",
     "execute_question_plan",
     "plan_research_question",
+    "select_paths_by_temporal_policy",
 ]
