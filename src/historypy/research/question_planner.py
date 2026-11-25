@@ -15,6 +15,7 @@ from typing import Literal
 from historypy.core.dataset import HistoricalDataset
 from historypy.core.models import HistoricalDate, SourceRecord
 from historypy.research.alias_registry import AliasRegistry
+from historypy.research.evidence_analysis import ClaimEvidenceAnalysis, analyze_claim_evidence
 from historypy.research.hybrid import DecomposedQuery, decompose_research_question
 from historypy.research.relationship_paths import (
     RelationshipPath,
@@ -90,6 +91,8 @@ class HopEvidenceReview:
     predicate: str
     source_records: tuple[SourceRecord, ...]
     source_independence: SourceSetIndependenceReport
+    claim_ids: tuple[str, ...]
+    claim_analyses: tuple[ClaimEvidenceAnalysis, ...]
     missing_source_reference: bool
 
 
@@ -344,6 +347,7 @@ def execute_question_plan(
         raise TypeError("plan must be a QuestionPlan")
     dataset.require_valid()
     source_index = {source.id: source for source in dataset.sources}
+    relationship_index = {edge.id: edge for edge in dataset.relationships}
     searches = tuple(
         find_relationship_paths(dataset, query) for query in plan.path_queries
     )
@@ -363,6 +367,12 @@ def execute_question_plan(
                     source_index[source_id]
                     for source_id in source_ids if source_id in source_index
                 )
+                relationship = relationship_index[step.relationship_id]
+                claim_ids = tuple(relationship.claim_ids)
+                claim_analyses = tuple(
+                    analyze_claim_evidence(dataset, claim_id)
+                    for claim_id in claim_ids
+                )
                 hop_reviews.append(HopEvidenceReview(
                     relationship_id=step.relationship_id,
                     predicate=step.predicate,
@@ -370,6 +380,8 @@ def execute_question_plan(
                     source_independence=analyze_source_set_independence(
                         dataset, source_ids
                     ),
+                    claim_ids=claim_ids,
+                    claim_analyses=claim_analyses,
                     missing_source_reference=not bool(source_ids),
                 ))
             temporal_status, temporal_note = _temporal_review(path)
@@ -415,6 +427,11 @@ def execute_question_plan(
         )
     if any(hop.missing_source_reference for review in reviews for hop in review.hops):
         warnings.append("At least one path hop has no linked source record.")
+    if any(not hop.claim_analyses for review in reviews for hop in review.hops):
+        warnings.append(
+            "At least one path hop has no explicitly linked claim-level evidence; "
+            "source metadata alone does not provide a quotation or locator."
+        )
     if any(
         hop.source_independence.status in {
             "dependence_unknown", "single_source_dependence_unknown",
