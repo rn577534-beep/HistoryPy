@@ -1,5 +1,5 @@
-from historypy.examples.titanic_inquiry_comparison import build_titanic_inquiry_dataset
 from historypy import render_event_source_comparison
+from historypy.examples.titanic_inquiry_comparison import build_titanic_inquiry_dataset
 
 
 def test_titanic_inquiry_comparison_preserves_both_reported_totals_and_locators():
