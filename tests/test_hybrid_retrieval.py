@@ -70,12 +70,12 @@ def test_hybrid_rrf_combines_trigram_and_bm25_with_stable_ranks():
     assert hits[0].record_id == "e1"
     assert hits[0].bm25_rank == 1
     assert hits[0].trigram_rank == 1
-    decomposed = index.search(
-        "Who was Alexander the Great and when did he besiege Tyre?",
-        decompose=True,
-    )
+    question = "Who was Alexander the Great and when did he besiege Tyre?"
+    baseline = index.search(question)
+    decomposed = index.search(question, decompose=True)
     assert decomposed
     assert decomposed[0].record_id == "e1"
+    assert decomposed[0].score >= baseline[0].score
 
 
 def test_hybrid_semantic_rank_is_optional_and_reported():
