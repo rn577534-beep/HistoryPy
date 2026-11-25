@@ -296,3 +296,25 @@ These tests do not replace power-loss testing on physical hardware, filesystem
 fault injection, or long-duration concurrent workload testing. WAL should be
 selected based on deployment workload and checkpoint/backup policy, not assumed
 to be universally faster.
+
+
+## DELETE versus WAL scale results
+
+Pinned GitHub Actions run:
+https://github.com/rn577534-beep/HistoryPy/actions/runs/45518628486
+
+| Records | Journal | Save time | Selective query | Broad query (top 1,000) | Reopen query | SQLite file | Peak process RSS |
+|---:|---|---:|---:|---:|---:|---:|---:|
+| 100,000 | DELETE | 9.065 s | 1.496 ms | 123.862 ms | 1.250 ms | 84.637 MiB | 221.223 MiB |
+| 100,000 | WAL | 13.600 s | 2.374 ms | 169.867 ms | 1.978 ms | 84.637 MiB | 221.324 MiB |
+| 1,000,000 | DELETE | 87.035 s | 5.694 ms | 1,145.411 ms | 4.962 ms | 845.113 MiB | 1,877.562 MiB |
+| 1,000,000 | WAL | 175.482 s | 7.513 ms | 2,052.605 ms | 7.227 ms | 845.113 MiB | 1,879.277 MiB |
+
+All four runs reported FTS5 available and SQLite integrity_check = ok.
+Both WAL runs completed a PASSIVE checkpoint with no busy pages remaining.
+The broad query intentionally returns at most 1,000 rows, so its timing is a
+bounded top-k query, not a full corpus export. WAL was slower than DELETE for
+this synthetic single-writer workload; WAL is retained as an opt-in mode for
+deployment concurrency requirements, not as a universal performance setting.
+Peak RSS includes the Python process, source dataset, SQLite cache, and native
+allocations; it is not an isolated measurement of index-only RAM.
