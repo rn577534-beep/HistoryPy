@@ -413,3 +413,27 @@ for review in plan_report.path_reviews:
     for hop in review.hops:
         print(hop.contradicted_claim_ids, hop.missing_claim_link)
 ```
+
+
+### Explicit temporal filtering policies
+
+Temporal review remains non-destructive by default: execution reports retain every candidate path. Researchers can apply an explicit policy afterward with `select_paths_by_temporal_policy`:
+
+```python
+from historypy import select_paths_by_temporal_policy
+
+# Remove only known-incompatible paths; unknown-date paths remain included.
+selection = select_paths_by_temporal_policy(
+    plan_report.path_reviews,
+    policy="exclude_incompatible",
+)
+
+# Strict mode: keep only paths whose recorded intervals are compatible.
+strict = select_paths_by_temporal_policy(
+    plan_report.path_reviews,
+    policy="compatible_only",
+)
+print(len(strict.excluded_unknown))  # unknown paths are reported, not hidden
+```
+
+The policy is mandatory. `all` retains every path; `exclude_incompatible` removes only known conflicts and retains unknown dates; `compatible_only` excludes both incompatible and unknown paths. Excluded records remain available in `TemporalPathSelection`, so the caller can audit what was filtered. No policy converts unknown into compatible.
