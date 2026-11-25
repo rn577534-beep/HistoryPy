@@ -258,9 +258,11 @@ class NormalizedSQLiteStore:
         target_path = Path(destination)
         if target_path.resolve() == Path(self.path).resolve():
             raise ValueError("backup destination must differ from source database")
-        with closing(self._connect()) as source:
-            with closing(sqlite3.connect(str(target_path))) as target:
-                source.backup(target)
+        with (
+            closing(self._connect()) as source,
+            closing(sqlite3.connect(str(target_path))) as target,
+        ):
+            source.backup(target)
         with closing(sqlite3.connect(str(target_path))) as verification:
             rows = verification.execute("PRAGMA integrity_check").fetchall()
         diagnostics = tuple(str(row[0]) for row in rows)
