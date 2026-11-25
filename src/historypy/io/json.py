@@ -99,6 +99,28 @@ def _record_from_dict(
     return record_type(**data)
 
 
+def iter_dataset_records(dataset: HistoricalDataset):
+    """Yield normalized interchange records one at a time in stable schema order.
+
+    This avoids allocating a second dataset-sized list of serialized dictionaries
+    in persistence backends that can stream records into their own transaction.
+    """
+    groups = (
+        ("sources", dataset.sources, ()),
+        ("claims", dataset.claims, ()),
+        ("events", dataset.events, ("date",)),
+        ("people", dataset.people, ("birth_date", "death_date")),
+        ("places", dataset.places, ()),
+        ("civilizations", dataset.civilizations, ("start_date", "end_date")),
+        ("organizations", dataset.organizations, ("founded", "dissolved")),
+        ("relationships", dataset.relationships, ("valid_from", "valid_to")),
+        ("evidence", dataset.evidence, ()),
+    )
+    for kind, records, date_fields in groups:
+        for index, record in enumerate(records):
+            yield kind, index, _record_to_dict(record, date_fields)
+
+
 def dataset_to_dict(dataset: HistoricalDataset) -> dict[str, Any]:
     """Convert a dataset to a versioned, JSON-compatible dictionary."""
     return {
