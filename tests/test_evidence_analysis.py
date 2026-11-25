@@ -7,10 +7,10 @@ from historypy import (
     SourceRecord,
 )
 from historypy.research import (
+    audit_citation_completeness,
     claims_with_conflicting_evidence,
     evidence_for_claim,
     summarize_claim_evidence,
-    audit_citation_completeness,
 )
 
 
