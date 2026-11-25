@@ -505,10 +505,10 @@ registry = SourceDependencyRegistry(
 )
 
 # Only verified assertions change the derived dataset.
+report = registry.audit_source_set(["report-2", "witness-1"])
+
+# Or inspect the annotated snapshot explicitly:
 annotated_dataset = registry.apply_verified()
-report = analyze_source_set_independence(
-    annotated_dataset, ["report-2", "witness-1"]
-)
 ```
 
 Shared-witness, shared-archive, syndication, and shared-dataset assertions require an explicit shared group ID. Candidate, disputed, and rejected assertions remain review data and are not applied. The original dataset is never mutated. Keep the registry alongside the dataset so reviewers can inspect the citation and decision behind every applied dependency edge. This metadata audit identifies recorded dependence; it does not rate credibility or determine historical truth.
