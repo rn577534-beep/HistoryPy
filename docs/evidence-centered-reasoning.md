@@ -245,3 +245,37 @@ for downstream temporal review; the initial path planner does not yet enforce
 a shared time window or automatically attach claim-level evidence obligations.
 Free-text question parsing into entity and predicate slots remains a separate,
 reviewable planning step.
+
+
+## 11. Paired multilingual decomposition benchmark
+
+`benchmarks/benchmark_multilingual_decomposition.py` now compares full-query
+hybrid retrieval with decomposition-enabled hybrid retrieval on paired held-out
+questions in:
+
+- French: HistoriQA-ThirdRepublic.
+- English: HotpotQA.
+
+Both methods use the same per-language corpus, same deterministic
+question-type-stratified held-out rows, same trigram + BM25 RRF index, and the
+same top-k. The report contains Recall@10, MRR@10, success@10, and the absolute
+decomposed-minus-baseline delta for each language, plus an unweighted language
+macro-average.
+
+Run:
+
+```bash
+python benchmarks/benchmark_multilingual_decomposition.py \
+  --french-corpus path/to/french_corpus.jsonl \
+  --french-questions path/to/french_questions.jsonl \
+  --english-hotpotqa path/to/hotpotqa.json \
+  --top-k 10 \
+  --output multilingual_decomposition_report.json
+```
+
+The benchmark does not treat HotpotQA as a historical corpus, and it does not
+treat gold document relevance labels as historical truth. French and English
+datasets differ in domain and annotation; the macro-average weights each
+language equally. No external semantic model is silently selected. A report
+must be generated with the actual corpus files before any numerical performance
+claim is made.
