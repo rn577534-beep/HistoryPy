@@ -131,6 +131,7 @@ class ResearchPipeline:
         max_hops: int = 3,
         limit: int = 10,
         direction: str = "both",
+        max_path_queries: int = 40,
     ) -> QuestionExecutionReport:
         """Plan and execute a reviewable entity/relationship multi-hop question.
 
@@ -145,6 +146,7 @@ class ResearchPipeline:
             max_hops=max_hops,
             limit=limit,
             direction=direction,
+            max_path_queries=max_path_queries,
         )
         return execute_question_plan(self.dataset, plan)
 
