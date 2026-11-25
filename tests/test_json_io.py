@@ -4,8 +4,8 @@ import pytest
 
 from historypy import (
     EvidenceLink,
-    HistoricalClaim,
     HistoricalCivilization,
+    HistoricalClaim,
     HistoricalDataset,
     HistoricalDate,
     HistoricalEvent,
