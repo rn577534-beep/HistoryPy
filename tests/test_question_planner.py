@@ -5,6 +5,7 @@ from historypy import (
     HistoricalDataset,
     HistoricalPerson,
     HistoricalRelationship,
+    ResearchPipeline,
     SourceRecord,
     execute_question_plan,
     plan_research_question,
@@ -148,3 +149,12 @@ def test_source_set_audit_never_infers_independence_from_missing_metadata():
     report = analyze_source_set_independence(_dataset(), ["s1", "s3"])
     assert report.status == "dependence_unknown"
     assert report.unknown_source_ids == ("s1", "s3")
+
+
+
+def test_research_pipeline_exposes_integrated_multi_hop_question_workflow():
+    report = ResearchPipeline(_dataset()).run_question(
+        "Ada Lovelace and Mary Somerville", max_hops=2
+    )
+    assert report.plan.question == "Ada Lovelace and Mary Somerville"
+    assert report.path_reviews
