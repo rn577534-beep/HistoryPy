@@ -226,7 +226,7 @@ def dataset_from_dict(
         ),
         relationships=records(
             "relationships", HistoricalRelationship,
-            tuple_fields=("source_ids",),
+            tuple_fields=("source_ids", "claim_ids"),
             date_fields=("valid_from", "valid_to"),
         ),
         evidence=records("evidence", EvidenceLink),
