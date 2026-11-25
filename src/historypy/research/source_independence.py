@@ -96,44 +96,44 @@ def _dependency_edges(dataset: HistoricalDataset) -> tuple[SourceDependency, ...
     ))
 
 
-def analyze_claim_source_independence(
-    dataset: HistoricalDataset, claim_id: str
-) -> ClaimSourceIndependenceReport:
-    """Group evidence sources connected by recorded source-genealogy links.
 
-    Direct and transitive derivation links and shared-evidence groups are
-    treated as known dependence. Intermediate sources are retained as bridge
-    nodes. Sources without a documented path to another evidence source are
-    classified as unknown, never independent.
+@dataclass(frozen=True, slots=True)
+class SourceSetIndependenceReport:
+    """Known/unknown genealogy for an arbitrary set of sources, not a truth score."""
 
-    This is a metadata audit, not an authenticity, reliability, or truth test.
-    """
-    if not any(claim.id == claim_id for claim in dataset.claims):
-        raise KeyError(f"Unknown claim id: {claim_id}")
+    evidence_source_ids: tuple[str, ...]
+    dependent_clusters: tuple[DependencyCluster, ...]
+    unknown_source_ids: tuple[str, ...]
+    status: str
 
-    source_ids = {source.id for source in dataset.sources}
-    evidence_source_ids = tuple(sorted({
-        link.source_id
-        for link in dataset.evidence
-        if link.claim_id == claim_id and link.source_id in source_ids
-    }))
-    if not evidence_source_ids:
-        return ClaimSourceIndependenceReport(
-            claim_id, (), (), (), "no_evidence"
-        )
+    @property
+    def known_dependent_source_count(self) -> int:
+        return sum(len(cluster.evidence_source_ids) for cluster in self.dependent_clusters)
+
+
+def analyze_source_set_independence(
+    dataset: HistoricalDataset, source_ids: tuple[str, ...] | list[str]
+) -> SourceSetIndependenceReport:
+    """Audit genealogy for any evidence-bearing source set, including path evidence."""
+    available = {source.id for source in dataset.sources}
+    evidence_ids = tuple(sorted(set(source_ids)))
+    unknown_refs = set(evidence_ids) - available
+    if unknown_refs:
+        raise KeyError(f"Unknown source id(s): {', '.join(sorted(unknown_refs))}")
+    if not evidence_ids:
+        return SourceSetIndependenceReport((), (), (), "no_evidence")
 
     edges = _dependency_edges(dataset)
-    adjacency: dict[str, set[str]] = {source_id: set() for source_id in source_ids}
+    adjacency: dict[str, set[str]] = {source_id: set() for source_id in available}
     for edge in edges:
         adjacency[edge.source_id].add(edge.related_source_id)
         adjacency[edge.related_source_id].add(edge.source_id)
 
-    evidence_set = set(evidence_source_ids)
+    evidence_set = set(evidence_ids)
     visited: set[str] = set()
+    clustered: set[str] = set()
     clusters: list[DependencyCluster] = []
-    clustered_evidence: set[str] = set()
-
-    for start in evidence_source_ids:
+    for start in evidence_ids:
         if start in visited:
             continue
         component: set[str] = set()
@@ -145,11 +145,9 @@ def analyze_claim_source_independence(
             visited.add(current)
             component.add(current)
             pending.extend(sorted(adjacency[current] - visited, reverse=True))
-
         component_evidence = tuple(sorted(component & evidence_set))
         if len(component_evidence) < 2:
             continue
-
         component_edges = tuple(
             edge for edge in edges
             if edge.source_id in component and edge.related_source_id in component
@@ -159,26 +157,43 @@ def analyze_claim_source_independence(
             bridge_source_ids=tuple(sorted(component - evidence_set)),
             dependency_edges=component_edges,
         ))
-        clustered_evidence.update(component_evidence)
+        clustered.update(component_evidence)
 
     clusters.sort(key=lambda cluster: cluster.evidence_source_ids)
-    unknown = tuple(sorted(evidence_set - clustered_evidence))
-
+    unknown = tuple(sorted(evidence_set - clustered))
     if clusters and unknown:
         status = "known_dependence_and_unknown"
     elif clusters:
         status = "known_dependence"
-    elif len(evidence_source_ids) == 1:
+    elif len(evidence_ids) == 1:
         status = "single_source_dependence_unknown"
     else:
         status = "dependence_unknown"
-
-    return ClaimSourceIndependenceReport(
-        claim_id=claim_id,
-        evidence_source_ids=evidence_source_ids,
+    return SourceSetIndependenceReport(
+        evidence_source_ids=evidence_ids,
         dependent_clusters=tuple(clusters),
         unknown_source_ids=unknown,
         status=status,
+    )
+
+
+def analyze_claim_source_independence(
+    dataset: HistoricalDataset, claim_id: str
+) -> ClaimSourceIndependenceReport:
+    """Group claim evidence sources by recorded genealogy; missing data stays unknown."""
+    if not any(claim.id == claim_id for claim in dataset.claims):
+        raise KeyError(f"Unknown claim id: {claim_id}")
+    evidence_ids = tuple(
+        link.source_id for link in dataset.evidence if link.claim_id == claim_id
+        and link.source_id in {source.id for source in dataset.sources}
+    )
+    report = analyze_source_set_independence(dataset, evidence_ids)
+    return ClaimSourceIndependenceReport(
+        claim_id=claim_id,
+        evidence_source_ids=report.evidence_source_ids,
+        dependent_clusters=report.dependent_clusters,
+        unknown_source_ids=report.unknown_source_ids,
+        status=report.status,
     )
 
 
