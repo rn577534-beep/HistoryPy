@@ -101,3 +101,27 @@ The expected result for case 5 is **unknown**, not independent corroboration.
 - No claim that an LLM-generated sub-question is itself evidence.
 - No silently resolved contradictions or missing hops.
 - No bulk alias ingestion without source, license, and attribution review.
+
+## 7. Implemented first slice: conservative source-independence audit
+
+The feature branch now includes `historypy.research.source_independence` with:
+
+- `analyze_claim_source_independence(dataset, claim_id)` for claim-level analysis;
+- `audit_source_independence(dataset)` for deterministic dataset-wide summaries;
+- typed reports for dependency clusters, source edges, bridge sources, and unknown sources;
+- direct and transitive `derived_from_source_ids` detection;
+- shared-evidence-group detection;
+- explicit unknown statuses when dependency metadata is absent;
+- adversarial tests for syndicated reports, transitive witness/document chains, mixed known/unknown dependencies, and claims without evidence.
+
+The implementation deliberately does not infer independence. It only reports known dependence when a recorded genealogy path exists. A single source is also marked as dependence-unknown because it cannot corroborate itself.
+
+Run the repository CI commands locally or through GitHub Actions before merging:
+
+```bash
+python -m pip install -e ".[dev]"
+pytest
+ruff check .
+```
+
+At this stage, the code and tests have been committed to the feature branch, but a passing CI result has not yet been observed.
