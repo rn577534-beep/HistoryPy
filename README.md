@@ -943,3 +943,29 @@ python benchmarks/benchmark_multilingual_decomposition.py \
 ```
 
 No benchmark numbers are hard-coded: run it with the actual corpus files.
+
+
+### Reviewable free-text multi-hop question workflow
+
+```python
+from historypy import ResearchPipeline
+
+report = ResearchPipeline(dataset).run_question(
+    "How was Ada Lovelace connected to Charles Babbage?",
+    alias_registry=verified_alias_registry,  # optional
+    predicate_lexicon={"collaborated_with": ("connected to", "worked with")},
+    max_hops=3,
+    direction="both",
+)
+for review in report.path_reviews:
+    print(review.path.entity_ids)
+    print(review.temporal_status, review.source_independence.status)
+    for hop in review.hops:
+        print(hop.relationship_id, hop.predicate, hop.source_records)
+```
+
+Only exact canonical names and researcher-verified aliases become entity
+candidates. Ambiguity, per-hop source records, path-wide source dependence,
+and temporal compatibility are exposed for review. Predicate phrases are
+candidate slots; path search remains unfiltered until the researcher confirms
+the intended relation sequence. A path is not proof of historical truth.
