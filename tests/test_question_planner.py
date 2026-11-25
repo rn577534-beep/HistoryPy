@@ -1,6 +1,8 @@
 from historypy import (
     AliasAssertion,
     AliasRegistry,
+    EvidenceLink,
+    HistoricalClaim,
     HistoricalDate,
     HistoricalDataset,
     HistoricalPerson,
@@ -35,24 +37,38 @@ def _dataset():
             HistoricalPerson("p3", "Mary Somerville"),
             HistoricalPerson("p4", "Alex Morgan"),
         ),
+        claims=(
+            HistoricalClaim("c1", "Ada Lovelace collaborated with Charles Babbage."),
+            HistoricalClaim("c2", "Charles Babbage corresponded with Mary Somerville."),
+            HistoricalClaim("c3", "Ada Lovelace influenced Mary Somerville."),
+        ),
+        evidence=(
+            EvidenceLink("c1", "s1", "supports", locator="page 1", quotation="Evidence A"),
+            EvidenceLink("c1", "s2", "supports", locator="page 2", quotation="Evidence B"),
+            EvidenceLink("c2", "s3", "supports", locator="page 3", quotation="Evidence C"),
+            EvidenceLink("c3", "s3", "supports", locator="page 4", quotation="Evidence D"),
+        ),
         relationships=(
             HistoricalRelationship(
                 "r1", "p1", "collaborated_with", "p2",
                 source_ids=("s1", "s2"),
                 valid_from=_date(1840, 1842),
                 valid_to=_date(1844, 1846),
+                claim_ids=("c1",),
             ),
             HistoricalRelationship(
                 "r2", "p2", "corresponded_with", "p3",
                 source_ids=("s3",),
                 valid_from=_date(1850, 1851),
                 valid_to=_date(1852, 1853),
+                claim_ids=("c2",),
             ),
             HistoricalRelationship(
                 "r3", "p1", "influenced", "p3",
                 source_ids=("s3",),
                 valid_from=_date(1840, 1841),
                 valid_to=_date(1843, 1844),
+                claim_ids=("c3",),
             ),
         ),
     )
@@ -133,6 +149,8 @@ def test_execution_attaches_per_hop_sources_and_temporal_conflict():
     )
     assert direct.temporal_status == "compatible"
     assert direct.hops[0].source_records[0].id == "s3"
+    assert direct.hops[0].claim_ids == ("c3",)
+    assert direct.hops[0].claim_analyses[0].locator_coverage == 1.0
 
     indirect = next(
         row for row in report.path_reviews
@@ -140,6 +158,8 @@ def test_execution_attaches_per_hop_sources_and_temporal_conflict():
     )
     assert indirect.temporal_status == "incompatible"
     assert indirect.hops[0].source_independence.status == "known_dependence"
+    assert indirect.hops[0].claim_analyses[0].assessment_status == "supported"
+    assert indirect.hops[0].claim_analyses[0].locator_coverage == 1.0
     assert indirect.hops[0].source_independence.dependent_clusters[0].evidence_source_ids == (
         "s1", "s2"
     )
