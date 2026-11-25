@@ -89,6 +89,7 @@ class HopEvidenceReview:
 
     relationship_id: str
     predicate: str
+    evidence_source_ids: tuple[str, ...]
     source_records: tuple[SourceRecord, ...]
     source_independence: SourceSetIndependenceReport
     claim_ids: tuple[str, ...]
@@ -103,6 +104,7 @@ class QuestionPathReview:
 
     path: RelationshipPath
     hops: tuple[HopEvidenceReview, ...]
+    evidence_source_ids: tuple[str, ...]
     source_independence: SourceSetIndependenceReport
     temporal_status: TemporalStatus
     temporal_note: str
@@ -375,15 +377,17 @@ def execute_question_plan(
         for path in search.paths:
             hop_reviews = []
             for step in path.steps:
-                source_ids = tuple(step.source_ids)
-                records = tuple(
-                    source_index[source_id]
-                    for source_id in source_ids if source_id in source_index
-                )
                 relationship = relationship_index[step.relationship_id]
                 claim_ids = tuple(relationship.claim_ids)
                 evidence_links = tuple(
                     link for link in dataset.evidence if link.claim_id in claim_ids
+                )
+                evidence_source_ids = tuple(sorted(
+                    set(step.source_ids) | {link.source_id for link in evidence_links}
+                ))
+                records = tuple(
+                    source_index[source_id]
+                    for source_id in evidence_source_ids if source_id in source_index
                 )
                 claim_analyses = tuple(
                     analyze_claim_evidence(dataset, claim_id)
@@ -392,15 +396,27 @@ def execute_question_plan(
                 hop_reviews.append(HopEvidenceReview(
                     relationship_id=step.relationship_id,
                     predicate=step.predicate,
+                    evidence_source_ids=evidence_source_ids,
                     source_records=records,
                     source_independence=analyze_source_set_independence(
-                        dataset, source_ids
+                        dataset, evidence_source_ids
                     ),
                     claim_ids=claim_ids,
                     evidence_links=evidence_links,
                     claim_analyses=claim_analyses,
-                    missing_source_reference=not bool(source_ids),
+                    missing_source_reference=not bool(evidence_source_ids),
                 ))
+            path_evidence_source_ids = tuple(sorted({
+                source_id for hop in hop_reviews for source_id in hop.evidence_source_ids
+            }))
+            path_independence = analyze_source_set_independence(
+                dataset, path_evidence_source_ids
+            )
+            reviews.append(QuestionPathReview(
+                path=path,
+                hops=tuple(hop_reviews),
+                evidence_source_ids=path_evidence_source_ids,
+                source_independence=path_independence,
             temporal_status, temporal_note = _temporal_review(path)
             path_independence = analyze_source_set_independence(
                 dataset, path.source_ids
@@ -415,7 +431,9 @@ def execute_question_plan(
     if not reviews:
         warnings.append("No relationship path was found for the proposed endpoint pairs.")
     if any(
-        review.source_independence.status == "known_dependence"
+        review.source_independence.status in {
+            "known_dependence", "known_dependence_and_unknown"
+        }
         for review in reviews
     ):
         warnings.append(
