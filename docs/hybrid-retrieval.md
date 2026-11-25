@@ -86,3 +86,6 @@ python benchmarks/benchmark_hybrid_retrieval.py \
 No semantic benchmark score is published until an actual model/provider is
 chosen and the evaluation is run. Do not substitute a toy fixture embedder
 for a real semantic relevance result.
+
+
+French question decomposition includes explicit conjunctions such as `et quand`, `et comment`, and comparative constructions such as `par rapport à`, `comparé à`, and `en comparaison avec`. These rules are intentionally narrow; the corpus benchmark must still determine whether decomposition improves retrieval rather than assuming it does.
