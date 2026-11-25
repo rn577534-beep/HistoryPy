@@ -130,7 +130,13 @@ class HybridSearchIndex:
             raise ValueError("entity_fuzzy_threshold must be between 0 and 1")
         if limit == 0:
             return ()
-        parts = decompose_research_question(query).parts if decompose else (query.strip(),)
+        if decompose:
+            decomposition = decompose_research_question(query)
+            # Keep the full question as an anchor: sub-questions add evidence
+            # without discarding context carried by the original wording.
+            parts = tuple(dict.fromkeys((query.strip(), *decomposition.parts)))
+        else:
+            parts = (query.strip(),)
         allowed = tuple(kinds) if kinds is not None else None
         scores: dict[tuple[str, str], float] = defaultdict(float)
         labels: dict[tuple[str, str], str] = {}
