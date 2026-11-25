@@ -13,7 +13,7 @@ def test_synthetic_event_comparison_preserves_two_distinct_accounts_and_locators
                 creator="Archive A", url="https://example.org/archive-a",
             ),
             SourceRecord(
-                "chronicle-b", "Synthetic chronicle account B", "chronicle",
+                "chronicle-b", "Synthetic chronicle account B", "primary",
                 creator="Chronicle B", url="https://example.org/chronicle-b",
             ),
         ),
