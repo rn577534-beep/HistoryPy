@@ -24,9 +24,6 @@ from historypy.graph import (
 )
 from historypy.integrations import (
     AggregationReport,
-    AliasAssertion,
-    AliasMatch,
-    AliasRegistry,
     DuplicateCandidateGroup,
     EuropeanaSearch,
     ExternalRecord,
@@ -61,6 +58,9 @@ from historypy.io import (
     save_dataset_csv_bundle,
 )
 from historypy.research import (
+    AliasAssertion,
+    AliasMatch,
+    AliasRegistry,
     BM25SearchHit,
     BM25SearchIndex,
     CitationCompletenessReport,
