@@ -124,7 +124,9 @@ class HybridSearchIndex:
                 result_sets.append((
                     "semantic",
                     self.semantic.search(
-                        part, embedder=embedder, kinds=allowed,\n                        limit=len(self.semantic.records),\n                    ),
+                        part, embedder=embedder, kinds=allowed,
+                        limit=len(self.semantic.records),
+                    ),
                 ))
             for method, hits in result_sets:
                 for rank, hit in enumerate(hits, start=1):
