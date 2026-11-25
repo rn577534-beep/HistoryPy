@@ -2,16 +2,16 @@ import pytest
 
 from historypy import (
     EvidenceLink,
-    HistoricalClaim,
     HistoricalCivilization,
+    HistoricalClaim,
     HistoricalDataset,
     HistoricalDate,
     HistoricalEvent,
     HistoricalOrganization,
     HistoricalPerson,
     HistoricalPlace,
-    SourceRecord,
     SQLiteMaintenanceStats,
+    SourceRecord,
 )
 from historypy.io.sqlite_normalized import NormalizedSQLiteStore
 
