@@ -121,3 +121,31 @@ def test_question_decomposition_supports_french_multi_hop_and_comparison():
         "Athènes comparée à Sparte"
     )
     assert feminine.parts == ("Athènes", "Sparte")
+
+
+def test_entity_alias_fuzzy_suggestions_are_review_only_and_rankable():
+    data = dataset()
+    resolver = EntityAwareSearchIndex.build(data)
+    suggestions = resolver.suggest("Alexandre", threshold=0.85)
+    assert suggestions
+    assert suggestions[0].record_id == "p1"
+    assert suggestions[0].similarity >= 0.85
+
+    index = HybridSearchIndex(
+        DatasetSearchIndex.build(data),
+        BM25SearchIndex.build(data),
+        entity_index=resolver,
+    )
+    hits = index.search("Alexandre", entity_fuzzy_threshold=0.85)
+    assert hits[0].record_id == "p1"
+    assert hits[0].entity_rank == 1
+
+
+def test_entity_alias_resolution_exposes_ambiguous_names():
+    data = HistoricalDataset(people=(
+        HistoricalPerson("p1", "John Smith"),
+        HistoricalPerson("p2", "John Smith"),
+    ))
+    matches = EntityAwareSearchIndex.build(data).resolve("John Smith")
+    assert len(matches) == 2
+    assert all(item.ambiguous and item.ambiguity_count == 2 for item in matches)
