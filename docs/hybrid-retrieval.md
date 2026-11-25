@@ -89,3 +89,5 @@ for a real semantic relevance result.
 
 
 French question decomposition includes explicit conjunctions such as `et quand`, `et comment`, and comparative constructions such as `par rapport à`, `comparé à`, and `en comparaison avec`. These rules are intentionally narrow; the corpus benchmark must still determine whether decomposition improves retrieval rather than assuming it does.
+
+The comparison parser recognizes the French forms `comparé`, `comparée`, `comparés`, and `comparées` before `à`; exact wording coverage remains rule-based rather than a general language understanding system.
