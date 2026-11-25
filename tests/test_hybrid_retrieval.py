@@ -190,3 +190,48 @@ def test_verified_alias_registry_provenance_flows_into_hybrid_hits():
     assert hit.matched_entity_evidence[0].review_status == "verified"
     assert hit.matched_entity_evidence[0].source_id == "s1"
     assert hit.matched_entity_evidence[0].locator == "catalogue entry 17"
+
+
+
+def test_verified_alias_lookup_can_be_scoped_to_language():
+    data = HistoricalDataset(
+        sources=(
+            SourceRecord("s1", "French catalogue", "archival"),
+            SourceRecord("s2", "English catalogue", "archival"),
+        ),
+        people=(HistoricalPerson("p1", "Joan of Arc"),),
+    )
+    registry = AliasRegistry(
+        data,
+        [
+            AliasAssertion(
+                "fr-1", "person", "p1", "Jeanne d'Arc", "fr",
+                "historical_name", "s1", "entry 1", "public-domain",
+                review_status="verified", reviewer="reviewer-1",
+                reviewed_at="2026-01-10",
+            ),
+            AliasAssertion(
+                "en-1", "person", "p1", "Joan of Arc", "en",
+                "spelling_variant", "s2", "entry 2", "public-domain",
+                review_status="verified", reviewer="reviewer-1",
+                reviewed_at="2026-01-10",
+            ),
+        ],
+        registry_version="1.0.0",
+        dataset_version="fixture-1",
+    )
+    resolver = EntityAwareSearchIndex.build(data, alias_registry=registry)
+    french = resolver.resolve("Jeanne d'Arc", language="fr")
+    english = resolver.resolve("Jeanne d'Arc", language="en")
+    assert len(french) == 1
+    assert french[0].language == "fr"
+    assert english == ()
+
+    hybrid = HybridSearchIndex(
+        DatasetSearchIndex.build(data),
+        BM25SearchIndex.build(data),
+        entity_index=resolver,
+    )
+    hits = hybrid.search("Jeanne d'Arc", entity_language="fr")
+    person = next(hit for hit in hits if hit.record_id == "p1")
+    assert person.matched_entity_evidence[0].language == "fr"
