@@ -37,7 +37,7 @@ def test_wikidata_alias_import_creates_only_candidate_assertions():
 
     assert len(dataset.sources) == 1
     source = dataset.sources[0]
-    assert source.id == "wikidata-q7186"
+    assert source.id == "wikidata-q7186-current"
     assert source.url == "https://www.wikidata.org/wiki/Q7186"
     assert len(registry.assertions) == 3
     assert {row.language for row in registry.assertions} == {"bn", "en", "fr"}
@@ -63,7 +63,7 @@ def test_import_is_deterministic_and_preserves_bengali_script_metadata():
     assert first.to_dict() == second.to_dict()
     assertion = first.assertions[0]
     assert assertion.script == "Beng"
-    assert assertion.locator == "Q7186/aliases/bn"
+    assert assertion.locator == "Q7186/current/aliases/bn"
     assert assertion.reviewer is None
     assert assertion.reviewed_at is None
 
@@ -96,6 +96,39 @@ def test_import_requires_explicit_mapping_and_validates_canonical_target():
             _dataset(),
             [{"id": "Q7186", "aliases": {"en": ["Madame Curie"]}}],
             {"Q7186": ("person", "missing")},
+            registry_version="v1",
+            dataset_version="d1",
+        )
+
+
+def test_import_pins_alias_source_to_wikidata_revision_when_available():
+    dataset, registry = import_wikidata_alias_candidates(
+        _dataset(),
+        [{
+            "id": "Q7186",
+            "lastrevid": 123456,
+            "aliases": {"en": ["Madame Curie"]},
+        }],
+        {"Q7186": ("person", "p1")},
+        registry_version="v1",
+        dataset_version="d1",
+    )
+    source = dataset.sources[0]
+    assert source.id == "wikidata-q7186-r123456"
+    assert source.url == "https://www.wikidata.org/w/index.php?title=Q7186&oldid=123456"
+    assert registry.assertions[0].locator == "Q7186/r123456/aliases/en"
+
+
+def test_import_rejects_invalid_wikidata_revision_identifier():
+    with pytest.raises(ValueError, match="lastrevid"):
+        import_wikidata_alias_candidates(
+            _dataset(),
+            [{
+                "id": "Q7186",
+                "lastrevid": True,
+                "aliases": {"en": ["Madame Curie"]},
+            }],
+            {"Q7186": ("person", "p1")},
             registry_version="v1",
             dataset_version="d1",
         )
