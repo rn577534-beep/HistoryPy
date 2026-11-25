@@ -101,7 +101,9 @@ from historypy.research.source_independence import (
     DatasetSourceIndependenceReport,
     DependencyCluster,
     SourceDependency,
+    SourceSetIndependenceReport,
     analyze_claim_source_independence,
+    analyze_source_set_independence,
     audit_source_independence,
 )
 from historypy.research.timeline import TimelineEntry, TimelineResult, timeline_for_dataset
