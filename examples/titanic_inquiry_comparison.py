@@ -124,7 +124,7 @@ def build_titanic_inquiry_dataset() -> HistoricalDataset:
             claim_id="titanic_survivors_706",
             source_id="british_court_cd6352",
             relation="contradicts",
-            quotation="712, rescued by Carpathia from the boats.",
+            quotation="712, rescued by",
             paragraph="Findings of the Court, Question 21(a)",
             locator="Findings of the Court — Question 21(a)",
             interpretation_note="British Court's rescue count.",
