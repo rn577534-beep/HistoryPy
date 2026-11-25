@@ -71,6 +71,13 @@ from historypy.research.source_audit import (
     audit_dataset_sources,
     audit_source_record,
 )
+from historypy.research.source_comparison import (
+    EventSourceComparison,
+    EventSourceEntry,
+    SourceEvidenceExcerpt,
+    compare_event_sources,
+    render_event_source_comparison,
+)
 from historypy.research.source_independence import (
     ClaimSourceIndependenceReport,
     DatasetSourceIndependenceReport,
@@ -78,13 +85,6 @@ from historypy.research.source_independence import (
     SourceDependency,
     analyze_claim_source_independence,
     audit_source_independence,
-)
-from historypy.research.source_comparison import (
-    EventSourceComparison,
-    EventSourceEntry,
-    SourceEvidenceExcerpt,
-    compare_event_sources,
-    render_event_source_comparison,
 )
 from historypy.research.timeline import TimelineEntry, TimelineResult, timeline_for_dataset
 from historypy.research.verification import ClaimAssessment, assess_claim
@@ -101,8 +101,8 @@ __all__ = [
     "DatasetQualityReport",
     "DatasetSearchIndex",
     "DatasetSourceIndependenceReport",
-    "DependencyCluster",
     "DecomposedQuery",
+    "DependencyCluster",
     "EntityAliasMatch",
     "EntityAliasSuggestion",
     "EntityAwareSearchIndex",
