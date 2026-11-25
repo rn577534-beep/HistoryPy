@@ -80,6 +80,8 @@ class SourceDependencyAssertion:
             if not self.reviewed_at:
                 raise ValueError("verified assertions require reviewed_at")
         if self.reviewed_at:
+            if not isinstance(self.reviewed_at, str):
+                raise ValueError("reviewed_at must use YYYY-MM-DD")
             try:
                 parsed = date.fromisoformat(self.reviewed_at)
             except ValueError as exc:
@@ -110,10 +112,13 @@ class SourceDependencyRegistry:
             or not isinstance(dataset_version, str) or not dataset_version.strip()
         ):
             raise ValueError("registry_version and dataset_version cannot be empty")
-        if any(not isinstance(row, SourceDependencyAssertion) for row in assertions):
+        if not isinstance(assertions, (tuple, list)):
+            raise TypeError("assertions must be a tuple or list")
+        rows = tuple(assertions)
+        if any(not isinstance(row, SourceDependencyAssertion) for row in rows):
             raise TypeError("assertions must contain SourceDependencyAssertion records")
         self.dataset = dataset
-        self.assertions = tuple(assertions)
+        self.assertions = rows
         self.registry_version = registry_version
         self.dataset_version = dataset_version
         source_ids = {source.id for source in dataset.sources}
