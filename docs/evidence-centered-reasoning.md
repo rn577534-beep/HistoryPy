@@ -303,6 +303,7 @@ plan_report = pipeline.run_question(
     limit=10,
     direction="both",
     max_path_queries=40,
+    max_explored_states=10000,
 )
 
 for review in plan_report.path_reviews:
@@ -320,8 +321,10 @@ assertions only. Candidate, disputed, and rejected aliases are not promoted.
 Homonyms remain separate candidates and are explicitly marked ambiguous.
 Predicate lexicons are researcher-supplied; detected predicate phrases are
 candidate slots, not automatic ontology assertions. Endpoint pairs generate
-bounded path hypotheses (40 by default, configurable up to 200), and path
-searches remain unfiltered until the researcher confirms the predicate sequence.
+bounded path hypotheses (40 by default, configurable up to 200), and a hard
+exploration budget per endpoint pair (10,000 states by default, configurable
+up to 100,000). Truncated searches are explicitly flagged. Path searches remain
+unfiltered until the researcher confirms the predicate sequence.
 
 Each returned path includes:
 - Per-hop source records, merged from relationship source IDs and linked
