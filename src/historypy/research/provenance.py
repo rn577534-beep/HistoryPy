@@ -57,10 +57,27 @@ def audit_dataset_provenance(dataset: HistoricalDataset) -> DatasetProvenanceRep
     claims_with_evidence = {link.claim_id for link in dataset.evidence}
     sorted_usage = tuple(sorted(usage.items()))
     dependency_pairs: set[tuple[str, str, str]] = set()
-    for source in dataset.sources:
-        for parent_id in source.derived_from_source_ids:
+    derivation = {
+        source.id: tuple(source.derived_from_source_ids)
+        for source in dataset.sources
+    }
+    for source_id, parent_ids in derivation.items():
+        direct_parents = set(parent_ids)
+        for parent_id in parent_ids:
             if parent_id in usage:
-                dependency_pairs.add((source.id, parent_id, "derived_from"))
+                dependency_pairs.add((source_id, parent_id, "derived_from"))
+        visited: set[str] = set()
+        pending = list(parent_ids)
+        while pending:
+            ancestor_id = pending.pop()
+            if ancestor_id in visited or ancestor_id == source_id:
+                continue
+            visited.add(ancestor_id)
+            if ancestor_id in usage and ancestor_id not in direct_parents:
+                dependency_pairs.add((
+                    source_id, ancestor_id, "derived_from_transitively"
+                ))
+            pending.extend(derivation.get(ancestor_id, ()))
     group_members: dict[str, list[str]] = {}
     for source in dataset.sources:
         for group_id in source.shared_evidence_group_ids:
