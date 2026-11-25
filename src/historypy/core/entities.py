@@ -166,14 +166,15 @@ class HistoricalRelationship:
             raise ValueError("confidence must be a number between 0.0 and 1.0")
         _validate_ids(self.source_ids, "source_ids")
         _validate_ids(self.claim_ids, "claim_ids")
-        if self.valid_from and self.valid_to:
-            if (
-                self.valid_from.calendar == self.valid_to.calendar
-                and self.valid_from.calendar != "unspecified"
-            ):
-                start_bounds = self.valid_from._comparison_bounds()
-                end_bounds = self.valid_to._comparison_bounds()
-                start = start_bounds[0] or start_bounds[1]
-                end = end_bounds[1] or end_bounds[0]
-                if start is not None and end is not None and start > end:
-                    raise ValueError("valid_from cannot be later than valid_to")
+        if (
+            self.valid_from
+            and self.valid_to
+            and self.valid_from.calendar == self.valid_to.calendar
+            and self.valid_from.calendar != "unspecified"
+        ):
+            start_bounds = self.valid_from._comparison_bounds()
+            end_bounds = self.valid_to._comparison_bounds()
+            start = start_bounds[0] or start_bounds[1]
+            end = end_bounds[1] or end_bounds[0]
+            if start is not None and end is not None and start > end:
+                raise ValueError("valid_from cannot be later than valid_to")
