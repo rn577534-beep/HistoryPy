@@ -64,6 +64,13 @@ from historypy.research.quality import (
     assess_dataset_quality,
 )
 from historypy.research.query import SearchHit, events_overlapping, search_dataset
+from historypy.research.relationship_paths import (
+    RelationshipPath,
+    RelationshipPathQuery,
+    RelationshipPathSearchReport,
+    RelationshipPathStep,
+    find_relationship_paths,
+)
 from historypy.research.report import render_claim_report
 from historypy.research.search_index import DatasetSearchIndex
 from historypy.research.semantic import SemanticSearchHit, SemanticSearchIndex
@@ -120,6 +127,10 @@ __all__ = [
     "MetricObservation",
     "PlaceDistance",
     "QualityFinding",
+    "RelationshipPath",
+    "RelationshipPathQuery",
+    "RelationshipPathSearchReport",
+    "RelationshipPathStep",
     "ResearchAction",
     "ResearchFacets",
     "ResearchPipeline",
@@ -154,6 +165,7 @@ __all__ = [
     "events_overlapping",
     "evidence_for_claim",
     "execute_research_query",
+    "find_relationship_paths",
     "great_circle_distance_km",
     "places_within_radius",
     "profile_dataset",
