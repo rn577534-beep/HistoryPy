@@ -1,3 +1,5 @@
+import pytest
+
 from historypy import (
     EvidenceLink,
     HistoricalClaim,
