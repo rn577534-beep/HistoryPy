@@ -1,9 +1,10 @@
 import pytest
 
-from historypy import HistoricalDataset, SourceRecord
-from historypy.research.source_dependency_registry import (
+from historypy import (
+    HistoricalDataset,
     SourceDependencyAssertion,
     SourceDependencyRegistry,
+    SourceRecord,
 )
 from historypy.research.source_independence import analyze_source_set_independence
 
