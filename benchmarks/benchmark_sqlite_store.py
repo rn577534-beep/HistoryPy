@@ -48,6 +48,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--records", type=int, default=100_000)
     parser.add_argument("--journal-mode", choices=("DELETE", "WAL"), default="DELETE")
+    parser.add_argument("--output", type=Path, help="Optional JSON report path")
     args = parser.parse_args()
     if args.records < 1:
         parser.error("--records must be positive")
@@ -104,7 +105,10 @@ def main() -> None:
             "process_peak_rss_mib": round(peak_rss_mib(), 3),
             "query_results_verified_after_reopen": True,
         }
-        print(json.dumps(report, indent=2, sort_keys=True))
+        rendered = json.dumps(report, indent=2, sort_keys=True)
+        if args.output:
+            args.output.write_text(rendered + "\\n", encoding="utf-8")
+        print(rendered)
 
 
 if __name__ == "__main__":
