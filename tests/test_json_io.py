@@ -5,9 +5,11 @@ import pytest
 from historypy import (
     EvidenceLink,
     HistoricalClaim,
+    HistoricalCivilization,
     HistoricalDataset,
     HistoricalDate,
     HistoricalEvent,
+    HistoricalOrganization,
     HistoricalPerson,
     HistoricalPlace,
     HistoricalRelationship,
@@ -120,3 +122,34 @@ def test_json_schema_header_is_explicit():
     payload = json.loads(dataset_to_json(HistoricalDataset()))
     assert payload["schema"] == "historypy.dataset"
     assert payload["schema_version"] == 1
+
+
+def test_multilingual_aliases_round_trip_for_all_entity_types():
+    original = HistoricalDataset(
+        people=(
+            HistoricalPerson("p1", "Alexander III", aliases=("Iskandar",)),
+        ),
+        places=(
+            HistoricalPlace("l1", "Constantinople", aliases=("Byzantium",)),
+        ),
+        civilizations=(
+            HistoricalCivilization(
+                "c1", "Byzantine Empire",
+                aliases=("Eastern Roman Empire", "Βυζαντινή Αυτοκρατορία"),
+            ),
+        ),
+        organizations=(
+            HistoricalOrganization(
+                "o1", "League of Nations",
+                aliases=("Société des Nations", "国際連盟"),
+            ),
+        ),
+    )
+    restored = dataset_from_json(dataset_to_json(original))
+    assert restored == original
+    assert restored.civilizations[0].aliases == (
+        "Eastern Roman Empire", "Βυζαντινή Αυτοκρατορία"
+    )
+    assert restored.organizations[0].aliases == (
+        "Société des Nations", "国際連盟"
+    )
