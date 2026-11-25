@@ -14,7 +14,7 @@ import time
 import tracemalloc
 from pathlib import Path
 
-from historypy import HistoricalDataset, HistoricalEvent, HistoricalDate, NormalizedSQLiteStore
+from historypy import HistoricalDataset, HistoricalDate, HistoricalEvent, NormalizedSQLiteStore
 
 
 def build_dataset(count: int) -> HistoricalDataset:
