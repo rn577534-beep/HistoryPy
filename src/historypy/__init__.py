@@ -24,6 +24,9 @@ from historypy.graph import (
 )
 from historypy.integrations import (
     AggregationReport,
+    AliasAssertion,
+    AliasMatch,
+    AliasRegistry,
     DuplicateCandidateGroup,
     EuropeanaSearch,
     ExternalRecord,
@@ -135,6 +138,9 @@ __version__ = "1.0.0"
 
 __all__ = [
     "AggregationReport",
+    "AliasAssertion",
+    "AliasMatch",
+    "AliasRegistry",
     "BM25SearchHit",
     "BM25SearchIndex",
     "CitationCompletenessReport",
