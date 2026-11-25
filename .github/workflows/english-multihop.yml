@@ -31,8 +31,9 @@ jobs:
       - name: Download official HotpotQA development set
         run: |
           curl --fail --location --retry 3 \
-            http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_dev_distractor_v1.json \
+            https://huggingface.co/datasets/namlh2004/hotpotqa/resolve/7e54db4656209750ff487f6fdf8e39a66dba136b/hotpot_dev_distractor_v1.json \
             --output hotpot_dev_distractor_v1.json
+          echo "e3da074df24e8369009918aa5cdbdd254dadcde4c63f7569d36afd6f2268caa8  hotpot_dev_distractor_v1.json" | sha256sum --check
       - name: Evaluate English multi-hop retrieval
         run: |
           python benchmarks/benchmark_hotpotqa_retrieval.py \
