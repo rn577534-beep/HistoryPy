@@ -212,7 +212,6 @@ class NormalizedSQLiteStore:
         if not isinstance(name, str) or not name.strip():
             raise ValueError("dataset name cannot be empty")
         dataset.require_valid()
-        payload = dataset_to_dict(dataset)
         with closing(self._connect()) as connection, connection:
             if self._fts5_available:
                 connection.execute(
@@ -225,11 +224,10 @@ class NormalizedSQLiteStore:
                    VALUES (?, ?, ?, ?)""",
                 (
                     name, SCHEMA_NAME, SCHEMA_VERSION,
-                    json.dumps(payload["metadata"], ensure_ascii=False, sort_keys=True),
+                    json.dumps(dict(dataset.metadata), ensure_ascii=False, sort_keys=True),
                 ),
             )
-            for kind in _RECORD_KINDS:
-                for index, record in enumerate(payload[kind]):
+            for kind, index, record in iter_dataset_records(dataset):
                     record_id = _record_id(kind, record, index)
                     start, end, calendar = _year_bounds(record)
                     serialized = json.dumps(
