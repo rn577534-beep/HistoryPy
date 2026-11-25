@@ -9,7 +9,8 @@ from dataclasses import dataclass
 from typing import Literal
 
 from historypy.core.dataset import HistoricalDataset
-from historypy.core.models import HistoricalDate, HistoricalRelationship
+from historypy.core.entities import HistoricalRelationship
+from historypy.core.models import HistoricalDate
 from historypy.graph.relationships import Direction, RelationshipGraph
 
 Traversal = Literal["forward", "reverse"]
