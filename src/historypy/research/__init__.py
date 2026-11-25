@@ -73,8 +73,8 @@ from historypy.research.question_planner import (
     QuestionPlan,
     TemporalPathSelection,
     execute_question_plan,
-    select_paths_by_temporal_policy,
     plan_research_question,
+    select_paths_by_temporal_policy,
 )
 from historypy.research.relationship_paths import (
     RelationshipPath,
