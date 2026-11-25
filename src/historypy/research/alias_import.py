@@ -94,17 +94,30 @@ def import_wikidata_alias_candidates(
         if not isinstance(aliases_by_language, dict):
             raise TypeError(f"aliases for {qid} must be a language mapping")
         entity_kind, entity_id = entity_mapping[qid]
-        source_id = f"wikidata-{qid.lower()}"
-        source_url = f"https://www.wikidata.org/wiki/{qid}"
+        revision = item.get("lastrevid")
+        if revision is not None and (
+            not isinstance(revision, int) or isinstance(revision, bool) or revision < 1
+        ):
+            raise ValueError(f"lastrevid for {qid} must be a positive integer")
+        revision_label = f"r{revision}" if revision is not None else "current"
+        source_id = f"wikidata-{qid.lower()}-{revision_label}"
+        source_url = (
+            f"https://www.wikidata.org/w/index.php?title={qid}&oldid={revision}"
+            if revision is not None else f"https://www.wikidata.org/wiki/{qid}"
+        )
         source = SourceRecord(
             id=source_id,
-            title=f"Wikidata item {qid}",
+            title=(
+                f"Wikidata item {qid} revision {revision}"
+                if revision is not None else f"Wikidata item {qid}"
+            ),
             source_type="other",
             publisher="Wikimedia Foundation",
             url=source_url,
             notes=(
                 "Structured-data alias export; imported as candidate assertions only. "
-                "No alias is researcher-verified by this import."
+                "No alias is researcher-verified by this import. "
+                f"Export revision: {revision_label}."
             ),
         )
         if source_id in existing_sources:
@@ -120,7 +133,9 @@ def import_wikidata_alias_candidates(
             if language not in allowed_languages:
                 continue
             for alias in _alias_values(raw_aliases):
-                identity = chr(31).join((qid, entity_kind, entity_id, language, alias))
+                identity = chr(31).join((
+                    qid, revision_label, entity_kind, entity_id, language, alias,
+                ))
                 alias_id = "wd-" + hashlib.sha256(identity.encode("utf-8")).hexdigest()[:24]
                 assertions[alias_id] = AliasAssertion(
                     alias_id=alias_id,
@@ -130,7 +145,7 @@ def import_wikidata_alias_candidates(
                     language=language,
                     alias_type="other",
                     source_id=source_id,
-                    locator=f"{qid}/aliases/{language}",
+                    locator=f"{qid}/{revision_label}/aliases/{language}",
                     license="CC0-1.0",
                     review_status="candidate",
                     script=_SCRIPT_BY_LANGUAGE[language],
