@@ -514,3 +514,33 @@ the SQLite index's isolated memory footprint.
 The latest standard CI run for the same commit passed all tests and Ruff on
 Python 3.10–3.13:
 https://github.com/rn577534-beep/HistoryPy/actions/runs/45531375694.
+
+
+## Latest SQLite DELETE/WAL repeat (2026-11-25)
+
+The latest repeat used the streaming writer on the same GitHub Actions
+Python 3.12 runner family (run:
+https://github.com/rn577534-beep/HistoryPy/actions/runs/45531375803).
+All four 100k/1m × DELETE/WAL jobs completed successfully. FTS5 was available
+in every job, each SQLite integrity check returned `ok`, and selective-query
+record IDs were identical after closing and reopening the database.
+
+| Records | Journal | Save | Traced Python allocation peak during save | Process peak RSS | Selective query | Broad query (top 1,000) | Database |
+|---:|---|---:|---:|---:|---:|---:|---:|
+| 100,000 | DELETE | 15.167 s | 17.171 MiB | 94.695 MiB | 2.211 ms | 198.137 ms | 84.637 MiB |
+| 100,000 | WAL | 11.699 s | 17.171 MiB | 94.559 MiB | 2.279 ms | 150.048 ms | 84.637 MiB |
+| 1,000,000 | DELETE | 156.713 s | 137.338 MiB | 648.090 MiB | 7.012 ms | 2,010.292 ms | 845.113 MiB |
+| 1,000,000 | WAL | 128.640 s | 137.338 MiB | 648.062 MiB | 6.990 ms | 1,486.954 ms | 845.113 MiB |
+
+Both WAL checkpoints returned `(0, 0, 0)`. The 1M database file is about
+845 MiB; the measured 648 MiB process peak is lower than the file size because
+the database is written to disk and the process RSS is not the database's
+resident file size. The source dataset remains resident in Python during the
+benchmark. These results differ from earlier runs, illustrating runner and
+workload variability: neither DELETE nor WAL is universally faster. Choose
+journal mode for concurrency and operational requirements, then benchmark
+with the target filesystem and workload.
+
+Each SQLite workflow job now uploads its machine-readable JSON report as an
+artifact, in addition to printing the report in the job log. This makes later
+comparisons reproducible without scraping console output.
