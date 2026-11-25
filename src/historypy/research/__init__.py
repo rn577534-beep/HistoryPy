@@ -168,6 +168,7 @@ __all__ = [
     "TimelineResult",
     "analyze_claim_evidence",
     "analyze_claim_source_independence",
+    "analyze_source_set_independence",
     "append_research_action",
     "assess_claim",
     "assess_dataset_quality",
