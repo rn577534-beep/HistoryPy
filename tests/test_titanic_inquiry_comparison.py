@@ -1,4 +1,4 @@
-from examples.titanic_inquiry_comparison import build_titanic_inquiry_dataset
+from historypy.examples.titanic_inquiry_comparison import build_titanic_inquiry_dataset
 from historypy import render_event_source_comparison
 
 
