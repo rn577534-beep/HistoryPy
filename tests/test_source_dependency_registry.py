@@ -127,3 +127,17 @@ def test_shared_group_metadata_is_required_only_for_shared_dependency_types():
         "page 1", "CC0",
     )
     assert assertion.shared_group_id is None
+
+
+def test_registry_rejects_non_string_review_date_and_non_sequence_assertions():
+    with pytest.raises(ValueError, match="reviewed_at"):
+        SourceDependencyAssertion(
+            "a1", "s1", "s2", "derived_from", "s3",
+            "page 1", "CC0", review_status="verified",
+            reviewer="reviewer-1", reviewed_at=20261125,
+        )
+    with pytest.raises(TypeError, match="tuple or list"):
+        SourceDependencyRegistry(
+            _dataset(), iter(()),
+            registry_version="v1", dataset_version="d1",
+        )
