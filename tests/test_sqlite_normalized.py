@@ -3,9 +3,13 @@ import pytest
 from historypy import (
     EvidenceLink,
     HistoricalClaim,
+    HistoricalCivilization,
     HistoricalDataset,
     HistoricalDate,
     HistoricalEvent,
+    HistoricalOrganization,
+    HistoricalPerson,
+    HistoricalPlace,
     SourceRecord,
     SQLiteMaintenanceStats,
 )
@@ -236,3 +240,26 @@ def test_normalized_store_wal_backup_and_maintenance(tmp_path):
 
     with pytest.raises(ValueError, match="must differ"):
         store.backup_to(database)
+
+
+def test_normalized_sqlite_preserves_multilingual_entity_aliases(tmp_path):
+    dataset = HistoricalDataset(
+        people=(HistoricalPerson("p1", "Alexander III", aliases=("Iskandar",)),),
+        places=(HistoricalPlace("l1", "Constantinople", aliases=("Byzantium",)),),
+        civilizations=(
+            HistoricalCivilization(
+                "c1", "Byzantine Empire",
+                aliases=("Eastern Roman Empire", "Βυζαντινή Αυτοκρατορία"),
+            ),
+        ),
+        organizations=(
+            HistoricalOrganization(
+                "o1", "League of Nations",
+                aliases=("Société des Nations", "国際連盟"),
+            ),
+        ),
+    )
+    store = NormalizedSQLiteStore(tmp_path / "aliases.sqlite", journal_mode="WAL")
+    store.save("aliases", dataset)
+    restored = store.load("aliases")
+    assert restored == dataset
