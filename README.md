@@ -924,3 +924,22 @@ Each step retains its relationship ID, predicate, original direction, source
 IDs, and validity dates. Unsourced edges are flagged. Paths are structural
 hypotheses, not automatic historical conclusions; time-window compatibility
 and free-text question planning remain explicit future steps.
+
+
+### Compare decomposition on French and English multi-hop retrieval
+
+A paired held-out benchmark compares full-query hybrid retrieval against
+decomposition-enabled hybrid retrieval on French HistoriQA and English
+HotpotQA. It reports Recall@10 and MRR@10 before and after decomposition, with
+per-language deltas and an equal-weight language macro-average.
+
+```bash
+python benchmarks/benchmark_multilingual_decomposition.py \
+  --french-corpus path/to/french_corpus.jsonl \
+  --french-questions path/to/french_questions.jsonl \
+  --english-hotpotqa path/to/hotpotqa.json \
+  --top-k 10 \
+  --output multilingual_decomposition_report.json
+```
+
+No benchmark numbers are hard-coded: run it with the actual corpus files.
