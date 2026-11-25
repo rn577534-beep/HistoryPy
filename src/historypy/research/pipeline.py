@@ -25,6 +25,12 @@ from historypy.research.evidence_analysis import (
     analyze_claim_evidence,
 )
 from historypy.research.query import SearchHit
+from historypy.research.alias_registry import AliasRegistry
+from historypy.research.question_planner import (
+    QuestionExecutionReport,
+    execute_question_plan,
+    plan_research_question,
+)
 from historypy.research.semantic import EmbeddingBatch, SemanticSearchHit, SemanticSearchIndex
 
 
@@ -115,6 +121,32 @@ class ResearchPipeline:
         self.embedder = embedder
         self.providers = tuple(providers)
         self.max_workers = max_workers
+
+    def run_question(
+        self,
+        question: str,
+        *,
+        alias_registry: AliasRegistry | None = None,
+        predicate_lexicon: dict[str, tuple[str, ...]] | None = None,
+        max_hops: int = 3,
+        limit: int = 10,
+        direction: str = "both",
+    ) -> QuestionExecutionReport:
+        """Plan and execute a reviewable entity/relationship multi-hop question.
+
+        Exact canonical names and verified aliases only are used for entity
+        candidates. The returned paths are not a generated historical answer.
+        """
+        plan = plan_research_question(
+            self.dataset,
+            question,
+            alias_registry=alias_registry,
+            predicate_lexicon=predicate_lexicon,
+            max_hops=max_hops,
+            limit=limit,
+            direction=direction,
+        )
+        return execute_question_plan(self.dataset, plan)
 
     def run(
         self,
