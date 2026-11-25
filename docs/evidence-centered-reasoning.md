@@ -202,3 +202,46 @@ The registry is intentionally separate from the lightweight legacy alias
 index. Integration into retrieval will preserve each alias assertion's review
 state and citation rather than flattening verified, candidate, and disputed
 forms into one undifferentiated string list.
+
+
+## 10. Implemented entity/relationship multi-hop path planner
+
+`historypy.research.relationship_paths` adds a bounded path engine over
+canonical entity IDs and typed `HistoricalRelationship` records:
+
+- Explicit start/end entity IDs; no guessed entity resolution from raw text.
+- Per-hop predicate constraints, optional wildcard hops, and outgoing,
+  incoming, or bidirectional traversal.
+- Bounded simple paths (1–12 hops) and result limits (1–500).
+- Every path step retains the original relationship ID, subject, predicate,
+  object, traversal direction, source IDs, and validity dates.
+- Relationships without source IDs are surfaced as evidence gaps.
+- Search reports include explored-state counts and a truncation flag.
+- Reverse traversal never rewrites the original subject/object direction.
+
+Example:
+
+```python
+from historypy import RelationshipPathQuery, find_relationship_paths
+
+report = find_relationship_paths(
+    dataset,
+    RelationshipPathQuery(
+        start_entity_id="person-001",
+        end_entity_id="place-001",
+        max_hops=3,
+        predicates=("member_of", None, "located_in"),
+        direction="outgoing",
+    ),
+)
+for path in report.paths:
+    print(path.entity_ids, path.source_ids)
+    print(path.relationships_missing_sources)
+```
+
+This is a structural path hypothesis, not proof that all edges are true,
+temporally compatible, or causally connected. Validity intervals are retained
+for downstream temporal review; the initial path planner does not yet enforce
+a shared time window or automatically attach claim-level evidence obligations.
+Free-text question parsing into entity and predicate slots remains a separate,
+reviewable planning step.
