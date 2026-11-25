@@ -1,0 +1,59 @@
+name: Multilingual semantic retrieval benchmark
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/benchmark_semantic_embedder.py"
+      - "benchmarks/benchmark_hybrid_retrieval.py"
+      - "src/historypy/research/semantic.py"
+      - "src/historypy/research/hybrid.py"
+      - "pyproject.toml"
+      - ".github/workflows/semantic-relevance.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: historypy-semantic-relevance
+  cancel-in-progress: true
+
+jobs:
+  semantic-relevance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install optional CPU semantic dependencies
+        run: python -m pip install -e ".[semantic]"
+      - name: Download pinned HistoriQA corpus
+        run: |
+          curl --fail --location --retry 3 \
+            https://raw.githubusercontent.com/atomegoyan/historiqa-thirdrepublic/08bf3cc5f25ae5cd065ce8330f4275147081ab66/dataset/corpus_dataset.jsonl \
+            --output corpus_dataset.jsonl
+          curl --fail --location --retry 3 \
+            https://raw.githubusercontent.com/atomegoyan/historiqa-thirdrepublic/08bf3cc5f25ae5cd065ce8330f4275147081ab66/dataset/question_dataset.jsonl \
+            --output question_dataset.jsonl
+      - name: Compare real multilingual semantic retrieval
+        env:
+          TOKENIZERS_PARALLELISM: "false"
+          HF_HUB_DISABLE_TELEMETRY: "1"
+        run: |
+          python benchmarks/benchmark_hybrid_retrieval.py \
+            --corpus corpus_dataset.jsonl \
+            --questions question_dataset.jsonl \
+            --top-k 10 \
+            --semantic-embedder benchmark_semantic_embedder:embed_texts \
+            --semantic-model-id sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 \
+            --output semantic-retrieval-report.json
+      - name: Upload semantic retrieval report
+        uses: actions/upload-artifact@v4
+        with:
+          name: historypy-semantic-retrieval-report
+          path: semantic-retrieval-report.json
+          if-no-files-found: error
