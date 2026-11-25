@@ -57,3 +57,32 @@ embedder is not evidence of semantic quality.
 - RRF combines ranks, not calibrated probabilities.
 - Semantic quality depends on the selected model, language, domain, and corpus.
 - Retrieval relevance is not source reliability or historical truth.
+
+## Relevance benchmark
+
+Use `benchmarks/benchmark_hybrid_retrieval.py` with the pinned HistoriQA
+corpus and question JSONL files to compare trigram, BM25, and lexical hybrid
+RRF on the same questions:
+
+~~~bash
+python benchmarks/benchmark_hybrid_retrieval.py \
+  --corpus corpus_dataset.jsonl \
+  --questions question_dataset.jsonl \
+  --top-k 10 \
+  --output hybrid-relevance.json
+~~~
+
+To add a real embedding model, provide an importable callable that accepts a
+sequence of strings and returns one vector per string, plus a stable model ID:
+
+~~~bash
+python benchmarks/benchmark_hybrid_retrieval.py \
+  --corpus corpus_dataset.jsonl \
+  --questions question_dataset.jsonl \
+  --semantic-embedder my_embeddings:embed_texts \
+  --semantic-model-id provider/model-version
+~~~
+
+No semantic benchmark score is published until an actual model/provider is
+chosen and the evaluation is run. Do not substitute a toy fixture embedder
+for a real semantic relevance result.
