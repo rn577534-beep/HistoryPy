@@ -923,7 +923,7 @@ for path in report.paths:
 Each step retains its relationship ID, predicate, original direction, source
 IDs, and validity dates. Unsourced edges are flagged. Paths are structural
 hypotheses, not automatic historical conclusions; time-window compatibility
-and free-text question planning remain explicit future steps.
+and free-text question planning are available as review-only workflows.
 
 
 ### Compare decomposition on French and English multi-hop retrieval
@@ -1002,3 +1002,6 @@ verified status, alias IDs, source references, and citation locators.
 
 Use `entity_language="fr"`, `"en"`, or another valid language tag to scope
 verified registry aliases while keeping canonical entity-name matching.
+
+
+Multi-hop question reviews also report claim-level contradictions, unsupported claims, missing locators, and a conservative path evidence status (`conflicting`, `contradicted`, `supported`, or `insufficient`). A contradicted hop cannot be masked by support on another hop; these labels summarize recorded evidence links and are not historical truth verdicts.
