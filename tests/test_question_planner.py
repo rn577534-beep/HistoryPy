@@ -346,3 +346,30 @@ def test_temporal_policy_excludes_known_conflicts_but_retains_unknown_by_choice(
     assert all(row.temporal_status != "incompatible" for row in selection.selected_reviews)
     assert len(selection.excluded_incompatible) == 2
     assert selection.excluded_unknown == ()
+
+
+def test_relationship_without_claim_link_is_an_explicit_evidence_gap():
+    base = _dataset()
+    relationships = tuple(
+        replace(row, claim_ids=()) if row.id == "r3" else row
+        for row in base.relationships
+    )
+    dataset = HistoricalDataset(
+        sources=base.sources,
+        people=base.people,
+        claims=base.claims,
+        evidence=base.evidence,
+        relationships=relationships,
+    )
+    report = execute_question_plan(
+        dataset, plan_research_question(
+            dataset, "Ada Lovelace and Mary Somerville", max_hops=2
+        )
+    )
+    direct = next(
+        row for row in report.path_reviews
+        if row.path.entity_ids == ("p1", "p3")
+    )
+    assert direct.evidence_status == "insufficient"
+    assert direct.hops[0].missing_claim_link
+    assert any("no explicitly linked claim-level evidence" in warning for warning in report.warnings)
