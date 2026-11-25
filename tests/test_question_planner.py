@@ -1,4 +1,5 @@
 import pytest
+from dataclasses import replace
 
 from historypy import (
     AliasAssertion,
@@ -13,6 +14,7 @@ from historypy import (
     SourceRecord,
     execute_question_plan,
     plan_research_question,
+    select_paths_by_temporal_policy,
 )
 from historypy.research.source_independence import analyze_source_set_independence
 
@@ -297,3 +299,49 @@ def test_path_status_fails_closed_when_one_hop_is_contradicted():
     assert indirect.evidence_status == "contradicted"
     assert indirect.contradicted_claim_ids == ("c1",)
     assert indirect.unsupported_claim_ids == ("c1",)
+
+
+def test_temporal_policy_requires_explicit_unknown_date_behavior():
+    base = _dataset()
+    relationships = tuple(
+        replace(row, valid_from=None, valid_to=None) if row.id == "r2" else row
+        for row in base.relationships
+    )
+    dataset = HistoricalDataset(
+        sources=base.sources,
+        people=base.people,
+        claims=base.claims,
+        evidence=base.evidence,
+        relationships=relationships,
+    )
+    report = execute_question_plan(
+        dataset, plan_research_question(
+            dataset, "Ada Lovelace and Mary Somerville", max_hops=2
+        )
+    )
+    selection = select_paths_by_temporal_policy(
+        report.path_reviews, policy="exclude_incompatible"
+    )
+    assert len(selection.selected_reviews) == 2
+    assert len(selection.excluded_unknown) == 0
+
+    strict = select_paths_by_temporal_policy(
+        report.path_reviews, policy="compatible_only"
+    )
+    assert len(strict.selected_reviews) == 1
+    assert len(strict.excluded_unknown) == 1
+    assert strict.excluded_unknown[0].temporal_status == "unknown"
+
+
+def test_temporal_policy_excludes_known_conflicts_but_retains_unknown_by_choice():
+    report = execute_question_plan(
+        _dataset(), plan_research_question(
+            _dataset(), "Ada Lovelace and Mary Somerville", max_hops=2
+        )
+    )
+    selection = select_paths_by_temporal_policy(
+        report.path_reviews, policy="exclude_incompatible"
+    )
+    assert all(row.temporal_status != "incompatible" for row in selection.selected_reviews)
+    assert len(selection.excluded_incompatible) == 1
+    assert selection.excluded_unknown == ()
