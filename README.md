@@ -957,6 +957,7 @@ report = ResearchPipeline(dataset).run_question(
     max_hops=3,
     direction="both",
     max_path_queries=40,
+    max_explored_states=10000,
 )
 for review in report.path_reviews:
     print(review.path.entity_ids)
