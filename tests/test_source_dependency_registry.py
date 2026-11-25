@@ -1,6 +1,8 @@
 import pytest
 
 from historypy import (
+    EvidenceLink,
+    HistoricalClaim,
     HistoricalDataset,
     SourceDependencyAssertion,
     SourceDependencyRegistry,
@@ -140,3 +142,35 @@ def test_registry_rejects_non_string_review_date_and_non_sequence_assertions():
             _dataset(), iter(()),
             registry_version="v1", dataset_version="d1",
         )
+
+
+def test_registry_audits_claim_evidence_using_verified_source_genealogy():
+    dataset = HistoricalDataset(
+        sources=_dataset().sources,
+        claims=(HistoricalClaim("c1", "A sample historical claim."),),
+        evidence=(
+            EvidenceLink("c1", "s2", "supports", locator="page 1"),
+            EvidenceLink("c1", "s3", "supports", locator="page 2"),
+        ),
+    )
+    registry = SourceDependencyRegistry(
+        dataset,
+        (
+            SourceDependencyAssertion(
+                "a1", "s2", "s1", "derived_from", "s3",
+                "entry 1", "CC0", review_status="verified",
+                reviewer="reviewer-1", reviewed_at="2026-11-25",
+            ),
+            SourceDependencyAssertion(
+                "a2", "s1", "s3", "shared_witness", "s3",
+                "entry 2", "CC0", review_status="verified",
+                shared_group_id="witness:1",
+                reviewer="reviewer-1", reviewed_at="2026-11-25",
+            ),
+        ),
+        registry_version="v1",
+        dataset_version="d1",
+    )
+    report = registry.audit_claim("c1")
+    assert report.status == "known_dependence"
+    assert report.evidence_source_ids == ("s2", "s3")
