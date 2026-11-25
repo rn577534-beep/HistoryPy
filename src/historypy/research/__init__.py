@@ -71,7 +71,9 @@ from historypy.research.question_planner import (
     QuestionExecutionReport,
     QuestionPathReview,
     QuestionPlan,
+    TemporalPathSelection,
     execute_question_plan,
+    select_paths_by_temporal_policy,
     plan_research_question,
 )
 from historypy.research.relationship_paths import (
@@ -145,6 +147,7 @@ __all__ = [
     "QuestionExecutionReport",
     "QuestionPathReview",
     "QuestionPlan",
+    "TemporalPathSelection",
     "RelationshipPath",
     "RelationshipPathQuery",
     "RelationshipPathSearchReport",
@@ -195,6 +198,7 @@ __all__ = [
     "render_event_source_comparison",
     "render_research_report",
     "search_dataset",
+    "select_paths_by_temporal_policy",
     "suggest_entity_matches",
     "summarize_claim_evidence",
     "timeline_for_dataset",
