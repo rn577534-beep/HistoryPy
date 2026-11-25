@@ -1,13 +1,15 @@
 import runpy
+import sys
 from pathlib import Path
 
-benchmark = runpy.run_path(
-    str(Path(__file__).parents[1] / "benchmarks" / "benchmark_historian_relevance.py")
-)
+benchmark_dir = Path(__file__).parents[1] / "benchmarks"
+sys.path.insert(0, str(benchmark_dir))
+benchmark = runpy.run_path(str(benchmark_dir / "benchmark_historian_relevance.py"))
+hybrid_benchmark = runpy.run_path(str(benchmark_dir / "benchmark_hybrid_retrieval.py"))
 build_historypy_dataset = benchmark["build_historypy_dataset"]
 evaluate = benchmark["evaluate"]
 resolve_gold_ids = benchmark["resolve_gold_ids"]
-stratified_holdout = benchmark["stratified_holdout"]
+stratified_holdout = hybrid_benchmark["stratified_holdout"]
 from historypy import DatasetSearchIndex
 
 
