@@ -1005,3 +1005,35 @@ verified registry aliases while keeping canonical entity-name matching.
 
 
 Multi-hop question reviews also report claim-level contradictions, unsupported claims, missing locators, and a conservative path evidence status (`conflicting`, `contradicted`, `supported`, or `insufficient`). A contradicted hop cannot be masked by support on another hop; these labels summarize recorded evidence links and are not historical truth verdicts.
+
+
+### Researcher-reviewed source genealogy
+
+Use `SourceDependencyRegistry` to store cited, versioned dependency assertions for derivation, shared witnesses, shared archival records, syndication, and shared datasets. Only `verified` assertions affect independence analysis; candidate, disputed, and rejected assertions remain inert.
+
+```python
+registry = SourceDependencyRegistry(
+    dataset,
+    [SourceDependencyAssertion(
+        assertion_id="genealogy-001",
+        source_id="report-2",
+        related_source_id="witness-1",
+        dependency_type="derived_from",
+        evidence_source_id="catalogue-1",
+        locator="entry 42",
+        license="CC-BY-4.0",
+        review_status="verified",
+        reviewer="researcher-1",
+        reviewed_at="2026-11-25",
+    )],
+    registry_version="genealogy-1",
+    dataset_version="dataset-1",
+)
+report = registry.audit_source_set(["report-2", "witness-1"])
+```
+
+The registry keeps the citation and review history separate from the applied dataset snapshot. It does not assign source credibility or determine historical truth.
+
+### Multilingual alias candidate imports
+
+`import_wikidata_alias_candidates` accepts a Wikidata JSON export plus an explicit QID-to-canonical-entity mapping. It imports Bengali, English, and French aliases as `candidate` assertions only, with CC0 metadata and revision-pinned locators when `lastrevid` is available. Human review against appropriate independent sources is required before verification.
