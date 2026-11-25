@@ -247,8 +247,8 @@ On this corpus the simple lexical RRF did not improve over BM25 and was slower.
 This is an important negative result: combining ranked lists does not guarantee
 better relevance. The current benchmark workflow additionally evaluates
 French-aware query decomposition; its results are reported separately when
-that run completes. No real semantic embedding model has yet been selected,
-so semantic metrics are intentionally absent.
+that run completes. A real multilingual sentence-transformer model is now evaluated in the
+separate semantic workflow and in the held-out results below.
 
 
 ## Held-out question evaluation
@@ -442,7 +442,10 @@ in WAL. On this single-writer synthetic workload DELETE was faster. WAL is
 therefore an opt-in concurrency mode, not a default speed optimization.
 
 The test suite also exercises four simultaneous writers using separate store
-instances and checks transaction rollback/reopen behavior. These are
+instances, checks transaction rollback/reopen behavior, and verifies a
+consistent online backup from a WAL database. The store now exposes
+`maintenance_stats()`, `optimize()`, and `backup_to()`; the backup is
+verified with SQLite `integrity_check`. These are
 application-level concurrency and rollback tests, not physical power-loss
 fault injection or months-long database maintenance tests. Production
 deployments still need backups, checkpoint monitoring, disk-space alerts,
