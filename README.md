@@ -111,6 +111,25 @@ conflicts = claims_with_conflicting_evidence(dataset)
 
 Evidence summaries count linked sources and relationships; they are not automated credibility scores. The library does not independently authenticate sources or decide historical truth. Multiple sources repeating one earlier account are not automatically independent corroboration.
 
+## Source independence audit
+
+HistoryPy can now group evidence sources that have **recorded** common origins. The audit follows direct and transitive `derived_from_source_ids` links and shared `shared_evidence_group_ids`. It also retains intermediate source records as bridge nodes when they connect two sources cited for the same claim.
+
+```python
+from historypy import analyze_claim_source_independence, audit_source_independence
+
+claim_report = analyze_claim_source_independence(dataset, "claim-001")
+print(claim_report.status)
+print(claim_report.dependent_clusters)
+print(claim_report.unknown_source_ids)
+
+dataset_report = audit_source_independence(dataset)
+print(dataset_report.claims_with_known_dependence)
+print(dataset_report.claims_with_unknown_dependence)
+```
+
+Statuses distinguish `known_dependence`, `known_dependence_and_unknown`, `dependence_unknown`, `single_source_dependence_unknown`, and `no_evidence`. A source without a documented dependency path is **unknown**, not independent. The audit does not infer independence from different publishers, URLs, titles, or source types. Record shared witnesses, syndicated dispatches, and common archival documents in the source genealogy metadata; otherwise the relationship cannot be detected. This report is a provenance aid, not a source-credibility or historical-truth score.
+
 ## Source metadata audit
 
 `audit_dataset_sources(dataset)` reports which recommended catalogue fields are present or absent for each source record. It checks creator, publication date, publisher, language, a URL or archival reference, and access date. Missing fields are catalogue gaps, not evidence that a source is unreliable or false.
