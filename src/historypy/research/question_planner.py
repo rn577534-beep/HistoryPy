@@ -9,7 +9,7 @@ from __future__ import annotations
 import re
 import unicodedata
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Literal
 
 from historypy.core.dataset import HistoricalDataset
@@ -210,11 +210,9 @@ def plan_research_question(
         })
     mentions = tuple(sorted(
         (
-            EntityMentionCandidate(
-                **{
-                    **candidate.__dict__,
-                    "ambiguity_count": ambiguity[candidate.matched_text.casefold()],
-                }
+            replace(
+                candidate,
+                ambiguity_count=ambiguity[candidate.matched_text.casefold()],
             )
             for candidate in candidates.values()
         ),
@@ -251,7 +249,10 @@ def plan_research_question(
         for end_kind, end_id in entity_ids
         if (start_kind, start_id) != (end_kind, end_id)
     )
-    warnings: list[str] = []
+    warnings: list[str] = [
+        "Predicate matches are reviewable candidates only; endpoint path searches "
+        "remain unfiltered until a researcher confirms the relation sequence."
+    ]
     if not mentions:
         warnings.append(
             "No exact canonical entity name or researcher-verified alias was found; "
@@ -343,7 +344,6 @@ def execute_question_plan(
         raise TypeError("plan must be a QuestionPlan")
     dataset.require_valid()
     source_index = {source.id: source for source in dataset.sources}
-    relationship_index = {edge.id: edge for edge in dataset.relationships}
     searches = tuple(
         find_relationship_paths(dataset, query) for query in plan.path_queries
     )
