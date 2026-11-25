@@ -19,7 +19,7 @@ if __package__:
         resolve_gold_ids,
     )
     from .benchmark_hotpotqa_retrieval import load_hotpotqa
-    from .benchmark_hybrid_retrieval import stratified_holdout, split_summary
+    from .benchmark_hybrid_retrieval import split_summary, stratified_holdout
 else:
     from benchmark_historian_relevance import (
         build_historypy_dataset,
@@ -27,7 +27,7 @@ else:
         resolve_gold_ids,
     )
     from benchmark_hotpotqa_retrieval import load_hotpotqa
-    from benchmark_hybrid_retrieval import stratified_holdout, split_summary
+    from benchmark_hybrid_retrieval import split_summary, stratified_holdout
 
 from historypy import BM25SearchIndex, DatasetSearchIndex, HybridSearchIndex
 
