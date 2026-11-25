@@ -261,6 +261,13 @@ class HistoricalDataset:
                     ))
         for record in self.relationships:
             check_sources(record, record.id, record.source_ids)
+            for claim_id in record.claim_ids:
+                if claim_id not in claim_ids:
+                    issues.append(ValidationIssue(
+                        "missing_relationship_claim",
+                        f"Unknown relationship claim id: {claim_id}",
+                        record.id, "claim_ids"
+                    ))
             for endpoint, field_name in (
                 (record.subject_id, "subject_id"), (record.object_id, "object_id")
             ):
