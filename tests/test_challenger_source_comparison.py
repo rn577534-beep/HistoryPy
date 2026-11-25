@@ -1,4 +1,5 @@
 from historypy import (
+    audit_citation_completeness,
     audit_dataset_provenance,
     render_event_source_comparison,
 )
@@ -29,3 +30,12 @@ def test_challenger_case_study_keeps_report_testimony_and_derivative_review_dist
         "rogers_commission_report",
         "derived_from",
     ) in provenance.potential_source_dependency_pairs
+
+
+def test_challenger_case_study_has_complete_traceable_citations():
+    audit = audit_citation_completeness(build_challenger_dataset())
+    assert audit.total_evidence_links > 0
+    assert audit.complete_citation_coverage == 1.0
+    assert audit.missing_locator_indices == ()
+    assert audit.missing_quotation_indices == ()
+    assert audit.missing_source_url_indices == ()
