@@ -179,6 +179,12 @@ class QuestionPathReview:
         }))
 
     @property
+    def contradicted_claim_ids(self) -> tuple[str, ...]:
+        return tuple(sorted({
+            claim_id for hop in self.hops for claim_id in hop.contradicted_claim_ids
+        }))
+
+    @property
     def claims_missing_locators(self) -> tuple[str, ...]:
         return tuple(sorted({
             claim_id for hop in self.hops for claim_id in hop.claims_missing_locators
