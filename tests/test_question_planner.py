@@ -295,4 +295,5 @@ def test_path_status_fails_closed_when_one_hop_is_contradicted():
         if row.path.entity_ids == ("p1", "p2", "p3")
     )
     assert indirect.evidence_status == "contradicted"
+    assert indirect.contradicted_claim_ids == ("c1",)
     assert indirect.unsupported_claim_ids == ("c1",)
