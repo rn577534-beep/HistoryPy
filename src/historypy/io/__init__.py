@@ -12,10 +12,15 @@ from historypy.io.json import (
     save_dataset,
 )
 from historypy.io.sqlite import SQLiteDatasetStore
-from historypy.io.sqlite_normalized import NormalizedSQLiteStore, SourceUsage, StoredRecord
+from historypy.io.sqlite_normalized import (
+    NormalizedSQLiteStore,
+    SQLiteMaintenanceStats,
+    SourceUsage,
+    StoredRecord,
+)
 
 __all__ = [
-    "SCHEMA_NAME", "SCHEMA_VERSION", "NormalizedSQLiteStore", "SQLiteDatasetStore", "SourceUsage", "StoredRecord",
+    "SCHEMA_NAME", "SCHEMA_VERSION", "NormalizedSQLiteStore", "SQLiteDatasetStore", "SQLiteMaintenanceStats", "SourceUsage", "StoredRecord",
     "dataset_from_dict", "dataset_from_json", "dataset_to_dict", "dataset_to_json",
     "load_dataset", "load_dataset_csv_bundle", "save_dataset", "save_dataset_csv_bundle",
 ]
