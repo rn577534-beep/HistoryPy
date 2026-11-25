@@ -71,7 +71,7 @@ from historypy.research.source_audit import (
     audit_dataset_sources,
     audit_source_record,
 )
-from historypy.research.source_comparison import (
+from historypy.research.source_independence import (
     ClaimSourceIndependenceReport,
     DatasetSourceIndependenceReport,
     DependencyCluster,
