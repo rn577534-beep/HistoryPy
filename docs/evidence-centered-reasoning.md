@@ -389,3 +389,27 @@ The optional `entity_language` filter scopes verified aliases by language
 tag while retaining canonical-name matches. This keeps the alias assertion ID,
 review state, language, source ID, and locator available after retrieval. Fuzzy suggestions remain review-only and
 are never silently promoted into verified alias assertions.
+
+
+### Contradiction and missing-evidence diagnostics
+
+Multi-hop reviews expose conservative diagnostics derived only from the recorded `EvidenceLink.relation` values:
+
+- `hop.conflicting_claim_ids`: claims with both `supports` and `contradicts` links.
+- `hop.contradicted_claim_ids`: claims with contradicting links and no supporting link.
+- `hop.unsupported_claim_ids`: claims with no supporting link (including contextualizing-only and mentioning-only evidence).
+- `hop.claims_missing_locators`: claims with no evidence links or at least one evidence link without a structured/free-form locator.
+- `path.evidence_status`: `conflicting`, `contradicted`, `supported`, or `insufficient`, aggregated conservatively across all hops.
+- `path.conflicting_claim_ids`, `path.unsupported_claim_ids`, and `path.claims_missing_locators` provide path-wide identifiers.
+
+The aggregation fails closed: a contradicted hop cannot be hidden by a different supported hop. A mixed claim is labeled conflicting rather than resolved automatically. These statuses describe the dataset's recorded links; they do not establish whether the claim is historically true. Missing relationship-to-claim links remain an explicit gap, not implicit support.
+
+```python
+for review in plan_report.path_reviews:
+    print(review.evidence_status)
+    print(review.conflicting_claim_ids)
+    print(review.unsupported_claim_ids)
+    print(review.claims_missing_locators)
+    for hop in review.hops:
+        print(hop.contradicted_claim_ids, hop.missing_claim_link)
+```
