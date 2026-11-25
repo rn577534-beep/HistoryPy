@@ -1,6 +1,6 @@
 import pytest
 
-from historypy import HistoricalDate, HistoricalRelationship
+from historypy import HistoricalClaim, HistoricalDate, HistoricalDataset, HistoricalRelationship
 
 
 def _year(value):
@@ -39,3 +39,19 @@ def test_relationship_does_not_compare_incomparable_calendars_as_ordered():
         ),
     )
     assert relationship.valid_from.calendar == "julian"
+
+
+
+def test_dataset_rejects_relationship_claim_references_that_do_not_exist():
+    dataset = HistoricalDataset(
+        people=(),
+        claims=(HistoricalClaim("claim-1", "A proposition."),),
+        relationships=(
+            HistoricalRelationship(
+                "r1", "missing-person-a", "related_to", "missing-person-b",
+                claim_ids=("missing-claim",),
+            ),
+        ),
+    )
+    codes = {issue.code for issue in dataset.validate()}
+    assert "missing_relationship_claim" in codes
