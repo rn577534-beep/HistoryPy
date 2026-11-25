@@ -92,3 +92,16 @@ def test_hybrid_semantic_rank_is_optional_and_reported():
     hits = index.search("Tyre", embedder=embed)
     assert hits[0].record_id == "e1"
     assert hits[0].semantic_rank == 1
+
+def test_entity_alias_matches_contribute_to_hybrid_ranking():
+    data = dataset()
+    entities = EntityAwareSearchIndex.build(data)
+    index = HybridSearchIndex(
+        DatasetSearchIndex.build(data),
+        BM25SearchIndex.build(data),
+        entity_index=entities,
+    )
+    hits = index.search("Iskandar")
+    person = next(hit for hit in hits if hit.record_id == "p1")
+    assert person.entity_rank == 1
+    assert person.matched_entity_aliases == ("Iskandar",)
