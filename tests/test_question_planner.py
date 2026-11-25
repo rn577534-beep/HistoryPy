@@ -196,3 +196,15 @@ def test_question_planner_bounds_endpoint_pair_hypotheses():
     assert len(plan.path_queries) == 2
     assert plan.path_queries_truncated
     assert any("endpoint pairs were omitted" in warning for warning in plan.warnings)
+
+
+
+def test_question_planner_rejects_malformed_predicate_lexicon():
+    import pytest
+
+    with pytest.raises(TypeError, match="tuple or list"):
+        plan_research_question(
+            _dataset(),
+            "Ada Lovelace and Charles Babbage",
+            predicate_lexicon={"collaborated_with": "connected to"},
+        )
