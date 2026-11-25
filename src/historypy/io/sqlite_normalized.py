@@ -13,7 +13,10 @@ from typing import Any
 
 from historypy.core.dataset import HistoricalDataset
 from historypy.io.json import (
-    SCHEMA_NAME, SCHEMA_VERSION, dataset_from_dict, iter_dataset_records,
+    SCHEMA_NAME,
+    SCHEMA_VERSION,
+    dataset_from_dict,
+    iter_dataset_records,
 )
 
 _STORE_SCHEMA_VERSION = 2
