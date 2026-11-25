@@ -163,14 +163,18 @@ class HybridSearchIndex:
                     scores[key] += 1.0 / (self.rrf_k + rank)
             if self.entity_index is not None:
                 entity_hits = self.entity_index.resolve(part, kinds=allowed)
-                for rank, entity in enumerate(entity_hits, start=1):
+                entity_ranks: dict[tuple[str, str], int] = {}
+                for entity in entity_hits:
                     key = (entity.kind, entity.record_id)
                     labels.setdefault(key, entity.canonical_name)
-                    ranks[key]["entity"] = min(
-                        rank, ranks[key].get("entity", rank)
-                    )
+                    if key not in entity_ranks:
+                        entity_ranks[key] = len(entity_ranks) + 1
+                        rank = entity_ranks[key]
+                        ranks[key]["entity"] = min(
+                            rank, ranks[key].get("entity", rank)
+                        )
+                        scores[key] += 1.0 / (self.rrf_k + rank)
                     matched_aliases[key].add(entity.matched_alias)
-                    scores[key] += 1.0 / (self.rrf_k + rank)
                 if entity_fuzzy_threshold is not None:
                     exact_keys = {
                         (entity.kind, entity.record_id) for entity in entity_hits
@@ -276,7 +280,7 @@ class EntityAwareSearchIndex:
         if not normalized:
             return ()
         allowed = set(kinds) if kinds is not None else None
-        matches: dict[tuple[str, str], EntityAliasMatch] = {}
+        matches: dict[tuple[str, str, str], EntityAliasMatch] = {}
         for alias, entities in self._aliases.items():
             if not re.search(rf"(?<!\\w){re.escape(alias)}(?!\\w)", normalized):
                 continue
@@ -292,10 +296,8 @@ class EntityAwareSearchIndex:
                     entity.kind, entity.record_id, entity.canonical_name,
                     entity.matched_alias, max(1, ambiguity_count)
                 )
-                key = (entity.kind, entity.record_id)
-                previous = matches.get(key)
-                if previous is None or len(candidate.matched_alias) > len(previous.matched_alias):
-                    matches[key] = candidate
+                key = (entity.kind, entity.record_id, alias)
+                matches[key] = candidate
         return tuple(sorted(
             matches.values(),
             key=lambda item: (item.kind, item.record_id, item.matched_alias)
