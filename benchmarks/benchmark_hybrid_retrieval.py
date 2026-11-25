@@ -13,16 +13,16 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
+from benchmark_historian_relevance import (
+    build_historypy_dataset,
+    load_jsonl,
+    resolve_gold_ids,
+)
 from historypy import (
     BM25SearchIndex,
     DatasetSearchIndex,
     HybridSearchIndex,
     SemanticSearchIndex,
-)
-from benchmark_historian_relevance import (
-    build_historypy_dataset,
-    load_jsonl,
-    resolve_gold_ids,
 )
 
 
