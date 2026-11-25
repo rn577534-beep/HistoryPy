@@ -28,6 +28,7 @@ class HybridSearchHit:
     bm25_rank: int | None
     trigram_rank: int | None
     semantic_rank: int | None
+    entity_rank: int | None
     matched_entity_aliases: tuple[str, ...] = ()
 
 
@@ -84,6 +85,7 @@ class HybridSearchIndex:
         bm25: BM25SearchIndex,
         semantic: SemanticSearchIndex | None = None,
         *,
+        entity_index: EntityAwareSearchIndex | None = None,
         rrf_k: int = 60,
     ) -> None:
         if rrf_k < 1:
@@ -93,6 +95,7 @@ class HybridSearchIndex:
         self.trigram = trigram
         self.bm25 = bm25
         self.semantic = semantic
+        self.entity_index = entity_index
         self.rrf_k = rrf_k
 
     def search(
@@ -115,6 +118,7 @@ class HybridSearchIndex:
         scores: dict[tuple[str, str], float] = defaultdict(float)
         labels: dict[tuple[str, str], str] = {}
         ranks: dict[tuple[str, str], dict[str, int]] = defaultdict(dict)
+        matched_aliases: dict[tuple[str, str], set[str]] = defaultdict(set)
         for part in parts:
             result_sets = [
                 ("trigram", self.trigram.search(part, kinds=allowed, limit=None)),
@@ -134,6 +138,16 @@ class HybridSearchIndex:
                     labels[key] = hit.label
                     ranks[key][method] = min(rank, ranks[key].get(method, rank))
                     scores[key] += 1.0 / (self.rrf_k + rank)
+            if self.entity_index is not None:
+                entity_hits = self.entity_index.resolve(part, kinds=allowed)
+                for rank, entity in enumerate(entity_hits, start=1):
+                    key = (entity.kind, entity.record_id)
+                    labels.setdefault(key, entity.canonical_name)
+                    ranks[key]["entity"] = min(
+                        rank, ranks[key].get("entity", rank)
+                    )
+                    matched_aliases[key].add(entity.matched_alias)
+                    scores[key] += 1.0 / (self.rrf_k + rank)
         ordered = sorted(scores, key=lambda key: (-scores[key], key[0], key[1]))
         return tuple(
             HybridSearchHit(
@@ -142,6 +156,8 @@ class HybridSearchIndex:
                 bm25_rank=ranks[key].get("bm25"),
                 trigram_rank=ranks[key].get("trigram"),
                 semantic_rank=ranks[key].get("semantic"),
+                entity_rank=ranks[key].get("entity"),
+                matched_entity_aliases=tuple(sorted(matched_aliases[key])),
             )
             for key in ordered[:limit]
         )
