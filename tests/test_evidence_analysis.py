@@ -82,3 +82,35 @@ def test_citation_completeness_requires_locator_quotation_and_source_url():
     assert report.missing_locator_indices == (1,)
     assert report.missing_source_url_indices == (1,)
     assert report.complete_citation_coverage == 0.5
+
+
+def test_claim_evidence_analysis_exposes_known_and_unknown_source_dependence():
+    from historypy.research import analyze_claim_evidence
+
+    dataset = HistoricalDataset(
+        sources=(
+            SourceRecord(
+                "s1", "Wire dispatch", "primary",
+                shared_evidence_group_ids=("wire-2024-01",),
+            ),
+            SourceRecord(
+                "s2", "Syndicated report", "secondary",
+                shared_evidence_group_ids=("wire-2024-01",),
+            ),
+            SourceRecord("s3", "Untraced report", "secondary"),
+        ),
+        claims=(HistoricalClaim("c1", "A documented claim"),),
+        evidence=(
+            EvidenceLink("c1", "s1", "supports"),
+            EvidenceLink("c1", "s2", "supports"),
+            EvidenceLink("c1", "s3", "supports"),
+        ),
+    )
+
+    analysis = analyze_claim_evidence(dataset, "c1")
+    assert analysis.distinct_source_count == 3
+    assert analysis.source_independence.status == "known_dependence_and_unknown"
+    assert analysis.source_independence.dependent_clusters[0].evidence_source_ids == (
+        "s1", "s2"
+    )
+    assert analysis.source_independence.unknown_source_ids == ("s3",)
