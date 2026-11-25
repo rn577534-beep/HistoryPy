@@ -210,3 +210,21 @@ Peak RSS is the total process high-water mark and includes the synthetic
 dataset, Python runtime, index, and native allocations. It is not the index's
 standalone memory cost. These values are specific to the GitHub Actions Linux
 runner and selective synthetic query.
+
+## Persistent normalized SQLite results (2026-11-25)
+
+Both SQLite FTS5 scale jobs completed successfully:
+https://github.com/rn577534-beep/HistoryPy/actions/runs/45516615547
+
+| Records | Save time | Additional traced Python memory during save | SQLite file size | Total process peak RSS | Query | Query after reopen |
+|---:|---:|---:|---:|---:|---:|---:|
+| 100,000 | 11.78 s | 68.897 MiB | 84.637 MiB | 221.082 MiB | 1.986 ms | 1.518 ms |
+| 1,000,000 | 127.84 s | 687.305 MiB | 845.113 MiB | 1,877.465 MiB | 6.579 ms | 5.995 ms |
+
+FTS5 was available in both runs, and the script verified identical query
+record IDs after reopening the database. Peak process RSS includes the
+synthetic in-memory dataset, Python runtime, SQLite caches, and native
+allocations; it is not just the persistent index. The benchmark uses a
+selective phrase query and synthetic records. It does not establish broad-query
+latency, write-concurrency behavior, crash recovery under power loss, or
+performance on real historical source material.
