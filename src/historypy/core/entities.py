@@ -94,10 +94,12 @@ class HistoricalCivilization:
     languages: tuple[str, ...] = ()
     description: str = ""
     source_ids: tuple[str, ...] = ()
+    aliases: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.id.strip() or not self.name.strip():
             raise ValueError("Civilization id and name cannot be empty")
+        _validate_ids(self.aliases, "aliases")
         _validate_ids(self.region_place_ids, "region_place_ids")
         _validate_ids(self.predecessor_ids, "predecessor_ids")
         _validate_ids(self.source_ids, "source_ids")
@@ -119,10 +121,12 @@ class HistoricalOrganization:
     parent_organization_ids: tuple[str, ...] = ()
     description: str = ""
     source_ids: tuple[str, ...] = ()
+    aliases: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.id.strip() or not self.name.strip():
             raise ValueError("Organization id and name cannot be empty")
+        _validate_ids(self.aliases, "aliases")
         if self.organization_type not in {
             "state", "dynasty", "kingdom", "empire", "government", "institution",
             "military", "religious", "trade", "political", "other",
