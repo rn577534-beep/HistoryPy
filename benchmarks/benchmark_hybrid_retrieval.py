@@ -8,7 +8,6 @@ from __future__ import annotations
 import argparse
 import importlib
 import json
-import statistics
 import time
 from collections import defaultdict
 from pathlib import Path
