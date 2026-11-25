@@ -143,6 +143,8 @@ def test_execution_attaches_per_hop_sources_and_temporal_conflict():
     assert indirect.hops[0].source_independence.dependent_clusters[0].evidence_source_ids == (
         "s1", "s2"
     )
+    assert indirect.source_independence.status == "known_dependence_and_unknown"
+    assert indirect.source_independence.unknown_source_ids == ("s3",)
 
 
 def test_source_set_audit_never_infers_independence_from_missing_metadata():
