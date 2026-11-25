@@ -59,7 +59,11 @@ def decompose_research_question(question: str) -> DecomposedQuery:
         r"\s+in\s+comparison\s+with\s+",
         r"\s+versus\s+",
         r"\s+vs\.?\s+",
+        r"\s+compar[ée]s?\s+à\s+",
+        r"\s+par\s+rapport\s+à\s+",
+        r"\s+contre\s+",
         r"\s+and\s+(?=(?:what|which|who|when|where|why|how|whose|did|does|was|were|is|are)\b)",
+        r"\s+et\s+(?=(?:que|quel|quelle|quels|quelles|qui|quand|où|comment|pourquoi|combien|est|était|étaient|a|ont|avait)\b)",
         r"\s*;\s*",
     )
     parts = [normalized]
