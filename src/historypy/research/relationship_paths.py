@@ -26,6 +26,7 @@ class RelationshipPathQuery:
     predicates: tuple[str | None, ...] = ()
     direction: Direction = "outgoing"
     limit: int = 20
+    max_explored_states: int = 10000
 
     def __post_init__(self) -> None:
         if not self.start_entity_id.strip() or not self.end_entity_id.strip():
@@ -46,6 +47,14 @@ class RelationshipPathQuery:
             or not 1 <= self.limit <= 500
         ):
             raise ValueError("limit must be an integer between 1 and 500")
+        if (
+            not isinstance(self.max_explored_states, int)
+            or isinstance(self.max_explored_states, bool)
+            or not 1 <= self.max_explored_states <= 100000
+        ):
+            raise ValueError(
+                "max_explored_states must be an integer between 1 and 100000"
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -128,6 +137,9 @@ def find_relationship_paths(
         ((query.start_entity_id,), ())
     ]
     while stack:
+        if explored >= query.max_explored_states:
+            truncated = True
+            break
         entity_path, steps = stack.pop()
         explored += 1
         current = entity_path[-1]
