@@ -65,14 +65,17 @@ class SourceDependencyAssertion:
         if self.review_status not in _REVIEW_STATUSES:
             raise ValueError(f"Unsupported review_status: {self.review_status}")
         if self.dependency_type in _SHARED_TYPES:
-            if not self.shared_group_id or not self.shared_group_id.strip():
+            if (
+                not isinstance(self.shared_group_id, str)
+                or not self.shared_group_id.strip()
+            ):
                 raise ValueError(
                     "shared dependency types require a shared_group_id"
                 )
         elif self.shared_group_id is not None:
             raise ValueError("derived_from assertions cannot set shared_group_id")
         if self.review_status == "verified":
-            if not self.reviewer or not self.reviewer.strip():
+            if not isinstance(self.reviewer, str) or not self.reviewer.strip():
                 raise ValueError("verified assertions require a reviewer")
             if not self.reviewed_at:
                 raise ValueError("verified assertions require reviewed_at")
@@ -99,7 +102,13 @@ class SourceDependencyRegistry:
         registry_version: str,
         dataset_version: str,
     ) -> None:
-        if not registry_version.strip() or not dataset_version.strip():
+        if not isinstance(dataset, HistoricalDataset):
+            raise TypeError("dataset must be a HistoricalDataset")
+        dataset.require_valid()
+        if (
+            not isinstance(registry_version, str) or not registry_version.strip()
+            or not isinstance(dataset_version, str) or not dataset_version.strip()
+        ):
             raise ValueError("registry_version and dataset_version cannot be empty")
         if any(not isinstance(row, SourceDependencyAssertion) for row in assertions):
             raise TypeError("assertions must contain SourceDependencyAssertion records")
