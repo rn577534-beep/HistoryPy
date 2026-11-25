@@ -18,6 +18,7 @@ from benchmark_historian_relevance import (
     load_jsonl,
     resolve_gold_ids,
 )
+
 from historypy import (
     BM25SearchIndex,
     DatasetSearchIndex,
