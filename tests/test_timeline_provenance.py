@@ -108,8 +108,8 @@ def test_provenance_flags_explicit_source_derivation_and_shared_evidence():
     ))
     report = audit_dataset_provenance(dataset)
     assert report.potential_source_dependency_pairs == (
-        ("s1", "s2", "derived_from"),
         ("s1", "s2", "shared_evidence_group:witness-17"),
+        ("s2", "s1", "derived_from"),
     )
 
 
