@@ -956,13 +956,14 @@ report = ResearchPipeline(dataset).run_question(
     predicate_lexicon={"collaborated_with": ("connected to", "worked with")},
     max_hops=3,
     direction="both",
+    max_path_queries=40,
 )
 for review in report.path_reviews:
     print(review.path.entity_ids)
     print(review.temporal_status, review.source_independence.status)
     for hop in review.hops:
         print(hop.relationship_id, hop.predicate, hop.source_records)
-        print(hop.claim_ids, hop.claim_analyses)
+        print(hop.claim_ids, hop.evidence_links, hop.claim_analyses)
 ```
 
 Only exact canonical names and researcher-verified aliases become entity
