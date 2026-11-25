@@ -12,6 +12,7 @@ import argparse
 import gc
 import json
 import platform
+import resource
 import statistics
 import time
 import tracemalloc
@@ -56,6 +57,11 @@ def peak_additional_bytes(operation) -> int:
         return max(0, peak - baseline)
     finally:
         tracemalloc.stop()
+
+
+def peak_process_rss_mib() -> float:
+    """Return process peak resident set size (Linux runner reports KiB)."""
+    return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
 
 
 def median_ms(operation, repeat: int) -> float:
@@ -112,6 +118,7 @@ def main() -> None:
         "result_parity": True,
         "index_build_ms": round(index_build_ms, 3),
         "index_build_peak_additional_mib": mib(index_peak),
+        "process_peak_rss_mib": round(peak_process_rss_mib(), 3),
         "linear_search_median_ms": round(linear_ms, 3),
         "indexed_search_median_ms": round(indexed_ms, 3),
         "linear_search_peak_additional_mib": mib(linear_peak),
@@ -119,7 +126,7 @@ def main() -> None:
         "observed_speedup": round(linear_ms / indexed_ms, 3) if indexed_ms else None,
         "memory_note": (
             "tracemalloc measures additional Python allocations; it excludes "
-            "pre-existing dataset memory, native allocations, and total process RSS."
+            "pre-existing dataset memory and native allocations. process_peak_rss_mib reports total process RSS peak separately."
         ),
         "scope_note": (
             "Synthetic selective-query stress test only; not historical relevance, "
