@@ -56,6 +56,16 @@ from historypy.research.pipeline import (
     ResearchTaskResult,
     render_research_report,
 )
+from historypy.research.question_planner import (
+    EntityMentionCandidate,
+    HopEvidenceReview,
+    PredicateCandidate,
+    QuestionExecutionReport,
+    QuestionPathReview,
+    QuestionPlan,
+    execute_question_plan,
+    plan_research_question,
+)
 from historypy.research.profile import DatasetProfile, profile_dataset
 from historypy.research.provenance import DatasetProvenanceReport, audit_dataset_provenance
 from historypy.research.quality import (
