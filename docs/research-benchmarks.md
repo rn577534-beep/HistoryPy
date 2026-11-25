@@ -249,3 +249,50 @@ better relevance. The current benchmark workflow additionally evaluates
 French-aware query decomposition; its results are reported separately when
 that run completes. No real semantic embedding model has yet been selected,
 so semantic metrics are intentionally absent.
+
+
+## Held-out question evaluation
+
+The hybrid HistoriQA benchmark now creates a deterministic, question-type-
+stratified 80/20 holdout by default (seed 2026). It reports training-side and
+held-out question counts separately and measures trigram, BM25, RRF, and
+decomposed RRF on the same held-out questions. Search indexes are built from
+the searchable corpus, not question labels; no model is trained on the
+question split. The split is a guard against selecting a method using every
+question and then presenting the same full-set score as independent evidence.
+The current split is deterministic and suitable for reproducible model
+selection; a future publication-quality evaluation should additionally freeze
+a final untouched test split before tuning.
+
+## English multi-hop benchmark
+
+HistoryPy includes an adapter for the HotpotQA distractor development set.
+The official CMU download host was unavailable in CI, so the workflow uses a
+pinned Hugging Face mirror and verifies its SHA-256 before parsing. HotpotQA
+contains English Wikipedia multi-hop questions with sentence-level supporting
+facts; HistoryPy evaluates retrieval of supporting document titles from the
+union of context paragraphs supplied in the benchmark. It is general Wikipedia
+multi-hop QA, not a historical-only corpus, and its metrics must not be pooled
+with HistoriQA's French historical-domain metrics.
+
+The workflow is .github/workflows/english-multihop.yml; the report is uploaded
+as a workflow artifact. Dataset license is CC BY-SA 4.0. Cite Yang et al. (2018),
+HotpotQA: A Dataset for Diverse, Explainable Multi-hop Question Answering,
+EMNLP 2018, and preserve attribution/share-alike terms.
+
+## Persistent SQLite journal modes
+
+NormalizedSQLiteStore supports the default DELETE journal mode and an
+opt-in WAL mode. WAL mode exposes explicit checkpoint_wal() and
+integrity_check() diagnostics. The SQLite scale workflow now runs both modes
+at 100k and 1m synthetic records, recording broad/selective query latency,
+reopen parity, file size, process RSS, checkpoint results, and integrity
+status. Concurrent writer tests use separate store instances and transactions
+to confirm SQLite serializes writes without losing committed datasets. A
+rollback test simulates an interrupted replacement transaction and verifies
+that the previously committed dataset remains readable.
+
+These tests do not replace power-loss testing on physical hardware, filesystem
+fault injection, or long-duration concurrent workload testing. WAL should be
+selected based on deployment workload and checkpoint/backup policy, not assumed
+to be universally faster.
