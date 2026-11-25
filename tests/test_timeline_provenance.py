@@ -91,3 +91,42 @@ def test_provenance_counts_sources_used_only_by_evidence():
     assert report.source_usage_counts == (("s1", 1),)
     assert report.orphan_source_ids == ()
     assert report.linked_source_count == 1
+
+
+def test_provenance_flags_explicit_source_derivation_and_shared_evidence():
+    dataset = HistoricalDataset(sources=(
+        SourceRecord(
+            "s1", "Original archive", "archival",
+            shared_evidence_group_ids=("witness-17",),
+        ),
+        SourceRecord(
+            "s2", "Later newspaper", "secondary",
+            derived_from_source_ids=("s1",),
+            shared_evidence_group_ids=("witness-17",),
+        ),
+        SourceRecord("s3", "Independent archive", "archival"),
+    ))
+    report = audit_dataset_provenance(dataset)
+    assert report.potential_source_dependency_pairs == (
+        ("s1", "s2", "derived_from"),
+        ("s1", "s2", "shared_evidence_group:witness-17"),
+    )
+
+
+def test_dataset_rejects_missing_or_circular_source_derivation():
+    import pytest
+
+    missing = HistoricalDataset(sources=(
+        SourceRecord("s1", "Source", "primary", derived_from_source_ids=("missing",)),
+    ))
+    assert "missing_derived_source" in {issue.code for issue in missing.validate()}
+
+    circular = HistoricalDataset(sources=(
+        SourceRecord("s1", "Source one", "primary", derived_from_source_ids=("s2",)),
+        SourceRecord("s2", "Source two", "secondary", derived_from_source_ids=("s1",)),
+    ))
+    assert "source_derivation_cycle" in {
+        issue.code for issue in circular.validate()
+    }
+    with pytest.raises(ValueError, match="source_derivation_cycle"):
+        circular.require_valid()
