@@ -47,6 +47,7 @@ def peak_rss_mib() -> float:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--records", type=int, default=100_000)
+    parser.add_argument("--journal-mode", choices=("DELETE", "WAL"), default="DELETE")
     args = parser.parse_args()
     if args.records < 1:
         parser.error("--records must be positive")
@@ -56,7 +57,7 @@ def main() -> None:
         database = Path(directory) / "historypy.sqlite"
         tracemalloc.start()
         started = time.perf_counter()
-        store = NormalizedSQLiteStore(database)
+        store = NormalizedSQLiteStore(database, journal_mode=args.journal_mode)
         store.save("scale", dataset)
         save_seconds = time.perf_counter() - started
         _, save_peak = tracemalloc.get_traced_memory()
@@ -69,7 +70,13 @@ def main() -> None:
         assert len(first) == min(expected, 100)
         assert store.count_records("scale", kind="events") == args.records
 
-        reopened = NormalizedSQLiteStore(database)
+        broad_started = time.perf_counter()
+        broad = store.search_records(
+            "scale", "historical record", kind="events", limit=1000
+        )
+        broad_query_ms = (time.perf_counter() - broad_started) * 1000
+
+        reopened = NormalizedSQLiteStore(database, journal_mode=args.journal_mode)
         reopen_started = time.perf_counter()
         persisted = reopened.search_records(
             "scale", "scaleprobe raremarker", kind="events", limit=100
@@ -79,12 +86,19 @@ def main() -> None:
             item.record_id for item in first
         ]
 
+        checkpoint = reopened.checkpoint_wal(mode="PASSIVE") if args.journal_mode == "WAL" else None
         report = {
             "records": args.records,
+            "journal_mode": store.journal_mode,
             "fts5_available": store._fts5_available,
+            "integrity_check": reopened.integrity_check(),
+            "wal_checkpoint": checkpoint,
             "save_seconds": round(save_seconds, 3),
             "save_peak_traced_python_mib": round(save_peak / (1024 * 1024), 3),
             "query_ms": round(query_ms, 3),
+            "broad_query_ms": round(broad_query_ms, 3),
+            "broad_query_returned": len(broad),
+            "broad_query_limit": 1000,
             "reopened_query_ms": round(reopen_query_ms, 3),
             "database_file_mib": round(database.stat().st_size / (1024 * 1024), 3),
             "process_peak_rss_mib": round(peak_rss_mib(), 3),
