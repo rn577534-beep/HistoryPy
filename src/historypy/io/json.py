@@ -168,7 +168,10 @@ def dataset_from_dict(
         raise TypeError("metadata must be an object containing only string keys and values")
 
     dataset = HistoricalDataset(
-        sources=records("sources", SourceRecord),
+        sources=records(
+            "sources", SourceRecord,
+            tuple_fields=("derived_from_source_ids", "shared_evidence_group_ids"),
+        ),
         claims=records(
             "claims", HistoricalClaim, tuple_fields=("subject_ids", "event_ids")
         ),
