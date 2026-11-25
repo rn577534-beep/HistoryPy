@@ -790,11 +790,19 @@ store = NormalizedSQLiteStore("history.sqlite", journal_mode="WAL")
 store.save("research", dataset)
 print(store.checkpoint_wal(mode="PASSIVE"))
 print(store.integrity_check())
+
+# Operational maintenance and a verified online backup:
+print(store.maintenance_stats())
+store.optimize()
+store.backup_to("history-backup.sqlite")
 ~~~
 
 The scale workflow tests DELETE and WAL modes at 100k and 1m synthetic records,
-including reopen parity and broad/selective query timings. These tests do not
-replace physical power-loss and filesystem fault-injection testing.
+including reopen parity and broad/selective query timings. The online backup
+uses SQLite's backup API and verifies the copied database with
+`integrity_check`. Page/freelist statistics help monitor file growth and
+reclaimable space. These tools do not replace off-site backup retention,
+physical power-loss testing, or filesystem fault-injection testing.
 
 ## Optional real semantic model benchmark
 
