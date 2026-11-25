@@ -80,6 +80,7 @@ class QuestionPlan:
     entity_mentions: tuple[EntityMentionCandidate, ...]
     predicate_candidates: tuple[PredicateCandidate, ...]
     path_queries: tuple[RelationshipPathQuery, ...]
+    path_queries_truncated: bool
     warnings: tuple[str, ...]
 
 
@@ -138,6 +139,7 @@ def plan_research_question(
     max_hops: int = 3,
     limit: int = 10,
     direction: Literal["outgoing", "incoming", "both"] = "both",
+    max_path_queries: int = 40,
 ) -> QuestionPlan:
     """Extract exact entity mentions and propose paths without asserting intent.
 
@@ -156,6 +158,11 @@ def plan_research_question(
         raise ValueError("limit must be an integer between 1 and 500")
     if direction not in {"outgoing", "incoming", "both"}:
         raise ValueError("direction must be outgoing, incoming, or both")
+    if (
+        not isinstance(max_path_queries, int) or isinstance(max_path_queries, bool)
+        or not 1 <= max_path_queries <= 200
+    ):
+        raise ValueError("max_path_queries must be an integer between 1 and 200")
 
     dataset.require_valid()
     normalized_question = _normalize(question)
@@ -253,7 +260,7 @@ def plan_research_question(
             _normalize(row.matched_text) for row in mentions if row.ambiguous
         }
     }
-    path_queries = tuple(
+    path_query_candidates = tuple(
         RelationshipPathQuery(
             start_entity_id=start_id,
             end_entity_id=end_id,
@@ -267,6 +274,8 @@ def plan_research_question(
         and frozenset(((start_kind, start_id), (end_kind, end_id)))
         not in ambiguous_entity_pairs
     )
+    path_queries = path_query_candidates[:max_path_queries]
+    path_queries_truncated = len(path_query_candidates) > max_path_queries
     warnings: list[str] = [
         (
             "Predicate matches are reviewable candidates only; endpoint path searches "
@@ -291,12 +300,18 @@ def plan_research_question(
         )
     if not path_queries and len(entity_ids) >= 2:
         warnings.append("No distinct endpoint pair could be generated.")
+    if path_queries_truncated:
+        warnings.append(
+            f"Path hypotheses were bounded to {max_path_queries}; "
+            f"{len(path_query_candidates) - max_path_queries} endpoint pairs were omitted."
+        )
     return QuestionPlan(
         question=question.strip(),
         decomposition=decompose_research_question(question),
         entity_mentions=mentions,
         predicate_candidates=tuple(predicate_candidates),
         path_queries=path_queries,
+        path_queries_truncated=path_queries_truncated,
         warnings=tuple(warnings),
     )
 
