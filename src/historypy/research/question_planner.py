@@ -13,7 +13,6 @@ from dataclasses import dataclass, replace
 from typing import Literal
 
 from historypy.core.dataset import HistoricalDataset
-from historypy.core.entities import HistoricalRelationship
 from historypy.core.models import HistoricalDate, SourceRecord
 from historypy.research.alias_registry import AliasRegistry
 from historypy.research.hybrid import DecomposedQuery, decompose_research_question
@@ -96,10 +95,11 @@ class HopEvidenceReview:
 
 @dataclass(frozen=True, slots=True)
 class QuestionPathReview:
-    """A candidate path with hop-level evidence and temporal compatibility."""
+    """A candidate path with hop/path genealogy and temporal compatibility."""
 
     path: RelationshipPath
     hops: tuple[HopEvidenceReview, ...]
+    source_independence: SourceSetIndependenceReport
     temporal_status: TemporalStatus
     temporal_note: str
 
@@ -203,7 +203,7 @@ def plan_research_question(
 
     ambiguity: dict[str, int] = {}
     for candidate in candidates.values():
-        ambiguity[candidate.matched_text.casefold()] = len({
+        ambiguity[_normalize(candidate.matched_text)] = len({
             (row.entity_kind, row.entity_id)
             for row in candidates.values()
             if row.matched_text.casefold() == candidate.matched_text.casefold()
@@ -373,14 +373,37 @@ def execute_question_plan(
                     missing_source_reference=not bool(source_ids),
                 ))
             temporal_status, temporal_note = _temporal_review(path)
+            path_independence = analyze_source_set_independence(
+                dataset, path.source_ids
+            )
             reviews.append(QuestionPathReview(
                 path=path,
                 hops=tuple(hop_reviews),
+                source_independence=path_independence,
                 temporal_status=temporal_status,
                 temporal_note=temporal_note,
             ))
     if not reviews:
         warnings.append("No relationship path was found for the proposed endpoint pairs.")
+    if any(
+        review.source_independence.status == "known_dependence"
+        for review in reviews
+    ):
+        warnings.append(
+            "At least one complete path contains source records with known shared "
+            "genealogy; do not count them as independent corroboration."
+        )
+    if any(
+        review.source_independence.status in {
+            "dependence_unknown", "single_source_dependence_unknown",
+            "known_dependence_and_unknown",
+        }
+        for review in reviews
+    ):
+        warnings.append(
+            "At least one complete path has unknown source dependence; the path's "
+            "source count is not an independence count."
+        )
     if any(review.temporal_status == "incompatible" for review in reviews):
         warnings.append(
             "At least one path has mutually incompatible relationship validity intervals."
