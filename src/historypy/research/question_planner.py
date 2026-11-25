@@ -98,6 +98,43 @@ class HopEvidenceReview:
     claim_analyses: tuple[ClaimEvidenceAnalysis, ...]
     missing_source_reference: bool
 
+    @property
+    def conflicting_claim_ids(self) -> tuple[str, ...]:
+        """Claims with both supporting and contradicting evidence links."""
+        return tuple(
+            analysis.claim_id for analysis in self.claim_analyses
+            if analysis.assessment_status == "mixed"
+        )
+
+    @property
+    def contradicted_claim_ids(self) -> tuple[str, ...]:
+        """Claims whose recorded evidence links are exclusively contradictory."""
+        return tuple(
+            analysis.claim_id for analysis in self.claim_analyses
+            if analysis.assessment_status == "contradicted"
+        )
+
+    @property
+    def unsupported_claim_ids(self) -> tuple[str, ...]:
+        """Claims with no recorded supporting evidence link."""
+        return tuple(
+            analysis.claim_id for analysis in self.claim_analyses
+            if not dict(analysis.relation_counts).get("supports", 0)
+        )
+
+    @property
+    def claims_missing_locators(self) -> tuple[str, ...]:
+        """Claims with no evidence links or at least one link lacking a locator."""
+        return tuple(
+            analysis.claim_id for analysis in self.claim_analyses
+            if analysis.total_links == 0 or analysis.links_missing_locators > 0
+        )
+
+    @property
+    def missing_claim_link(self) -> bool:
+        """Whether the relationship has no explicit claim-level evidence link."""
+        return not self.claim_ids or not self.claim_analyses
+
 
 @dataclass(frozen=True, slots=True)
 class QuestionPathReview:
@@ -109,6 +146,43 @@ class QuestionPathReview:
     source_independence: SourceSetIndependenceReport
     temporal_status: TemporalStatus
     temporal_note: str
+
+    @property
+    def evidence_status(self) -> Literal[
+        "conflicting", "contradicted", "supported", "insufficient"
+    ]:
+        """Aggregate recorded claim-link status; this is not a truth verdict."""
+        analyses = tuple(
+            analysis for hop in self.hops for analysis in hop.claim_analyses
+        )
+        if not analyses:
+            return "insufficient"
+        statuses = {analysis.assessment_status for analysis in analyses}
+        if "mixed" in statuses:
+            return "conflicting"
+        if "contradicted" in statuses and "supported" not in statuses:
+            return "contradicted"
+        if "supported" in statuses:
+            return "supported"
+        return "insufficient"
+
+    @property
+    def conflicting_claim_ids(self) -> tuple[str, ...]:
+        return tuple(sorted({
+            claim_id for hop in self.hops for claim_id in hop.conflicting_claim_ids
+        }))
+
+    @property
+    def unsupported_claim_ids(self) -> tuple[str, ...]:
+        return tuple(sorted({
+            claim_id for hop in self.hops for claim_id in hop.unsupported_claim_ids
+        }))
+
+    @property
+    def claims_missing_locators(self) -> tuple[str, ...]:
+        return tuple(sorted({
+            claim_id for hop in self.hops for claim_id in hop.claims_missing_locators
+        }))
 
 
 @dataclass(frozen=True, slots=True)
@@ -484,6 +558,26 @@ def execute_question_plan(
         )
     if any(hop.missing_source_reference for review in reviews for hop in review.hops):
         warnings.append("At least one path hop has no linked source record.")
+    if any(hop.conflicting_claim_ids for review in reviews for hop in review.hops):
+        warnings.append(
+            "At least one linked claim has both supporting and contradicting evidence; "
+            "review the conflicting source passages before drawing a conclusion."
+        )
+    if any(hop.contradicted_claim_ids for review in reviews for hop in review.hops):
+        warnings.append(
+            "At least one linked claim has only contradicting evidence recorded; "
+            "the relationship path must not be presented as established."
+        )
+    if any(hop.unsupported_claim_ids for review in reviews for hop in review.hops):
+        warnings.append(
+            "At least one linked claim has no supporting evidence link; "
+            "contextual or mentioning links do not count as support."
+        )
+    if any(hop.claims_missing_locators for review in reviews for hop in review.hops):
+        warnings.append(
+            "At least one linked claim has evidence without complete locator coverage; "
+            "the cited passage may not be directly traceable."
+        )
     if any(not hop.claim_analyses for review in reviews for hop in review.hops):
         warnings.append(
             "At least one path hop has no explicitly linked claim-level evidence; "
