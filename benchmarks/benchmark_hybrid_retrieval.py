@@ -27,7 +27,7 @@ from historypy import (
 )
 
 
-def evaluate(index: Any, questions: list[dict[str, Any]], top_k: int, embedder=None):
+def evaluate(\n    index: Any, questions: list[dict[str, Any]], top_k: int,\n    embedder=None, decompose: bool = False,\n):
     groups: dict[str, dict[str, float]] = defaultdict(
         lambda: {"n": 0, "recall": 0.0, "mrr": 0.0, "success": 0.0}
     )
@@ -35,7 +35,11 @@ def evaluate(index: Any, questions: list[dict[str, Any]], top_k: int, embedder=N
     for row in questions:
         query = str(row.get("question") or "").strip()
         gold = set(row["gold_ids"])
-        if isinstance(index, (HybridSearchIndex, SemanticSearchIndex)):
+        if isinstance(index, HybridSearchIndex):
+            hits = index.search(
+                query, embedder=embedder, limit=top_k, decompose=decompose
+            )
+        elif isinstance(index, SemanticSearchIndex):
             hits = index.search(query, embedder=embedder, limit=top_k)
         else:
             hits = index.search(query, limit=top_k)
@@ -92,6 +96,7 @@ def main() -> None:
     ]
     trigram = DatasetSearchIndex.build(dataset)
     bm25 = BM25SearchIndex.build(dataset)
+    hybrid = HybridSearchIndex(trigram, bm25)
     report: dict[str, Any] = {
         "dataset": "HistoriQA-ThirdRepublic",
         "corpus_records": len(corpus),
@@ -101,7 +106,10 @@ def main() -> None:
             "trigram_all_terms": evaluate(trigram, questions, args.top_k),
             "bm25": evaluate(bm25, questions, args.top_k),
             "hybrid_trigram_bm25_rrf": evaluate(
-                HybridSearchIndex(trigram, bm25), questions, args.top_k
+                hybrid, questions, args.top_k
+            ),
+            "hybrid_trigram_bm25_decomposed_rrf": evaluate(
+                hybrid, questions, args.top_k, decompose=True
             ),
         },
         "semantic_model_id": None,
@@ -123,9 +131,12 @@ def main() -> None:
         report["methods"]["semantic"] = evaluate(
             semantic, questions, args.top_k, embedder
         )
+        hybrid_semantic = HybridSearchIndex(trigram, bm25, semantic)
         report["methods"]["hybrid_trigram_bm25_semantic_rrf"] = evaluate(
-            HybridSearchIndex(trigram, bm25, semantic),
-            questions, args.top_k, embedder,
+            hybrid_semantic, questions, args.top_k, embedder
+        )
+        report["methods"]["hybrid_trigram_bm25_semantic_decomposed_rrf"] = evaluate(
+            hybrid_semantic, questions, args.top_k, embedder, decompose=True
         )
     rendered = json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True)
     if args.output:
