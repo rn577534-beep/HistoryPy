@@ -41,7 +41,7 @@ hits = hybrid.search(
 entities = EntityAwareSearchIndex.build(dataset).resolve("Iskandar in Byzantium")
 ~~~
 
-The real-corpus benchmark now compares trigram, BM25, lexical RRF, and decomposed lexical RRF. If configured, it also compares semantic-only, three-way RRF, and decomposed three-way RRF.
+The real-corpus benchmark now compares trigram, BM25, lexical RRF, and decomposed lexical RRF. It uses a deterministic 80/20 question-type-stratified held-out split by default and reports metrics on unseen questions separately. If configured, it also compares semantic-only, three-way RRF, and decomposed three-way RRF.
 A production semantic comparison is opt-in: pass an importable
 `module:callable` embedder and a stable `--semantic-model-id`. HistoryPy does
 not silently select a model, send corpus text to a provider, or treat cosine
@@ -53,6 +53,9 @@ embedder is not evidence of semantic quality.
 - Query decomposition is rule-based and deliberately conservative.
 - Alias resolution only finds supplied aliases; it cannot discover every
   historical spelling, transliteration, title, exonym, or name change.
+- Fuzzy alias suggestions are a review queue for likely typographic variants;
+  transliteration and historical name changes must be explicit researcher-entered
+  aliases. Suggestions never merge records or prove identity.
 - Shared or ambiguous names can return multiple entities.
 - RRF combines ranks, not calibrated probabilities.
 - Semantic quality depends on the selected model, language, domain, and corpus.
@@ -91,3 +94,18 @@ for a real semantic relevance result.
 French question decomposition includes explicit conjunctions such as `et quand`, `et comment`, and comparative constructions such as `par rapport à`, `comparé à`, and `en comparaison avec`. These rules are intentionally narrow; the corpus benchmark must still determine whether decomposition improves retrieval rather than assuming it does.
 
 The comparison parser recognizes the French forms `comparé`, `comparée`, `comparés`, and `comparées` before `à`; exact wording coverage remains rule-based rather than a general language understanding system.
+
+
+## English multi-hop evaluation
+
+`benchmarks/benchmark_hotpotqa_retrieval.py` evaluates the English
+HotpotQA distractor development set using its question-level context paragraphs
+and annotated supporting-fact titles. It builds a deduplicated corpus from the
+union of supplied paragraphs and evaluates BM25, trigram, lexical RRF, and
+decomposed RRF on a deterministic question-type-stratified held-out set.
+
+HotpotQA is a general Wikipedia multi-hop benchmark, not a history-only dataset.
+Its scores must not be compared as if they came from the same domain as
+HistoriQA-ThirdRepublic. The benchmark is an English multi-hop stress test for
+decomposition and ranking behavior, not a claim about historical-domain accuracy.
+The dataset is CC BY-SA 4.0; retain attribution and share-alike obligations.
