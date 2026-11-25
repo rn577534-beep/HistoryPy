@@ -194,3 +194,19 @@ synthetic event records, not real historical data. Process peak RSS includes
 the in-memory synthetic dataset and should be interpreted separately from
 tracemalloc. SQLite's FTS5 phrase semantics are not BM25 ranking and are not
 comparable to a semantic embedding score without a relevance evaluation.
+
+## Total process RSS measurement (2026-11-25)
+
+The scale benchmark now records process peak RSS in addition to the incremental
+Python allocations measured by `tracemalloc`. Run:
+https://github.com/rn577534-beep/HistoryPy/actions/runs/45516214661
+
+| Records | Index build | Additional Python allocation peak | Total process peak RSS | Indexed query | Linear query | Speedup |
+|---:|---:|---:|---:|---:|---:|---:|
+| 100,000 | 1.113 s | 44.325 MiB | 132.832 MiB | 3.884 ms | 68.359 ms | 17.60x |
+| 1,000,000 | 10.343 s | 440.223 MiB | 1,015.484 MiB | 53.795 ms | 639.322 ms | 11.88x |
+
+Peak RSS is the total process high-water mark and includes the synthetic
+dataset, Python runtime, index, and native allocations. It is not the index's
+standalone memory cost. These values are specific to the GitHub Actions Linux
+runner and selective synthetic query.
