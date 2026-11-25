@@ -13,7 +13,7 @@ from dataclasses import dataclass, replace
 from typing import Literal
 
 from historypy.core.dataset import HistoricalDataset
-from historypy.core.models import HistoricalDate, SourceRecord
+from historypy.core.models import EvidenceLink, HistoricalDate, SourceRecord
 from historypy.research.alias_registry import AliasRegistry
 from historypy.research.evidence_analysis import ClaimEvidenceAnalysis, analyze_claim_evidence
 from historypy.research.hybrid import DecomposedQuery, decompose_research_question
@@ -92,6 +92,7 @@ class HopEvidenceReview:
     source_records: tuple[SourceRecord, ...]
     source_independence: SourceSetIndependenceReport
     claim_ids: tuple[str, ...]
+    evidence_links: tuple[EvidenceLink, ...]
     claim_analyses: tuple[ClaimEvidenceAnalysis, ...]
     missing_source_reference: bool
 
@@ -369,6 +370,9 @@ def execute_question_plan(
                 )
                 relationship = relationship_index[step.relationship_id]
                 claim_ids = tuple(relationship.claim_ids)
+                evidence_links = tuple(
+                    link for link in dataset.evidence if link.claim_id in claim_ids
+                )
                 claim_analyses = tuple(
                     analyze_claim_evidence(dataset, claim_id)
                     for claim_id in claim_ids
@@ -381,6 +385,7 @@ def execute_question_plan(
                         dataset, source_ids
                     ),
                     claim_ids=claim_ids,
+                    evidence_links=evidence_links,
                     claim_analyses=claim_analyses,
                     missing_source_reference=not bool(source_ids),
                 ))
