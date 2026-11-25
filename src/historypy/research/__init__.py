@@ -1,5 +1,6 @@
 """Research utilities for evidence-aware historical analysis."""
 
+from historypy.research.alias_import import import_wikidata_alias_candidates
 from historypy.research.alias_registry import AliasAssertion, AliasMatch, AliasRegistry
 from historypy.research.audit_trail import (
     ResearchAction,
@@ -191,6 +192,7 @@ __all__ = [
     "execute_research_query",
     "find_relationship_paths",
     "great_circle_distance_km",
+    "import_wikidata_alias_candidates",
     "places_within_radius",
     "plan_research_question",
     "profile_dataset",
