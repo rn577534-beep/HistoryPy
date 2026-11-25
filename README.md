@@ -684,3 +684,12 @@ sources and claim quotations by source, preserving researcher-entered support
 or contradiction labels and exact page/paragraph/archive/timecode locators.
 They do not automatically determine whether sources are independent or which
 account is true.
+
+
+## Hybrid and entity-aware retrieval
+
+HistoryPy now provides conservative multi-hop query decomposition, exact
+canonical-name/alias lookup for people and places, and reciprocal-rank fusion
+across trigram and BM25 indexes with optional caller-supplied semantic vectors.
+See [the retrieval guide](docs/hybrid-retrieval.md). Retrieval ranking is not
+historical truth, and alias matches never automatically merge entities.
