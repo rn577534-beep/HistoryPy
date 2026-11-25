@@ -962,6 +962,7 @@ for review in report.path_reviews:
     print(review.temporal_status, review.source_independence.status)
     for hop in review.hops:
         print(hop.relationship_id, hop.predicate, hop.source_records)
+        print(hop.claim_ids, hop.claim_analyses)
 ```
 
 Only exact canonical names and researcher-verified aliases become entity
@@ -969,3 +970,9 @@ candidates. Ambiguity, per-hop source records, path-wide source dependence,
 and temporal compatibility are exposed for review. Predicate phrases are
 candidate slots; path search remains unfiltered until the researcher confirms
 the intended relation sequence. A path is not proof of historical truth.
+
+
+Relationship records may link to claim records with `claim_ids=(...)`.
+The multi-hop workflow then reports claim-level evidence coverage for each
+hop. Missing claim links remain visible evidence gaps; source IDs alone are
+not a substitute for locators, quotations, and claim-level evidence review.
