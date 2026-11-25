@@ -160,11 +160,11 @@ class QuestionPathReview:
         statuses = {analysis.assessment_status for analysis in analyses}
         if "mixed" in statuses:
             return "conflicting"
-        if "contradicted" in statuses and "supported" not in statuses:
+        if "contradicted" in statuses:
             return "contradicted"
-        if "supported" in statuses:
-            return "supported"
-        return "insufficient"
+        if "insufficient" in statuses:
+            return "insufficient"
+        return "supported" if "supported" in statuses else "insufficient"
 
     @property
     def conflicting_claim_ids(self) -> tuple[str, ...]:
