@@ -7,6 +7,7 @@ from historypy import (
     HistoricalDate,
     HistoricalEvent,
     SourceRecord,
+    SQLiteMaintenanceStats,
 )
 from historypy.io.sqlite_normalized import NormalizedSQLiteStore
 
@@ -220,6 +221,7 @@ def test_normalized_store_wal_backup_and_maintenance(tmp_path):
     store.save("archive", original)
 
     before = store.maintenance_stats()
+    assert isinstance(before, SQLiteMaintenanceStats)
     assert before.journal_mode == "WAL"
     assert before.page_count > 0
     assert before.allocated_bytes == before.page_count * before.page_size_bytes
