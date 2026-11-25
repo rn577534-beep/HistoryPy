@@ -54,3 +54,44 @@ def test_candidates_are_deterministically_ordered():
     assert [(item.left_id, item.right_id) for item in results] == [
         ("a", "b"), ("a", "z"), ("b", "z")
     ]
+
+
+def test_civilization_and_organization_accept_historical_aliases():
+    from historypy import HistoricalCivilization, HistoricalOrganization
+    from historypy.research.hybrid import EntityAwareSearchIndex
+
+    dataset = HistoricalDataset(
+        civilizations=(
+            HistoricalCivilization(
+                id="c1", name="Byzantine Empire",
+                aliases=("Eastern Roman Empire", "Βυζαντινή Αυτοκρατορία"),
+            ),
+        ),
+        organizations=(
+            HistoricalOrganization(
+                id="o1", name="League of Nations",
+                aliases=("Société des Nations", "国際連盟"),
+            ),
+        ),
+    )
+    index = EntityAwareSearchIndex.build(dataset)
+    byzantium = index.resolve("The Eastern Roman Empire")
+    league = index.resolve("Société des Nations and 国際連盟")
+    assert [(item.kind, item.record_id) for item in byzantium] == [
+        ("civilization", "c1")
+    ]
+    assert [(item.kind, item.record_id) for item in league] == [
+        ("organization", "o1")
+    ]
+    assert {item.matched_alias for item in league} == {
+        "Société des Nations", "国際連盟"
+    }
+
+
+def test_civilization_and_organization_aliases_are_validated():
+    from historypy import HistoricalCivilization, HistoricalOrganization
+
+    with pytest.raises(ValueError, match="aliases"):
+        HistoricalCivilization(id="c1", name="Empire", aliases=("",))
+    with pytest.raises(ValueError, match="aliases"):
+        HistoricalOrganization(id="o1", name="Institution", aliases=("X", "X"))
