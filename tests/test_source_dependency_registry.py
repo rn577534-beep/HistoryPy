@@ -6,7 +6,6 @@ from historypy import (
     SourceDependencyRegistry,
     SourceRecord,
 )
-from historypy.research.source_independence import analyze_source_set_independence
 
 
 def _dataset():
@@ -54,7 +53,7 @@ def test_verified_genealogy_assertions_apply_but_candidates_do_not():
     assert source_map["s2"].shared_evidence_group_ids == ()
     assert dataset.sources[1].derived_from_source_ids == ()
 
-    report = analyze_source_set_independence(applied, ["s2", "s3"])
+    report = registry.audit_source_set(["s2", "s3"])
     assert report.status == "known_dependence"
     assert report.dependent_clusters[0].bridge_source_ids == ("s1",)
 
