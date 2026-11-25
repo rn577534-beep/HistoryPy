@@ -166,8 +166,14 @@ class HybridSearchIndex:
                     matched_aliases[key].add(entity.matched_alias)
                     scores[key] += 1.0 / (self.rrf_k + rank)
                 if entity_fuzzy_threshold is not None:
-                    suggestions = self.entity_index.suggest(
-                        part, kinds=allowed, threshold=entity_fuzzy_threshold
+                    exact_keys = {
+                        (entity.kind, entity.record_id) for entity in entity_hits
+                    }
+                    suggestions = tuple(
+                        entity for entity in self.entity_index.suggest(
+                            part, kinds=allowed, threshold=entity_fuzzy_threshold
+                        )
+                        if (entity.kind, entity.record_id) not in exact_keys
                     )
                     for rank, entity in enumerate(suggestions, start=1):
                         key = (entity.kind, entity.record_id)
@@ -264,29 +270,28 @@ class EntityAwareSearchIndex:
         if not normalized:
             return ()
         allowed = set(kinds) if kinds is not None else None
-        matches = []
+        matches: dict[tuple[str, str], EntityAliasMatch] = {}
         for alias, entities in self._aliases.items():
-            if re.search(rf"(?<!\w){re.escape(alias)}(?!\w)", normalized):
-                matches.extend(
-                    entity for entity in entities
-                    if allowed is None or entity.kind in allowed
-                )
-        ambiguity_counts: dict[str, int] = {}
-        for alias, entities in self._aliases.items():
-            ambiguity_counts[alias] = sum(
-                1 for entity in entities
+            if not re.search(rf"(?<!\\w){re.escape(alias)}(?!\\w)", normalized):
+                continue
+            eligible = [
+                entity for entity in entities
                 if allowed is None or entity.kind in allowed
-            )
-        return tuple(sorted(
-            (
-                EntityAliasMatch(
-                    item.kind, item.record_id, item.canonical_name,
-                    item.matched_alias, ambiguity_counts.get(
-                        _normalize_phrase(item.matched_alias), 1
-                    )
+            ]
+            ambiguity_count = len({
+                (entity.kind, entity.record_id) for entity in eligible
+            })
+            for entity in eligible:
+                candidate = EntityAliasMatch(
+                    entity.kind, entity.record_id, entity.canonical_name,
+                    entity.matched_alias, max(1, ambiguity_count)
                 )
-                for item in matches
-            ),
+                key = (entity.kind, entity.record_id)
+                previous = matches.get(key)
+                if previous is None or len(candidate.matched_alias) > len(previous.matched_alias):
+                    matches[key] = candidate
+        return tuple(sorted(
+            matches.values(),
             key=lambda item: (item.kind, item.record_id, item.matched_alias)
         ))
 
