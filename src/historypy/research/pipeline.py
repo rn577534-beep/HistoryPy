@@ -177,6 +177,16 @@ class ResearchPipeline:
         if any(result.external and result.external.failures for result in tasks):
             gaps.append("One or more external providers failed; inspect provider_failures.")
         for analysis in claim_analyses:
+            if analysis.source_independence.unknown_source_ids:
+                gaps.append(
+                    f"Claim {analysis.claim_id} has source(s) with unknown "
+                    "dependence; do not count them as independent corroboration."
+                )
+            if analysis.source_independence.dependent_clusters:
+                gaps.append(
+                    f"Claim {analysis.claim_id} includes known dependent sources; "
+                    "review shared origins before counting corroboration."
+                )
             if analysis.assessment_status in {"insufficient", "mixed"}:
                 gaps.append(
                     f"Claim {analysis.claim_id} has {analysis.assessment_status} "
@@ -238,6 +248,23 @@ def render_research_report(report: ResearchReport) -> str:
             f"{item.total_links} evidence links, "
             f"{item.links_missing_locators} links missing locators."
         )
+        independence = item.source_independence
+        lines.append(
+            f"  - Source dependence: **{independence.status}**; "
+            f"{independence.known_dependent_source_count} sources in known "
+            f"dependency clusters; {len(independence.unknown_source_ids)} "
+            "source(s) with unknown dependence."
+        )
+        for cluster in independence.dependent_clusters:
+            lines.append(
+                "  - Known dependency cluster: "
+                + ", ".join(f"`{source_id}`" for source_id in cluster.evidence_source_ids)
+            )
+        if independence.unknown_source_ids:
+            lines.append(
+                "  - Dependence unknown for: "
+                + ", ".join(f"`{source_id}`" for source_id in independence.unknown_source_ids)
+            )
     lines.extend(("", "## Duplicate candidates and metadata conflicts", ""))
     lines.append(f"- Duplicate candidate groups for human review: {len(report.duplicate_candidates)}")
     lines.append(f"- Metadata conflict fields: {len(report.metadata_conflicts)}")
