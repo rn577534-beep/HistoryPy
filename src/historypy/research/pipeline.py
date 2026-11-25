@@ -258,7 +258,9 @@ def render_research_report(report: ResearchReport) -> str:
         for cluster in independence.dependent_clusters:
             lines.append(
                 "  - Known dependency cluster: "
-                + ", ".join(f"`{source_id}`" for source_id in cluster.evidence_source_ids)
+                + ", ".join(
+                    f"`{source_id}`" for source_id in cluster.evidence_source_ids
+                )
             )
         if independence.unknown_source_ids:
             lines.append(
