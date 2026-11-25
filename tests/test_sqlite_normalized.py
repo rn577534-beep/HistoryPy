@@ -158,3 +158,53 @@ def test_normalized_store_search_fallback_and_fts_cleanup(tmp_path):
         assert connection.execute(
             "SELECT COUNT(*) FROM hp06_records_fts WHERE dataset_name = 'sample'"
         ).fetchone()[0] == 0
+
+
+def test_normalized_store_wal_concurrent_writes_checkpoint_and_integrity(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+
+    database = tmp_path / "wal-history.db"
+    stores = [NormalizedSQLiteStore(database, journal_mode="WAL") for _ in range(4)]
+
+    def write(index):
+        dataset = HistoricalDataset(events=(
+            HistoricalEvent(
+                f"e{index}", f"Concurrent archive event {index}",
+                HistoricalDate(
+                    earliest_year=1900 + index, latest_year=1900 + index,
+                    precision="year", calendar="gregorian",
+                ),
+            ),
+        ))
+        stores[index].save(f"dataset-{index}", dataset)
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        list(executor.map(write, range(4)))
+
+    assert stores[0].journal_mode == "WAL"
+    assert stores[0].names() == (
+        "dataset-0", "dataset-1", "dataset-2", "dataset-3"
+    )
+    assert all(stores[0].count_records(f"dataset-{i}") == 1 for i in range(4))
+    checkpoint = stores[0].checkpoint_wal(mode="PASSIVE")
+    assert len(checkpoint) == 3
+    assert stores[0].integrity_check() == ("ok",)
+
+
+def test_normalized_store_rolls_back_interrupted_replacement(tmp_path):
+    database = tmp_path / "rollback.db"
+    store = NormalizedSQLiteStore(database, journal_mode="WAL")
+    original = make_dataset()
+    store.save("stable", original)
+
+    connection = store._connect()
+    try:
+        connection.execute("BEGIN IMMEDIATE")
+        connection.execute("DELETE FROM hp06_datasets WHERE name = ?", ("stable",))
+        connection.rollback()
+    finally:
+        connection.close()
+
+    reopened = NormalizedSQLiteStore(database, journal_mode="WAL")
+    assert reopened.load("stable") == original
+    assert reopened.integrity_check() == ("ok",)
