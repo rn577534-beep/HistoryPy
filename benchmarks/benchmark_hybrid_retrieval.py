@@ -100,7 +100,7 @@ def stratified_holdout(
         ordered = sorted(
             rows,
             key=lambda row: hashlib.sha256(
-                f"{seed}|{category}|{row.get('id') or row.get('question_id') or row.get('question')}".encode("utf-8")
+                f"{seed}|{category}|{row.get('id') or row.get('question_id') or row.get('question')}".encode()
             ).hexdigest(),
         )
         if len(ordered) < 2:
