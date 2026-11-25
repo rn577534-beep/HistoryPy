@@ -12,7 +12,10 @@ import json
 from pathlib import Path
 from typing import Any
 
-from benchmark_hybrid_retrieval import evaluate, split_summary, stratified_holdout
+if __package__:
+    from .benchmark_hybrid_retrieval import evaluate, split_summary, stratified_holdout
+else:
+    from benchmark_hybrid_retrieval import evaluate, split_summary, stratified_holdout
 
 from historypy import (
     BM25SearchIndex,
