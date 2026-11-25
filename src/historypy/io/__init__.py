@@ -14,8 +14,8 @@ from historypy.io.json import (
 from historypy.io.sqlite import SQLiteDatasetStore
 from historypy.io.sqlite_normalized import (
     NormalizedSQLiteStore,
-    SQLiteMaintenanceStats,
     SourceUsage,
+    SQLiteMaintenanceStats,
     StoredRecord,
 )
 
