@@ -544,3 +544,50 @@ with the target filesystem and workload.
 Each SQLite workflow job now uploads its machine-readable JSON report as an
 artifact, in addition to printing the report in the job log. This makes later
 comparisons reproducible without scraping console output.
+
+
+## Multi-hop decomposition: held-out comparison by language
+
+The reports below use the same deterministic 80/20 question-type-stratified
+holdout for each dataset. "Before" is hybrid Trigram + BM25 reciprocal-rank
+fusion without decomposition; "After" is the same hybrid with the current
+rule-based decomposition enabled. The original full question remains a
+retrieval anchor in both cases.
+
+### French — HistoriQA-ThirdRepublic
+
+Held-out multi-hop subset: 176 questions (30 bridge-entity, 38 comparative,
+108 generic), drawn from the 355-question held-out set. Metrics are calculated
+separately by question type; the final row is a question-count-weighted
+aggregate across the three multi-hop categories.
+
+| Multi-hop group | Questions | Before Recall@10 | After Recall@10 | Before MRR@10 | After MRR@10 |
+|---|---:|---:|---:|---:|---:|
+| Bridge entity | 30 | 30.00% | 30.00% | 40.89% | 40.89% |
+| Comparative | 38 | 26.32% | 25.00% | 29.67% | 29.30% |
+| Generic | 108 | 31.94% | 13.89% | 32.49% | 10.25% |
+| **All multi-hop (weighted)** | **176** | **30.40%** | **19.03%** | **33.31%** | **19.59%** |
+
+### English — HotpotQA
+
+Held-out subset: 1,481 questions (1,184 bridge and 297 comparison questions).
+HotpotQA is a general-domain multi-hop benchmark, not a history-only corpus.
+
+| Multi-hop group | Questions | Before Recall@10 | After Recall@10 | Before MRR@10 | After MRR@10 |
+|---|---:|---:|---:|---:|---:|
+| Bridge | 1,184 | 75.30% | 74.96% | 85.70% | 85.49% |
+| Comparison | 297 | 90.74% | 90.57% | 83.23% | 82.89% |
+| **All multi-hop** | **1,481** | **78.39%** | **78.09%** | **85.21%** | **84.97%** |
+
+**Conclusion:** the current deterministic decomposition did not improve either
+held-out benchmark. The loss is especially large for generic French multi-hop
+questions. It remains opt-in and must not be made the default. Future changes
+need a fresh untouched evaluation split and should test entity/bridge
+resolution and sub-question coverage rather than merely splitting conjunctions.
+
+Reports:
+- [French semantic and hybrid retrieval report](https://github.com/rn577534-beep/HistoryPy/actions/runs/45519533279)
+- [English HotpotQA report](https://github.com/rn577534-beep/HistoryPy/actions/runs/45519533341)
+
+The benchmark scores measure document retrieval against dataset relevance
+labels. They do not show that the retrieved account is historically true.
