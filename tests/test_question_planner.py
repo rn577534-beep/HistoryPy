@@ -1,5 +1,6 @@
-import pytest
 from dataclasses import replace
+
+import pytest
 
 from historypy import (
     AliasAssertion,
