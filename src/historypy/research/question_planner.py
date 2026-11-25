@@ -241,6 +241,16 @@ def plan_research_question(
     )
 
     entity_ids = sorted({(row.entity_kind, row.entity_id) for row in mentions})
+    ambiguous_entity_pairs = {
+        frozenset(
+            (row.entity_kind, row.entity_id)
+            for row in mentions
+            if _normalize(row.matched_text) == phrase
+        )
+        for phrase in {
+            _normalize(row.matched_text) for row in mentions if row.ambiguous
+        }
+    }
     path_queries = tuple(
         RelationshipPathQuery(
             start_entity_id=start_id,
@@ -252,6 +262,8 @@ def plan_research_question(
         for start_kind, start_id in entity_ids
         for end_kind, end_id in entity_ids
         if (start_kind, start_id) != (end_kind, end_id)
+        and frozenset(((start_kind, start_id), (end_kind, end_id)))
+        not in ambiguous_entity_pairs
     )
     warnings: list[str] = [
         "Predicate matches are reviewable candidates only; endpoint path searches "
