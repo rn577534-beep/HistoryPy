@@ -78,6 +78,7 @@ def test_civilization_and_organization_accept_historical_aliases():
     byzantium = index.resolve("The Eastern Roman Empire")
     league_french = index.resolve("Société des Nations")
     league_japanese = index.resolve("国際連盟")
+    both_aliases = index.resolve("Société des Nations and 国際連盟")
     assert [(item.kind, item.record_id) for item in byzantium] == [
         ("civilization", "c1")
     ]
@@ -89,6 +90,12 @@ def test_civilization_and_organization_accept_historical_aliases():
     ]
     assert league_french[0].matched_alias == "Société des Nations"
     assert league_japanese[0].matched_alias == "国際連盟"
+    assert {item.matched_alias for item in both_aliases} == {
+        "Société des Nations", "国際連盟"
+    }
+    assert {(item.kind, item.record_id) for item in both_aliases} == {
+        ("organization", "o1")
+    }
 
 
 def test_civilization_and_organization_aliases_are_validated():
