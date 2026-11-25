@@ -89,10 +89,10 @@ class HistoricalDataset:
         source_visited: set[str] = set()
         source_active: list[str] = []
         source_positions: dict[str, int] = {}
-        for source_id in source_adjacency:
+        for source_id, derived_ids in source_adjacency.items():
             if source_id in source_visited:
                 continue
-            stack = [(source_id, iter(source_adjacency[source_id]))]
+            stack = [(source_id, iter(derived_ids))]
             source_active.append(source_id)
             source_positions[source_id] = 0
             source_visited.add(source_id)
