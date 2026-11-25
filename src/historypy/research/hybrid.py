@@ -9,7 +9,7 @@ import re
 import unicodedata
 from collections import defaultdict
 from collections.abc import Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from difflib import SequenceMatcher
 
 from historypy.core.dataset import HistoricalDataset
@@ -31,6 +31,7 @@ class HybridSearchHit:
     semantic_rank: int | None
     entity_rank: int | None
     matched_entity_aliases: tuple[str, ...] = ()
+    matched_entity_evidence: tuple[EntityAliasMatch, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -142,6 +143,7 @@ class HybridSearchIndex:
         labels: dict[tuple[str, str], str] = {}
         ranks: dict[tuple[str, str], dict[str, int]] = defaultdict(dict)
         matched_aliases: dict[tuple[str, str], set[str]] = defaultdict(set)
+        matched_entity_evidence: dict[tuple[str, str], dict[tuple[str, str], EntityAliasMatch]] = defaultdict(dict)
         for part in parts:
             result_sets = [
                 ("trigram", self.trigram.search(part, kinds=allowed, limit=None)),
@@ -175,6 +177,8 @@ class HybridSearchIndex:
                         )
                         scores[key] += 1.0 / (self.rrf_k + rank)
                     matched_aliases[key].add(entity.matched_alias)
+                    evidence_key = (entity.match_type, entity.alias_id or entity.matched_alias)
+                    matched_entity_evidence[key][evidence_key] = entity
                 if entity_fuzzy_threshold is not None:
                     exact_keys = {
                         (entity.kind, entity.record_id) for entity in entity_hits
@@ -203,6 +207,10 @@ class HybridSearchIndex:
                 semantic_rank=ranks[key].get("semantic"),
                 entity_rank=ranks[key].get("entity"),
                 matched_entity_aliases=tuple(sorted(matched_aliases[key])),
+                matched_entity_evidence=tuple(
+                    matched_entity_evidence[key][evidence_key]
+                    for evidence_key in sorted(matched_entity_evidence[key])
+                ),
             )
             for key in ordered[:limit]
         )
@@ -210,13 +218,19 @@ class HybridSearchIndex:
 
 @dataclass(frozen=True, slots=True)
 class EntityAliasMatch:
-    """Exact normalized alias match linked to a typed entity record."""
+    """Exact normalized alias match with review state and citation provenance."""
 
     kind: str
     record_id: str
     canonical_name: str
     matched_alias: str
     ambiguity_count: int = 1
+    match_type: str = "legacy_alias"
+    review_status: str = "unverified"
+    alias_id: str | None = None
+    source_id: str | None = None
+    locator: str | None = None
+    language: str | None = None
 
     @property
     def ambiguous(self) -> bool:
@@ -248,7 +262,15 @@ class EntityAwareSearchIndex:
         self._aliases = aliases
 
     @classmethod
-    def build(cls, dataset: HistoricalDataset) -> EntityAwareSearchIndex:
+    def build(
+        cls,
+        dataset: HistoricalDataset,
+        *,
+        alias_registry=None,
+    ) -> EntityAwareSearchIndex:
+        """Build an entity index; only verified registry assertions gain verified status."""
+        if alias_registry is not None and alias_registry.dataset != dataset:
+            raise ValueError("alias_registry must match the indexed dataset snapshot")
         rows: dict[str, list[EntityAliasMatch]] = defaultdict(list)
         groups = (
             ("person", dataset.people),
@@ -261,11 +283,42 @@ class EntityAwareSearchIndex:
                 for alias in dict.fromkeys((record.name, *record.aliases)):
                     normalized = _normalize_phrase(alias)
                     if normalized:
+                        is_canonical = alias == record.name
                         rows[normalized].append(EntityAliasMatch(
-                            kind, record.id, record.name, alias
+                            kind=kind,
+                            record_id=record.id,
+                            canonical_name=record.name,
+                            matched_alias=alias,
+                            match_type="canonical_name" if is_canonical else "legacy_alias",
+                            review_status="canonical_record" if is_canonical else "unverified",
                         ))
+        if alias_registry is not None:
+            for assertion in alias_registry.assertions:
+                if assertion.review_status != "verified":
+                    continue
+                match = alias_registry.resolve(assertion.alias)
+                for resolved in match:
+                    normalized = _normalize_phrase(resolved.alias)
+                    rows[normalized].append(EntityAliasMatch(
+                        kind=resolved.entity_kind,
+                        record_id=resolved.entity_id,
+                        canonical_name=resolved.canonical_name,
+                        matched_alias=resolved.alias,
+                        match_type="verified_alias",
+                        review_status="verified",
+                        alias_id=resolved.alias_id,
+                        source_id=resolved.source_id,
+                        locator=resolved.locator,
+                        language=resolved.language,
+                    ))
         return cls({
-            key: tuple(sorted(values, key=lambda item: (item.kind, item.record_id, item.matched_alias)))
+            key: tuple(sorted(
+                values,
+                key=lambda item: (
+                    item.kind, item.record_id, item.matched_alias,
+                    item.match_type, item.alias_id or "",
+                ),
+            ))
             for key, values in rows.items()
         })
 
@@ -292,12 +345,20 @@ class EntityAwareSearchIndex:
                 (entity.kind, entity.record_id) for entity in eligible
             })
             for entity in eligible:
-                candidate = EntityAliasMatch(
-                    entity.kind, entity.record_id, entity.canonical_name,
-                    entity.matched_alias, max(1, ambiguity_count)
-                )
+                candidate = replace(entity, ambiguity_count=max(1, ambiguity_count))
                 key = (entity.kind, entity.record_id, alias)
-                matches[key] = candidate
+                previous = matches.get(key)
+                priority = {
+                    "legacy_alias": 0,
+                    "canonical_name": 1,
+                    "verified_alias": 2,
+                }
+                if (
+                    previous is None
+                    or priority.get(candidate.match_type, 0)
+                    > priority.get(previous.match_type, 0)
+                ):
+                    matches[key] = candidate
         return tuple(sorted(
             matches.values(),
             key=lambda item: (item.kind, item.record_id, item.matched_alias)
