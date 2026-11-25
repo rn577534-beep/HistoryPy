@@ -1,13 +1,21 @@
-from pathlib import Path
 import sys
+from importlib.util import module_from_spec, spec_from_file_location
+from pathlib import Path
 from types import SimpleNamespace
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "benchmarks"))
-
-from benchmark_multilingual_decomposition import (
-    compare_decomposition,
-    macro_average,
+BENCHMARK_DIR = Path(__file__).resolve().parents[1] / "benchmarks"
+sys.path.insert(0, str(BENCHMARK_DIR))
+SPEC = spec_from_file_location(
+    "benchmark_multilingual_decomposition",
+    BENCHMARK_DIR / "benchmark_multilingual_decomposition.py",
 )
+assert SPEC is not None and SPEC.loader is not None
+MODULE = module_from_spec(SPEC)
+sys.modules[SPEC.name] = MODULE
+SPEC.loader.exec_module(MODULE)
+
+compare_decomposition = MODULE.compare_decomposition
+macro_average = MODULE.macro_average
 
 
 class FakeHybridIndex:
