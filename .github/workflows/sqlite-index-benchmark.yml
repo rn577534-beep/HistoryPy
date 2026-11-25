@@ -34,4 +34,14 @@ jobs:
       - name: Install package
         run: python -m pip install -e .
       - name: Benchmark persistent SQLite index
-        run: python benchmarks/benchmark_sqlite_store.py --records ${{ matrix.records }} --journal-mode ${{ matrix.journal-mode }}
+        run: |
+          python benchmarks/benchmark_sqlite_store.py \
+            --records ${{ matrix.records }} \
+            --journal-mode ${{ matrix.journal-mode }} \
+            --output sqlite-${{ matrix.records }}-${{ matrix.journal-mode }}.json
+      - name: Upload SQLite benchmark report
+        uses: actions/upload-artifact@v4
+        with:
+          name: sqlite-${{ matrix.records }}-${{ matrix.journal-mode }}-report
+          path: sqlite-${{ matrix.records }}-${{ matrix.journal-mode }}.json
+          if-no-files-found: error
