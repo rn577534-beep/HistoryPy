@@ -10,6 +10,69 @@ from historypy.research.evidence import summarize_claim_evidence
 
 
 @dataclass(frozen=True, slots=True)
+class CitationCompletenessReport:
+    """Dataset-wide locator, quotation, and URL coverage; not a truth score."""
+
+    total_evidence_links: int
+    links_with_locator: int
+    links_with_quotation: int
+    links_with_source_url: int
+    links_with_locator_quotation_and_url: int
+    missing_locator_indices: tuple[int, ...]
+    missing_quotation_indices: tuple[int, ...]
+    missing_source_url_indices: tuple[int, ...]
+
+    @property
+    def complete_citation_coverage(self) -> float | None:
+        if not self.total_evidence_links:
+            return None
+        return self.links_with_locator_quotation_and_url / self.total_evidence_links
+
+
+def audit_citation_completeness(
+    dataset: HistoricalDataset,
+) -> CitationCompletenessReport:
+    """Audit whether each evidence link has a locator, quotation, and source URL.
+
+    Evidence indices refer to their zero-based position in dataset.evidence.
+    Completeness is a traceability measure, not an assessment of source quality.
+    """
+    sources = {source.id: source for source in dataset.sources}
+    missing_locator = []
+    missing_quotation = []
+    missing_url = []
+    with_locator = with_quotation = with_url = complete = 0
+    for index, link in enumerate(dataset.evidence):
+        has_locator = any((
+            link.locator, link.page, link.paragraph, link.archive_shelfmark,
+            link.url_fragment, link.transcription_line, link.timecode,
+        ))
+        has_quotation = bool(link.quotation and link.quotation.strip())
+        source = sources.get(link.source_id)
+        has_url = bool(source and source.url and source.url.strip())
+        with_locator += int(has_locator)
+        with_quotation += int(has_quotation)
+        with_url += int(has_url)
+        complete += int(has_locator and has_quotation and has_url)
+        if not has_locator:
+            missing_locator.append(index)
+        if not has_quotation:
+            missing_quotation.append(index)
+        if not has_url:
+            missing_url.append(index)
+    return CitationCompletenessReport(
+        total_evidence_links=len(dataset.evidence),
+        links_with_locator=with_locator,
+        links_with_quotation=with_quotation,
+        links_with_source_url=with_url,
+        links_with_locator_quotation_and_url=complete,
+        missing_locator_indices=tuple(missing_locator),
+        missing_quotation_indices=tuple(missing_quotation),
+        missing_source_url_indices=tuple(missing_url),
+    )
+
+
+@dataclass(frozen=True, slots=True)
 class ClaimEvidenceAnalysis:
     """Auditable evidence coverage for one claim; counts are not quality scores."""
 
