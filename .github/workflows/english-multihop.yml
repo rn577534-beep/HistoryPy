@@ -1,0 +1,47 @@
+name: English multi-hop retrieval benchmark
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/benchmark_hotpotqa_retrieval.py"
+      - "benchmarks/benchmark_hybrid_retrieval.py"
+      - "tests/test_hotpotqa_benchmark.py"
+      - ".github/workflows/english-multihop.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: historypy-english-multihop
+  cancel-in-progress: true
+
+jobs:
+  hotpotqa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install HistoryPy
+        run: python -m pip install -e .
+      - name: Download official HotpotQA development set
+        run: |
+          curl --fail --location --retry 3 \
+            http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_dev_distractor_v1.json \
+            --output hotpot_dev_distractor_v1.json
+      - name: Evaluate English multi-hop retrieval
+        run: |
+          python benchmarks/benchmark_hotpotqa_retrieval.py \
+            --data hotpot_dev_distractor_v1.json \
+            --top-k 10 \
+            --output hotpotqa-retrieval-report.json
+      - name: Upload benchmark report
+        uses: actions/upload-artifact@v4
+        with:
+          name: historypy-hotpotqa-english-report
+          path: hotpotqa-retrieval-report.json
+          if-no-files-found: error
