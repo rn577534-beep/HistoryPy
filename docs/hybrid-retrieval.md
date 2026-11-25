@@ -41,7 +41,7 @@ hits = hybrid.search(
 entities = EntityAwareSearchIndex.build(dataset).resolve("Iskandar in Byzantium")
 ~~~
 
-The real-corpus benchmark now has an RRF comparison for trigram + BM25.
+The real-corpus benchmark now compares trigram, BM25, lexical RRF, and decomposed lexical RRF. If configured, it also compares semantic-only, three-way RRF, and decomposed three-way RRF.
 A production semantic comparison is opt-in: pass an importable
 `module:callable` embedder and a stable `--semantic-model-id`. HistoryPy does
 not silently select a model, send corpus text to a provider, or treat cosine
