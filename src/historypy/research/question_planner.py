@@ -150,8 +150,18 @@ def plan_research_question(
     """
     if not isinstance(question, str) or not question.strip():
         raise ValueError("question cannot be empty")
-    if alias_registry is not None and alias_registry.dataset is not dataset:
-        raise ValueError("alias_registry must be built for the same dataset instance")
+    if alias_registry is not None and alias_registry.dataset != dataset:
+        raise ValueError("alias_registry must be built for the same dataset snapshot")
+    if predicate_lexicon is not None:
+        if not isinstance(predicate_lexicon, Mapping):
+            raise TypeError("predicate_lexicon must be a mapping")
+        for predicate, terms in predicate_lexicon.items():
+            if not isinstance(predicate, str) or not predicate.strip():
+                raise ValueError("predicate lexicon keys must be non-empty strings")
+            if isinstance(terms, str) or not isinstance(terms, (tuple, list)):
+                raise TypeError("each predicate lexicon value must be a tuple or list of terms")
+            if any(not isinstance(term, str) or not term.strip() for term in terms):
+                raise ValueError("predicate lexicon terms must be non-empty strings")
     if not isinstance(max_hops, int) or isinstance(max_hops, bool) or not 1 <= max_hops <= 12:
         raise ValueError("max_hops must be an integer between 1 and 12")
     if not isinstance(limit, int) or isinstance(limit, bool) or not 1 <= limit <= 500:
