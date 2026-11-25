@@ -125,3 +125,29 @@ ruff check .
 ```
 
 At this stage, the code and tests have been committed to the feature branch, but a passing CI result has not yet been observed.
+
+
+## 8. Integrated claim and report analysis
+
+The claim-level evidence analyzer now attaches a
+`ClaimSourceIndependenceReport` as `ClaimEvidenceAnalysis.source_independence`.
+The research pipeline's Markdown renderer prints known dependency clusters,
+bridge context through the structured report, and unresolved source IDs. It
+also adds explicit research-gap warnings for both known dependence and unknown
+dependence. These warnings do not alter the claim's support/contradiction status
+and do not convert retrieval or source counts into truth scores.
+
+Example:
+
+```python
+from historypy.research import analyze_claim_evidence
+
+analysis = analyze_claim_evidence(dataset, "claim-1")
+print(analysis.source_independence.status)
+print(analysis.source_independence.dependent_clusters)
+print(analysis.source_independence.unknown_source_ids)
+```
+
+The integration test uses two reports in one shared-evidence group and a third
+source with no genealogy metadata. The expected result is one known dependent
+cluster plus one unknown source—not three independent confirmations.
