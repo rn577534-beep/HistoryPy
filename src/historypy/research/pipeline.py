@@ -5,7 +5,7 @@ resolve historical disputes, or treat retrieval relevance as evidence of truth.
 """
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 from historypy.core.dataset import HistoricalDataset
@@ -19,13 +19,13 @@ from historypy.integrations.aggregation import (
     search_all,
 )
 from historypy.integrations.historical_apis import ExternalRecord
+from historypy.research.alias_registry import AliasRegistry
 from historypy.research.engine import ResearchQuery, execute_research_query
 from historypy.research.evidence_analysis import (
     ClaimEvidenceAnalysis,
     analyze_claim_evidence,
 )
 from historypy.research.query import SearchHit
-from historypy.research.alias_registry import AliasRegistry
 from historypy.research.question_planner import (
     QuestionExecutionReport,
     execute_question_plan,
@@ -127,7 +127,7 @@ class ResearchPipeline:
         question: str,
         *,
         alias_registry: AliasRegistry | None = None,
-        predicate_lexicon: dict[str, tuple[str, ...]] | None = None,
+        predicate_lexicon: Mapping[str, tuple[str, ...]] | None = None,
         max_hops: int = 3,
         limit: int = 10,
         direction: str = "both",
