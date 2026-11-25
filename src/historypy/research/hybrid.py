@@ -123,7 +123,7 @@ class HybridSearchIndex:
             if self.semantic is not None and embedder is not None:
                 result_sets.append((
                     "semantic",
-                    self.semantic.search(part, embedder=embedder, kinds=allowed, limit=None),
+                    self.semantic.search(\n                        part, embedder=embedder, kinds=allowed,\n                        limit=len(self.semantic.records),\n                    ),
                 ))
             for method, hits in result_sets:
                 for rank, hit in enumerate(hits, start=1):
