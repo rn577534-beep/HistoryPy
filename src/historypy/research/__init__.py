@@ -1,5 +1,6 @@
 """Research utilities for evidence-aware historical analysis."""
 
+from historypy.research.alias_registry import AliasAssertion, AliasMatch, AliasRegistry
 from historypy.research.audit_trail import (
     ResearchAction,
     append_research_action,
@@ -90,6 +91,9 @@ from historypy.research.timeline import TimelineEntry, TimelineResult, timeline_
 from historypy.research.verification import ClaimAssessment, assess_claim
 
 __all__ = [
+    "AliasAssertion",
+    "AliasMatch",
+    "AliasRegistry",
     "BM25SearchHit",
     "BM25SearchIndex",
     "CitationCompletenessReport",
