@@ -175,3 +175,22 @@ native allocations, and total process RSS. Broad queries, different text
 distributions, different hardware, and real historical corpora can behave
 very differently. The million-record run demonstrates that this fixture and
 index can complete at that size; it is not a guarantee for every dataset.
+
+
+## Persistent SQLite index benchmark
+
+Run the optional persistent-index stress test with:
+
+~~~bash
+python benchmarks/benchmark_sqlite_store.py --records 100000
+python benchmarks/benchmark_sqlite_store.py --records 1000000
+~~~
+
+The manual GitHub Actions workflow `.github/workflows/sqlite-index-benchmark.yml`
+provides the same two sizes. It measures save time, traced Python allocation
+peak during save, database file size, process peak RSS, FTS5 availability,
+query latency, and a search repeated after reopening the database. These are
+synthetic event records, not real historical data. Process peak RSS includes
+the in-memory synthetic dataset and should be interpreted separately from
+tracemalloc. SQLite's FTS5 phrase semantics are not BM25 ranking and are not
+comparable to a semantic embedding score without a relevance evaluation.
