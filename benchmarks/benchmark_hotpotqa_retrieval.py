@@ -9,12 +9,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import time
-from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
 from benchmark_hybrid_retrieval import evaluate, split_summary, stratified_holdout
+
 from historypy import (
     BM25SearchIndex,
     DatasetSearchIndex,
