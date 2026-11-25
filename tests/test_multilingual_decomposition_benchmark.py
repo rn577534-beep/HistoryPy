@@ -1,6 +1,10 @@
+from pathlib import Path
+import sys
 from types import SimpleNamespace
 
-from benchmarks.benchmark_multilingual_decomposition import (
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "benchmarks"))
+
+from benchmark_multilingual_decomposition import (
     compare_decomposition,
     macro_average,
 )
