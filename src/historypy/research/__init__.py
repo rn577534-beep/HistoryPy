@@ -87,12 +87,6 @@ from historypy.research.relationship_paths import (
 from historypy.research.report import render_claim_report
 from historypy.research.search_index import DatasetSearchIndex
 from historypy.research.semantic import SemanticSearchHit, SemanticSearchIndex
-from historypy.research.source_dependency_registry import (
-    DependencyReviewStatus,
-    DependencyType,
-    SourceDependencyAssertion,
-    SourceDependencyRegistry,
-)
 from historypy.research.source_audit import (
     SourceMetadataAudit,
     audit_dataset_sources,
@@ -104,6 +98,12 @@ from historypy.research.source_comparison import (
     SourceEvidenceExcerpt,
     compare_event_sources,
     render_event_source_comparison,
+)
+from historypy.research.source_dependency_registry import (
+    DependencyReviewStatus,
+    DependencyType,
+    SourceDependencyAssertion,
+    SourceDependencyRegistry,
 )
 from historypy.research.source_independence import (
     ClaimSourceIndependenceReport,
