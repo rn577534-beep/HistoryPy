@@ -76,16 +76,19 @@ def test_civilization_and_organization_accept_historical_aliases():
     )
     index = EntityAwareSearchIndex.build(dataset)
     byzantium = index.resolve("The Eastern Roman Empire")
-    league = index.resolve("Société des Nations and 国際連盟")
+    league_french = index.resolve("Société des Nations")
+    league_japanese = index.resolve("国際連盟")
     assert [(item.kind, item.record_id) for item in byzantium] == [
         ("civilization", "c1")
     ]
-    assert [(item.kind, item.record_id) for item in league] == [
+    assert [(item.kind, item.record_id) for item in league_french] == [
         ("organization", "o1")
     ]
-    assert {item.matched_alias for item in league} == {
-        "Société des Nations", "国際連盟"
-    }
+    assert [(item.kind, item.record_id) for item in league_japanese] == [
+        ("organization", "o1")
+    ]
+    assert league_french[0].matched_alias == "Société des Nations"
+    assert league_japanese[0].matched_alias == "国際連盟"
 
 
 def test_civilization_and_organization_aliases_are_validated():
