@@ -44,6 +44,7 @@ from historypy.integrations import (
 )
 from historypy.io import (
     NormalizedSQLiteStore,
+    SQLiteMaintenanceStats,
     SourceUsage,
     SQLiteDatasetStore,
     StoredRecord,
@@ -185,6 +186,7 @@ __all__ = [
     "ResearchTask",
     "ResearchTaskResult",
     "SQLiteDatasetStore",
+    "SQLiteMaintenanceStats",
     "SearchHit",
     "SearchProvider",
     "SemanticSearchHit",
