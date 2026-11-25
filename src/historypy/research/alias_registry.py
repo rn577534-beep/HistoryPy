@@ -244,7 +244,10 @@ class AliasRegistry:
         if payload.get("schema") != cls.schema:
             raise ValueError(f"Expected schema {cls.schema!r}")
         if payload.get("schema_version") != cls.schema_version:
-            raise ValueError(f"Unsupported alias registry schema version: {payload.get('schema_version')!r}")
+            version = payload.get("schema_version")
+            raise ValueError(
+                f"Unsupported alias registry schema version: {version!r}"
+            )
         rows = payload.get("assertions")
         if not isinstance(rows, list):
             raise TypeError("assertions must be a list")
