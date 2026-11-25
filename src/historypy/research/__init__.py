@@ -161,6 +161,7 @@ __all__ = [
     "SemanticSearchHit",
     "SemanticSearchIndex",
     "SourceDependency",
+    "SourceSetIndependenceReport",
     "SourceEvidenceExcerpt",
     "SourceMetadataAudit",
     "TimelineEntry",
