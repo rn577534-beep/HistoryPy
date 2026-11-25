@@ -758,7 +758,7 @@ SourceRecord(
 )
 ~~~
 
-The provenance audit reports direct derivation and shared-evidence pairs.
+The provenance audit reports direct and transitive derivation plus shared-evidence pairs.
 Unrecorded dependencies remain unknown; the audit does not infer independence.
 
 ~~~python
