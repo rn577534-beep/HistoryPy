@@ -208,3 +208,61 @@ def test_question_planner_rejects_malformed_predicate_lexicon():
             "Ada Lovelace and Charles Babbage",
             predicate_lexicon={"collaborated_with": "connected to"},
         )
+
+
+def test_path_review_surfaces_conflicting_claims_and_missing_locators():
+    base = _dataset()
+    dataset = HistoricalDataset(
+        sources=base.sources,
+        people=base.people,
+        claims=base.claims,
+        evidence=base.evidence + (
+            EvidenceLink("c3", "s1", "contradicts", quotation="Counter-evidence"),
+        ),
+        relationships=base.relationships,
+    )
+    report = execute_question_plan(
+        dataset, plan_research_question(
+            dataset, "Ada Lovelace and Mary Somerville", max_hops=2
+        )
+    )
+    direct = next(
+        row for row in report.path_reviews
+        if row.path.entity_ids == ("p1", "p3")
+    )
+    assert direct.evidence_status == "conflicting"
+    assert direct.conflicting_claim_ids == ("c3",)
+    assert direct.hops[0].conflicting_claim_ids == ("c3",)
+    assert direct.claims_missing_locators == ("c3",)
+    assert any("both supporting and contradicting" in warning for warning in report.warnings)
+
+
+def test_path_review_does_not_call_contradiction_only_claim_supported():
+    base = _dataset()
+    evidence = tuple(
+        EvidenceLink(
+            link.claim_id, link.source_id,
+            "contradicts" if link.claim_id == "c3" else link.relation,
+            locator=link.locator, quotation=link.quotation,
+        )
+        for link in base.evidence
+    )
+    dataset = HistoricalDataset(
+        sources=base.sources,
+        people=base.people,
+        claims=base.claims,
+        evidence=evidence,
+        relationships=base.relationships,
+    )
+    report = execute_question_plan(
+        dataset, plan_research_question(
+            dataset, "Ada Lovelace and Mary Somerville", max_hops=2
+        )
+    )
+    direct = next(
+        row for row in report.path_reviews
+        if row.path.entity_ids == ("p1", "p3")
+    )
+    assert direct.evidence_status == "contradicted"
+    assert direct.hops[0].contradicted_claim_ids == ("c3",)
+    assert direct.unsupported_claim_ids == ("c3",)
