@@ -7,6 +7,7 @@ benchmark = runpy.run_path(
 build_historypy_dataset = benchmark["build_historypy_dataset"]
 evaluate = benchmark["evaluate"]
 resolve_gold_ids = benchmark["resolve_gold_ids"]
+stratified_holdout = benchmark["stratified_holdout"]
 from historypy import DatasetSearchIndex
 
 
@@ -52,3 +53,23 @@ def test_real_corpus_benchmark_loader_and_relevance_metrics():
     assert report["overall_recall@1"] == 1.0
     assert report["overall_mrr@1"] == 1.0
     assert report["by_question_type"]["SH"]["success@1"] == 1.0
+
+
+def test_stratified_holdout_is_deterministic_and_preserves_question_types():
+    questions = [
+        {"id": f"fr-{i}", "question": f"Question {i}", "question_type": "MH"}
+        for i in range(10)
+    ] + [
+        {"id": f"en-{i}", "question": f"Question EN {i}", "question_type": "SH"}
+        for i in range(5)
+    ]
+    train, test = stratified_holdout(questions, test_fraction=0.2, seed=41)
+    train_again, test_again = stratified_holdout(
+        questions, test_fraction=0.2, seed=41
+    )
+    assert train == train_again
+    assert test == test_again
+    assert len(train) + len(test) == len(questions)
+    assert {row["question_type"] for row in train} == {"MH", "SH"}
+    assert {row["question_type"] for row in test} == {"MH", "SH"}
+    assert not ({row["id"] for row in train} & {row["id"] for row in test})
