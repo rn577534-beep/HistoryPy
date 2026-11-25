@@ -32,7 +32,7 @@ from historypy.research.evidence_analysis import (
     ClaimEvidenceAnalysis,
     analyze_claim_evidence,
 )
-from historypy.research.geography import (
+from historypy.research.hybrid import (\n    DecomposedQuery,\n    EntityAliasMatch,\n    EntityAwareSearchIndex,\n    HybridSearchHit,\n    HybridSearchIndex,\n    decompose_research_question,\n)\nfrom historypy.research.geography import (
     PlaceDistance,
     great_circle_distance_km,
     places_within_radius,
@@ -76,7 +76,7 @@ __all__ = [
     "ClaimAssessment",
     "ClaimEvidenceAnalysis",
     "DatasetProfile",
-    "DatasetProvenanceReport",
+    "DatasetProvenanceReport",\n    "DecomposedQuery",\n    "EntityAliasMatch",\n    "EntityAwareSearchIndex",\n    "HybridSearchHit",\n    "HybridSearchIndex",
     "DatasetQualityReport",
     "DatasetSearchIndex",
     "EntityMatchCandidate",
@@ -112,7 +112,7 @@ __all__ = [
     "claims_with_conflicting_evidence",
     "compare_event_sources",
     "compare_metrics",
-    "content_hash",
+    "content_hash",\n    "decompose_research_question",
     "events_overlapping",
     "evidence_for_claim",
     "execute_research_query",
