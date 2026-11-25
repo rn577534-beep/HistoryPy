@@ -318,3 +318,132 @@ this synthetic single-writer workload; WAL is retained as an opt-in mode for
 deployment concurrency requirements, not as a universal performance setting.
 Peak RSS includes the Python process, source dataset, SQLite cache, and native
 allocations; it is not an isolated measurement of index-only RAM.
+
+
+## Measured retrieval comparison: held-out French questions (2026-11-25)
+
+Pinned run: https://github.com/rn577534-beep/HistoryPy/actions/runs/45519533279
+
+The same deterministic, question-type-stratified 80/20 split was used for all
+methods. The held-out set contains 355 of 1,782 questions (179 single-hop and
+176 multi-hop). The multilingual embedding model was
+`sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`, executed on
+CPU. The table reports the held-out set only:
+
+| Method | Recall@10 | MRR@10 | Mean query time |
+|---|---:|---:|---:|
+| Trigram all-terms | 0.28% | 0.03% | 30.590 ms |
+| BM25 | 56.76% | 51.58% | 30.065 ms |
+| Trigram + BM25 RRF | 56.48% | 50.66% | 68.493 ms |
+| BM25 + trigram, decomposed RRF | 43.80% | 35.22% | 82.514 ms |
+| Semantic only | 22.39% | 16.28% | 68.391 ms |
+| Trigram + BM25 + semantic RRF | 48.31% | 34.34% | 142.219 ms |
+| Trigram + BM25 + semantic, decomposed RRF | 48.59% | 32.27% | 184.150 ms |
+
+On this French historical corpus, BM25 is the strongest tested method. Adding
+semantic results to simple reciprocal-rank fusion lowered Recall@10 and MRR@10;
+decomposition also lowered the held-out scores. This is a useful negative
+result, not a reason to hide or discard the experiments. The real embedding
+integration works, but this particular model/fusion configuration is not
+selected as the default retriever. Model scores are relevance rankings, not
+probabilities or truth judgments.
+
+The report also evaluates all 1,782 questions. Full-set scores are not an
+independent test after method selection; use the held-out numbers above for
+comparison and reserve a new untouched split for future tuning.
+
+## English multi-hop held-out evaluation
+
+Pinned HotpotQA workflow: https://github.com/rn577534-beep/HistoryPy/actions/runs/45519533341
+
+The benchmark evaluated 1,481 held-out English questions against 66,581
+Wikipedia context documents. HotpotQA is a general-domain multi-hop benchmark,
+not a historical-only dataset. Its supporting-fact document titles are
+retrieval relevance labels, not historical truth labels.
+
+| Method | Recall@10 | MRR@10 | Mean query time |
+|---|---:|---:|---:|
+| Trigram all-terms | 0.00% | 0.00% | 31.264 ms |
+| BM25 | 78.39% | 85.21% | 376.892 ms |
+| Trigram + BM25 RRF | 78.39% | 85.21% | 505.680 ms |
+| Trigram + BM25 decomposed RRF | 78.09% | 84.97% | 533.191 ms |
+
+The current rule-based decomposition did not improve this held-out set. It
+slightly lowered Recall@10 and MRR@10 and increased query time. It therefore
+remains opt-in/experimental; it must not be automatically applied until a
+new decomposition strategy demonstrates gains on a fresh held-out set. The
+large mean query times reflect searching a 66k-document corpus with the
+current in-memory index and are not latency guarantees.
+
+## Entity-aware retrieval and ambiguity
+
+`EntityAwareSearchIndex` indexes canonical names and researcher-supplied
+aliases for people, places, civilizations, and organizations. It normalizes
+case, punctuation, and Latin diacritics. Exact alias matches preserve every
+candidate when a name is ambiguous. Optional fuzzy suggestions are a review
+queue for likely spelling variants; they never merge records or assert that
+two people are identical. Historical name changes and cross-script
+transliterations should be entered as explicit aliases, because fuzzy string
+similarity cannot reliably establish them. Fuzzy suggestions are opt-in via
+`entity_fuzzy_threshold` in hybrid search. Unit tests cover ambiguity and
+review-only suggestions; a large, historian-labelled alias benchmark remains
+future work.
+
+## Source comparison case studies
+
+### Titanic inquiries (1912)
+
+`examples/titanic_inquiry_comparison.py` compares the U.S. Senate Report
+No. 806 with the British Wreck Commissioner's Court report. The example
+preserves different reported totals for lifeboat capacity (1,176 versus
+1,178) and people saved/rescued (706 versus 712), with printed page or finding
+locators and source URLs. The documents are separate official investigations,
+but the independence of their underlying witnesses and records is not
+established. See [the case study](source-comparison-case-study.md).
+
+### Challenger mission 51-L (1986)
+
+`src/historypy/examples/challenger_source_comparison.py` compares the
+Presidential Commission report, its hearing transcript, and a later House
+report. The transcript and final report are marked as sharing the same
+commission evidence group; the House report is explicitly marked as derived
+from the Commission report. Thus three documents are not counted as three
+independent evidence streams. See
+[challenger source comparison](challenger-source-comparison.md).
+
+## Citation completeness and source dependence
+
+`audit_citation_completeness(dataset)` reports, for every evidence link,
+whether a locator, quotation, and source URL are recorded, including indexes
+of missing fields. This is a traceability audit, not a source-quality or truth
+score. `audit_dataset_provenance(dataset)` reports source usage, orphan
+sources, claims without evidence, and potential dependency pairs derived from
+explicit `derived_from_source_ids` and `shared_evidence_group_ids` metadata.
+These links are only as complete as the researcher's recorded provenance;
+unrecorded copying, shared witnesses, or common archival origins cannot be
+automatically discovered. Dataset validation rejects missing derivation
+references and source-derivation cycles.
+
+## SQLite DELETE/WAL operational measurements
+
+The scale workflow tested 100,000 and 1,000,000 synthetic events in both
+journal modes (run:
+https://github.com/rn577534-beep/HistoryPy/actions/runs/45518628486).
+All four runs had FTS5 available, passed SQLite `integrity_check`, and
+verified that query results survived closing and reopening the database.
+WAL runs completed a PASSIVE checkpoint with no busy pages remaining.
+
+At one million records, the database file was 845.113 MiB. Save used
+687.305 MiB of additional traced Python allocations and process peak RSS was
+about 1.88 GiB (the source dataset itself was already resident in memory).
+DELETE took 87.035 s to save; WAL took 175.482 s. The bounded broad query
+(returning at most 1,000 results) took 1,145.411 ms in DELETE and 2,052.605 ms
+in WAL. On this single-writer synthetic workload DELETE was faster. WAL is
+therefore an opt-in concurrency mode, not a default speed optimization.
+
+The test suite also exercises four simultaneous writers using separate store
+instances and checks transaction rollback/reopen behavior. These are
+application-level concurrency and rollback tests, not physical power-loss
+fault injection or months-long database maintenance tests. Production
+deployments still need backups, checkpoint monitoring, disk-space alerts,
+and periodic integrity checks.
