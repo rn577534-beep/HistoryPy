@@ -103,3 +103,17 @@ def test_query_bounds_and_predicate_constraints_are_validated():
         RelationshipPathQuery("p1", "p2", max_hops=1, predicates=("a", "b"))
     with pytest.raises(ValueError, match="direction"):
         RelationshipPathQuery("p1", "p2", direction="sideways")
+
+
+
+def test_path_search_honors_hard_exploration_budget():
+    report = find_relationship_paths(
+        _dataset(),
+        RelationshipPathQuery(
+            "p1", "p4", max_hops=4, direction="both",
+            max_explored_states=1,
+        ),
+    )
+    assert report.explored_states == 1
+    assert report.truncated
+    assert report.paths == ()
