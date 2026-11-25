@@ -418,7 +418,7 @@ whether a locator, quotation, and source URL are recorded, including indexes
 of missing fields. This is a traceability audit, not a source-quality or truth
 score. `audit_dataset_provenance(dataset)` reports source usage, orphan
 sources, claims without evidence, and potential dependency pairs derived from
-explicit `derived_from_source_ids` and `shared_evidence_group_ids` metadata.
+direct/transitive `derived_from_source_ids` and `shared_evidence_group_ids` metadata.
 These links are only as complete as the researcher's recorded provenance;
 unrecorded copying, shared witnesses, or common archival origins cannot be
 automatically discovered. Dataset validation rejects missing derivation
@@ -450,3 +450,36 @@ application-level concurrency and rollback tests, not physical power-loss
 fault injection or months-long database maintenance tests. Production
 deployments still need backups, checkpoint monitoring, disk-space alerts,
 and periodic integrity checks.
+
+
+## Latest streaming SQLite writer measurements
+
+After the initial scale run exposed high temporary serialization memory, the
+normalized SQLite save path was changed to serialize one record at a time
+instead of constructing a second full dataset-sized dictionary. The new
+benchmark run completed all four size/journal combinations:
+https://github.com/rn577534-beep/HistoryPy/actions/runs/45530795173
+
+| Records | Journal | Save time | Additional traced Python memory during save | Total process peak RSS | Selective query | Broad query (top 1,000) |
+|---:|---|---:|---:|---:|---:|---:|
+| 100,000 | DELETE | 15.434 s | 17.171 MiB | 94.582 MiB | 2.319 ms | 200.521 ms |
+| 100,000 | WAL | 8.682 s | 17.171 MiB | 94.645 MiB | 1.746 ms | 127.706 ms |
+| 1,000,000 | DELETE | 146.918 s | 137.338 MiB | 648.117 MiB | 8.187 ms | 1,991.619 ms |
+| 1,000,000 | WAL | 133.825 s | 137.338 MiB | 648.164 MiB | 6.920 ms | 1,715.582 ms |
+
+All four runs wrote an 84.637 MiB (100k) or 845.113 MiB (1m) database,
+reported `integrity_check = ok`, and verified that the selected query
+returned the same record IDs after reopening. The million-record WAL run's
+PASSIVE checkpoint returned `(0, 0, 0)`, indicating no outstanding WAL pages
+at that checkpoint.
+
+Compared with the earlier non-streaming million-record save measurement,
+the new writer reduced additional traced Python memory from 687.305 MiB to
+137.338 MiB (about 80%) and process peak RSS from 1,877.562 MiB to 648.117 MiB
+(about 65%). These process figures include the source dataset and runtime;
+they are not the index's isolated RAM footprint. Save time varied by mode and
+runner load, so the memory improvement must not be read as a guaranteed speed
+improvement. Broad search remains materially slower than selective search.
+
+The benchmark run is synthetic and single-writer. It is not a long-running
+production workload or a physical crash/power-loss test.
