@@ -76,6 +76,49 @@ class HistoricalDataset:
             indexes[kind] = index
 
         source_ids = set(indexes["source"])
+        source_adjacency: dict[str, tuple[str, ...]] = {}
+        for source in self.sources:
+            source_adjacency[source.id] = tuple(source.derived_from_source_ids)
+            for parent_id in source.derived_from_source_ids:
+                if parent_id not in source_ids:
+                    issues.append(ValidationIssue(
+                        "missing_derived_source",
+                        f"Unknown derived-from source id: {parent_id}",
+                        source.id, "derived_from_source_ids"
+                    ))
+        source_visited: set[str] = set()
+        source_active: list[str] = []
+        source_positions: dict[str, int] = {}
+        for source_id in source_adjacency:
+            if source_id in source_visited:
+                continue
+            stack = [(source_id, iter(source_adjacency[source_id]))]
+            source_active.append(source_id)
+            source_positions[source_id] = 0
+            source_visited.add(source_id)
+            while stack:
+                node, neighbors = stack[-1]
+                try:
+                    neighbor = next(neighbors)
+                except StopIteration:
+                    stack.pop()
+                    source_positions.pop(node, None)
+                    source_active.pop()
+                    continue
+                if neighbor not in source_adjacency:
+                    continue
+                if neighbor in source_positions:
+                    cycle = source_active[source_positions[neighbor]:] + [neighbor]
+                    issues.append(ValidationIssue(
+                        "source_derivation_cycle",
+                        f"Circular source derivation: {' -> '.join(cycle)}",
+                        node, "derived_from_source_ids"
+                    ))
+                elif neighbor not in source_visited:
+                    source_visited.add(neighbor)
+                    source_positions[neighbor] = len(source_active)
+                    source_active.append(neighbor)
+                    stack.append((neighbor, iter(source_adjacency[neighbor])))
         claim_ids = set(indexes["claim"])
         event_ids = set(indexes["event"])
         person_ids = set(indexes["person"])
