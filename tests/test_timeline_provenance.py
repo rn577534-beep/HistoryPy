@@ -104,12 +104,18 @@ def test_provenance_flags_explicit_source_derivation_and_shared_evidence():
             derived_from_source_ids=("s1",),
             shared_evidence_group_ids=("witness-17",),
         ),
-        SourceRecord("s3", "Independent archive", "archival"),
+        SourceRecord(
+            "s3", "Later synthesis", "secondary",
+            derived_from_source_ids=("s2",),
+        ),
+        SourceRecord("s4", "Independent archive", "archival"),
     ))
     report = audit_dataset_provenance(dataset)
     assert report.potential_source_dependency_pairs == (
         ("s1", "s2", "shared_evidence_group:witness-17"),
         ("s2", "s1", "derived_from"),
+        ("s3", "s1", "derived_from_transitively"),
+        ("s3", "s2", "derived_from"),
     )
 
 
