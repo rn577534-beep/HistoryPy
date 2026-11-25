@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 from historypy.core.dataset import HistoricalDataset
-from historypy.core.models import HistoricalDate
+from historypy.core.models import HistoricalDate, HistoricalRelationship
 from historypy.graph.relationships import Direction, RelationshipGraph
 
 Traversal = Literal["forward", "reverse"]
@@ -111,7 +111,7 @@ def find_relationship_paths(
     if query.start_entity_id == query.end_entity_id:
         return RelationshipPathSearchReport(query, (), 0, False)
 
-    adjacency: dict[str, list[tuple[str, object, Traversal]]] = {
+    adjacency: dict[str, list[tuple[str, HistoricalRelationship, Traversal]]] = {
         entity_id: [] for entity_id in graph.entity_ids
     }
     for edge in sorted(graph.relationships, key=lambda item: item.id):
