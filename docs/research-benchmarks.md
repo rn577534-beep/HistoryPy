@@ -228,3 +228,24 @@ allocations; it is not just the persistent index. The benchmark uses a
 selective phrase query and synthetic records. It does not establish broad-query
 latency, write-concurrency behavior, crash recovery under power loss, or
 performance on real historical source material.
+
+## Real-corpus lexical retrieval comparison (HistoriQA-ThirdRepublic)
+
+Pinned benchmark run:
+https://github.com/rn577534-beep/HistoryPy/actions/runs/45516315463
+
+All 1,782 questions over the 3,386-document French 1887 corpus were evaluated
+at Recall@10 and MRR@10:
+
+| Method | Recall@10 | MRR@10 | Mean query time |
+|---|---:|---:|---:|
+| Trigram all-terms | 0.22% | 0.0015 | 32.107 ms |
+| BM25 | 55.64% | 0.4889 | 24.316 ms |
+| Trigram + BM25 RRF | 55.42% | 0.4800 | 62.626 ms |
+
+On this corpus the simple lexical RRF did not improve over BM25 and was slower.
+This is an important negative result: combining ranked lists does not guarantee
+better relevance. The current benchmark workflow additionally evaluates
+French-aware query decomposition; its results are reported separately when
+that run completes. No real semantic embedding model has yet been selected,
+so semantic metrics are intentionally absent.
