@@ -268,8 +268,10 @@ def plan_research_question(
         not in ambiguous_entity_pairs
     )
     warnings: list[str] = [
-        "Predicate matches are reviewable candidates only; endpoint path searches "
-        "remain unfiltered until a researcher confirms the relation sequence."
+        (
+            "Predicate matches are reviewable candidates only; endpoint path searches "
+            "remain unfiltered until a researcher confirms the relation sequence."
+        )
     ]
     if not mentions:
         warnings.append(
