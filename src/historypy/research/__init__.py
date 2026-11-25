@@ -29,8 +29,10 @@ from historypy.research.evidence import (
     summarize_claim_evidence,
 )
 from historypy.research.evidence_analysis import (
+    CitationCompletenessReport,
     ClaimEvidenceAnalysis,
     analyze_claim_evidence,
+    audit_citation_completeness,
 )
 from historypy.research.geography import (
     PlaceDistance,
@@ -82,6 +84,7 @@ __all__ = [
     "BM25SearchHit",
     "BM25SearchIndex",
     "ClaimAssessment",
+    "CitationCompletenessReport",
     "ClaimEvidenceAnalysis",
     "DatasetProfile",
     "DatasetProvenanceReport",
@@ -116,6 +119,7 @@ __all__ = [
     "TimelineEntry",
     "TimelineResult",
     "analyze_claim_evidence",
+    "audit_citation_completeness",
     "append_research_action",
     "assess_claim",
     "assess_dataset_quality",
