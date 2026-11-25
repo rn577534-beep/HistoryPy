@@ -29,6 +29,7 @@ from historypy.research.source_independence import (
 )
 
 TemporalStatus = Literal["compatible", "incompatible", "unknown"]
+TemporalFilterPolicy = Literal["all", "compatible_only", "exclude_incompatible"]
 
 
 def _normalize(value: str) -> str:
@@ -189,6 +190,16 @@ class QuestionPathReview:
         return tuple(sorted({
             claim_id for hop in self.hops for claim_id in hop.claims_missing_locators
         }))
+
+
+@dataclass(frozen=True, slots=True)
+class TemporalPathSelection:
+    """Explicit temporal-policy selection with excluded records retained."""
+
+    policy: TemporalFilterPolicy
+    selected_reviews: tuple[QuestionPathReview, ...]
+    excluded_incompatible: tuple[QuestionPathReview, ...]
+    excluded_unknown: tuple[QuestionPathReview, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -462,6 +473,46 @@ def _temporal_review(
     return "compatible", "All recorded hop validity intervals share a common time window."
 
 
+
+def select_paths_by_temporal_policy(
+    reviews: tuple[QuestionPathReview, ...] | list[QuestionPathReview],
+    *,
+    policy: TemporalFilterPolicy,
+) -> TemporalPathSelection:
+    """Apply an explicit temporal policy without silently dropping unknown dates.
+
+    all keeps every status; compatible_only excludes incompatible and unknown;
+    exclude_incompatible removes only known-incompatible paths and retains unknown.
+    """
+    if policy not in {"all", "compatible_only", "exclude_incompatible"}:
+        raise ValueError(
+            "policy must be all, compatible_only, or exclude_incompatible"
+        )
+    rows = tuple(reviews)
+    if any(not isinstance(row, QuestionPathReview) for row in rows):
+        raise TypeError("reviews must contain QuestionPathReview records")
+    incompatible = tuple(row for row in rows if row.temporal_status == "incompatible")
+    unknown = tuple(row for row in rows if row.temporal_status == "unknown")
+    if policy == "all":
+        selected = rows
+        excluded_incompatible = ()
+        excluded_unknown = ()
+    elif policy == "compatible_only":
+        selected = tuple(row for row in rows if row.temporal_status == "compatible")
+        excluded_incompatible = incompatible
+        excluded_unknown = unknown
+    else:
+        selected = tuple(row for row in rows if row.temporal_status != "incompatible")
+        excluded_incompatible = incompatible
+        excluded_unknown = ()
+    return TemporalPathSelection(
+        policy=policy,
+        selected_reviews=selected,
+        excluded_incompatible=excluded_incompatible,
+        excluded_unknown=excluded_unknown,
+    )
+
+
 def execute_question_plan(
     dataset: HistoricalDataset,
     plan: QuestionPlan,
@@ -615,6 +666,8 @@ __all__ = [
     "QuestionExecutionReport",
     "QuestionPathReview",
     "QuestionPlan",
+    "TemporalPathSelection",
+    "select_paths_by_temporal_policy",
     "execute_question_plan",
     "plan_research_question",
 ]
