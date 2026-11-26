@@ -1076,3 +1076,11 @@ copies or portions. The software is provided without warranty; see
 [LICENSE](LICENSE) for the complete terms.
 
 Copyright (c) 2026 HistoryPy contributors.
+
+
+## Citing HistoryPy
+
+If you use HistoryPy in research or teaching, please cite the software. The
+repository includes machine-readable citation metadata in
+[`CITATION.cff`](CITATION.cff), which GitHub can use to display a recommended
+citation.
