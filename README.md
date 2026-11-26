@@ -1065,3 +1065,14 @@ The registry keeps the citation and review history separate from the applied dat
 ### Multilingual alias candidate imports
 
 `import_wikidata_alias_candidates` accepts a Wikidata JSON export plus an explicit QID-to-canonical-entity mapping. It imports Bengali, English, and French aliases as `candidate` assertions only, with CC0 metadata and revision-pinned locators when `lastrevid` is available. Human review against appropriate independent sources is required before verification.
+
+
+## License
+
+HistoryPy is distributed under the **MIT License**. You may use, copy, modify,
+merge, publish, distribute, sublicense, and sell copies of the software,
+provided that the copyright and permission notices are included in substantial
+copies or portions. The software is provided without warranty; see
+[LICENSE](LICENSE) for the complete terms.
+
+Copyright (c) 2026 HistoryPy contributors.
