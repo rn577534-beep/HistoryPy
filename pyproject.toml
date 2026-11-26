@@ -27,7 +27,9 @@ classifiers = [
 Homepage = "https://github.com/rn577534-beep/HistoryPy"
 Repository = "https://github.com/rn577534-beep/HistoryPy"
 Issues = "https://github.com/rn577534-beep/HistoryPy/issues"
-Releasing = "https://github.com/rn577534-beep/HistoryPy/blob/feat/evidence-centered-reasoning/docs/releasing.md"
+Changelog = "https://github.com/rn577534-beep/HistoryPy/blob/main/CHANGELOG.md"
+Citation = "https://github.com/rn577534-beep/HistoryPy/blob/main/CITATION.cff"
+Releasing = "https://github.com/rn577534-beep/HistoryPy/blob/main/docs/releasing.md"
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "ruff>=0.6"]
