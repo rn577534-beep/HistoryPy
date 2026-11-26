@@ -18,15 +18,29 @@ https://pypi.org/project/historypy/.
    accurately reflect that status.
 4. Create/verify the maintainer's PyPI account and enable two-factor
    authentication.
-5. Configure a PyPI Trusted Publisher for this GitHub repository:
+5. Configure a TestPyPI Trusted Publisher for a rehearsal:
+   - Owner: `rn577534-beep`
+   - Repository: `HistoryPy`
+   - Workflow filename: `publish-testpypi.yml`
+   - Environment name: `testpypi`
+6. Create the GitHub environment named `testpypi` in repository settings. Run
+   the `Publish to TestPyPI` workflow manually from the Actions tab and verify
+   installation from TestPyPI in a clean environment:
+
+   ```bash
+   python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ historypy
+   ```
+
+   TestPyPI is a rehearsal service; it is separate from production PyPI.
+7. Configure a PyPI Trusted Publisher for this GitHub repository:
    - Owner: `rn577534-beep`
    - Repository: `HistoryPy`
    - Workflow filename: `publish.yml`
    - Environment name: `pypi`
-6. Create the GitHub environment named `pypi` in repository settings. Do not
+8. Create the GitHub environment named `pypi` in repository settings. Do not
    add a long-lived PyPI API token to GitHub secrets; the workflow uses
    OpenID Connect Trusted Publishing.
-7. Run the normal test workflow and review the release contents before tagging.
+9. Run the normal test workflow and review the release contents before tagging.
 
 ## Publishing
 
