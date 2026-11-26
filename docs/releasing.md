@@ -28,7 +28,7 @@ https://pypi.org/project/historypy/.
    installation from TestPyPI in a clean environment:
 
    ```bash
-   python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ historypy
+   python -m pip install --index-url https://test.pypi.org/simple/ --no-deps "historypy==1.0.0"
    ```
 
    TestPyPI is a rehearsal service; it is separate from production PyPI.
