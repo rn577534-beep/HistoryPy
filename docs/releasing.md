@@ -9,9 +9,10 @@ https://pypi.org/project/historypy/.
 1. Confirm that the `historypy` project name can be registered on PyPI. A
    missing search result is not proof that a name is available; PyPI may have
    reserved or blocked it.
-2. Choose the project's actual open-source license with the copyright holders.
-   Do not publish while `pyproject.toml` still says `TBD`. Add the matching
-   SPDX license expression and include the corresponding license text/file.
+2. HistoryPy's repository metadata declares the MIT License, with the complete
+   terms in the root `LICENSE` file. Before distributing a release, confirm
+   that every included contribution is owned by its contributor or is
+   compatible with MIT, and retain all required third-party notices.
 3. Review the current version and development status in `pyproject.toml`.
    The project currently describes itself as pre-alpha; release metadata must
    accurately reflect that status.
