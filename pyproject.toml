@@ -22,6 +22,12 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Information Analysis",
 ]
 
+[project.urls]
+Homepage = "https://github.com/rn577534-beep/HistoryPy"
+Repository = "https://github.com/rn577534-beep/HistoryPy"
+Issues = "https://github.com/rn577534-beep/HistoryPy/issues"
+Releasing = "https://github.com/rn577534-beep/HistoryPy/blob/feat/evidence-centered-reasoning/docs/releasing.md"
+
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "ruff>=0.6"]
 semantic = ["sentence-transformers>=3.0,<6"]
