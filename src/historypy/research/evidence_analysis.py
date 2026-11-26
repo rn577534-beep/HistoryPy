@@ -7,6 +7,10 @@ from dataclasses import dataclass
 
 from historypy.core.dataset import HistoricalDataset
 from historypy.research.evidence import summarize_claim_evidence
+from historypy.research.source_independence import (
+    ClaimSourceIndependenceReport,
+    analyze_claim_source_independence,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -83,6 +87,7 @@ class ClaimEvidenceAnalysis:
     links_missing_locators: int
     total_links: int
     assessment_status: str
+    source_independence: ClaimSourceIndependenceReport
 
     @property
     def locator_coverage(self) -> float | None:
@@ -132,4 +137,5 @@ def analyze_claim_evidence(
         links_missing_locators=missing_locators,
         total_links=len(links),
         assessment_status=status,
+        source_independence=analyze_claim_source_independence(dataset, claim_id),
     )

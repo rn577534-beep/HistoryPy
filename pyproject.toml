@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77.1.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,7 +8,8 @@ version = "1.0.0"
 description = "An evidence-aware Python toolkit for historical research and analysis"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "TBD" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "HistoryPy contributors" }]
 keywords = ["history", "historical-research", "chronology", "humanities", "evidence"]
 classifiers = [
@@ -21,6 +22,14 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
   "Topic :: Scientific/Engineering :: Information Analysis",
 ]
+
+[project.urls]
+Homepage = "https://github.com/rn577534-beep/HistoryPy"
+Repository = "https://github.com/rn577534-beep/HistoryPy"
+Issues = "https://github.com/rn577534-beep/HistoryPy/issues"
+Changelog = "https://github.com/rn577534-beep/HistoryPy/blob/main/CHANGELOG.md"
+Citation = "https://github.com/rn577534-beep/HistoryPy/blob/main/CITATION.cff"
+Releasing = "https://github.com/rn577534-beep/HistoryPy/blob/main/docs/releasing.md"
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "ruff>=0.6"]

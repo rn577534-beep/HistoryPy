@@ -5,7 +5,7 @@ resolve historical disputes, or treat retrieval relevance as evidence of truth.
 """
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 from historypy.core.dataset import HistoricalDataset
@@ -19,12 +19,18 @@ from historypy.integrations.aggregation import (
     search_all,
 )
 from historypy.integrations.historical_apis import ExternalRecord
+from historypy.research.alias_registry import AliasRegistry
 from historypy.research.engine import ResearchQuery, execute_research_query
 from historypy.research.evidence_analysis import (
     ClaimEvidenceAnalysis,
     analyze_claim_evidence,
 )
 from historypy.research.query import SearchHit
+from historypy.research.question_planner import (
+    QuestionExecutionReport,
+    execute_question_plan,
+    plan_research_question,
+)
 from historypy.research.semantic import EmbeddingBatch, SemanticSearchHit, SemanticSearchIndex
 
 
@@ -116,6 +122,36 @@ class ResearchPipeline:
         self.providers = tuple(providers)
         self.max_workers = max_workers
 
+    def run_question(
+        self,
+        question: str,
+        *,
+        alias_registry: AliasRegistry | None = None,
+        predicate_lexicon: Mapping[str, tuple[str, ...]] | None = None,
+        max_hops: int = 3,
+        limit: int = 10,
+        direction: str = "both",
+        max_path_queries: int = 40,
+        max_explored_states: int = 10000,
+    ) -> QuestionExecutionReport:
+        """Plan and execute a reviewable entity/relationship multi-hop question.
+
+        Exact canonical names and verified aliases only are used for entity
+        candidates. The returned paths are not a generated historical answer.
+        """
+        plan = plan_research_question(
+            self.dataset,
+            question,
+            alias_registry=alias_registry,
+            predicate_lexicon=predicate_lexicon,
+            max_hops=max_hops,
+            limit=limit,
+            direction=direction,
+            max_path_queries=max_path_queries,
+            max_explored_states=max_explored_states,
+        )
+        return execute_question_plan(self.dataset, plan)
+
     def run(
         self,
         query: str,
@@ -177,6 +213,16 @@ class ResearchPipeline:
         if any(result.external and result.external.failures for result in tasks):
             gaps.append("One or more external providers failed; inspect provider_failures.")
         for analysis in claim_analyses:
+            if analysis.source_independence.unknown_source_ids:
+                gaps.append(
+                    f"Claim {analysis.claim_id} has source(s) with unknown "
+                    "dependence; do not count them as independent corroboration."
+                )
+            if analysis.source_independence.dependent_clusters:
+                gaps.append(
+                    f"Claim {analysis.claim_id} includes known dependent sources; "
+                    "review shared origins before counting corroboration."
+                )
             if analysis.assessment_status in {"insufficient", "mixed"}:
                 gaps.append(
                     f"Claim {analysis.claim_id} has {analysis.assessment_status} "
@@ -238,6 +284,25 @@ def render_research_report(report: ResearchReport) -> str:
             f"{item.total_links} evidence links, "
             f"{item.links_missing_locators} links missing locators."
         )
+        independence = item.source_independence
+        lines.append(
+            f"  - Source dependence: **{independence.status}**; "
+            f"{independence.known_dependent_source_count} sources in known "
+            f"dependency clusters; {len(independence.unknown_source_ids)} "
+            "source(s) with unknown dependence."
+        )
+        for cluster in independence.dependent_clusters:
+            lines.append(
+                "  - Known dependency cluster: "
+                + ", ".join(
+                    f"`{source_id}`" for source_id in cluster.evidence_source_ids
+                )
+            )
+        if independence.unknown_source_ids:
+            lines.append(
+                "  - Dependence unknown for: "
+                + ", ".join(f"`{source_id}`" for source_id in independence.unknown_source_ids)
+            )
     lines.extend(("", "## Duplicate candidates and metadata conflicts", ""))
     lines.append(f"- Duplicate candidate groups for human review: {len(report.duplicate_candidates)}")
     lines.append(f"- Metadata conflict fields: {len(report.metadata_conflicts)}")

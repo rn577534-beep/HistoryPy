@@ -17,11 +17,39 @@ HistoryPy is designed to help researchers represent historical information witho
 
 Requires Python 3.10 or newer.
 
+### Install directly from GitHub
+
+The current development version can be installed without cloning the repository:
+
 ```bash
+python -m pip install "git+https://github.com/rn577534-beep/HistoryPy.git@feat/evidence-centered-reasoning"
+```
+
+This requires Git to be installed and available on your PATH. To verify the installation:
+
+```bash
+python -c "import historypy; print(historypy.__version__)"
+```
+
+### Install from a local clone (contributors)
+
+```bash
+git clone --branch feat/evidence-centered-reasoning --single-branch https://github.com/rn577534-beep/HistoryPy.git
+cd HistoryPy
 python -m pip install -e ".[dev]"
 pytest
 ruff check .
 ```
+
+### Optional semantic-search dependencies
+
+Install the optional embedding-model dependencies from a local clone with:
+
+```bash
+python -m pip install ".[semantic]"
+```
+
+The semantic extra installs `sentence-transformers`; the base installation does not download an embedding model automatically.
 
 ## Quick start
 
@@ -110,6 +138,25 @@ conflicts = claims_with_conflicting_evidence(dataset)
 ```
 
 Evidence summaries count linked sources and relationships; they are not automated credibility scores. The library does not independently authenticate sources or decide historical truth. Multiple sources repeating one earlier account are not automatically independent corroboration.
+
+## Source independence audit
+
+HistoryPy can now group evidence sources that have **recorded** common origins. The audit follows direct and transitive `derived_from_source_ids` links and shared `shared_evidence_group_ids`. It also retains intermediate source records as bridge nodes when they connect two sources cited for the same claim.
+
+```python
+from historypy import analyze_claim_source_independence, audit_source_independence
+
+claim_report = analyze_claim_source_independence(dataset, "claim-001")
+print(claim_report.status)
+print(claim_report.dependent_clusters)
+print(claim_report.unknown_source_ids)
+
+dataset_report = audit_source_independence(dataset)
+print(dataset_report.claims_with_known_dependence)
+print(dataset_report.claims_with_unknown_dependence)
+```
+
+Statuses distinguish `known_dependence`, `known_dependence_and_unknown`, `dependence_unknown`, `single_source_dependence_unknown`, and `no_evidence`. A source without a documented dependency path is **unknown**, not independent. The audit does not infer independence from different publishers, URLs, titles, or source types. Record shared witnesses, syndicated dispatches, and common archival documents in the source genealogy metadata; otherwise the relationship cannot be detected. This report is a provenance aid, not a source-credibility or historical-truth score.
 
 ## Source metadata audit
 
@@ -822,3 +869,218 @@ evaluation choice, not a historical source-quality or truth estimator. The
 semantic workflow stores a machine-readable report as a GitHub Actions
 artifact; report metrics, not the mere presence of the model, determine whether
 semantic fusion is useful.
+
+
+### Source independence inside claim analysis
+
+The normal claim evidence analysis now includes the conservative source-genealogy report:
+
+```python
+from historypy import analyze_claim_evidence
+
+analysis = analyze_claim_evidence(dataset, "claim-001")
+print(analysis.assessment_status)  # support/contradiction coverage only
+print(analysis.source_independence.status)
+print(analysis.source_independence.dependent_clusters)
+print(analysis.source_independence.unknown_source_ids)
+```
+
+A cluster means the cited sources have a recorded shared origin or derivation path.
+Sources without a recorded relationship remain **unknown**, not independent.
+Research reports show these groups and add a caution when dependence is known or
+unknown; this does not change the claim's evidence status or assign a truth score.
+
+
+### Versioned multilingual alias registry
+
+For citation-backed aliases with researcher review metadata, use the separate
+registry rather than treating every legacy string alias as verified:
+
+```python
+from historypy import AliasAssertion, AliasRegistry
+
+registry = AliasRegistry(
+    dataset,
+    [AliasAssertion(
+        alias_id="alias-001",
+        entity_kind="person",
+        entity_id="person-001",
+        alias="Jeanne d’Arc",
+        language="fr",
+        alias_type="historical_name",
+        source_id="source-001",
+        locator="page 14",
+        license="CC-BY-4.0",
+        review_status="verified",
+        reviewer="researcher-id",
+        reviewed_at="2026-01-10",
+    )],
+    registry_version="aliases-1.0",
+    dataset_version="dataset-2026-01",
+)
+print(registry.resolve("Jeanne d'Arc", language="fr"))
+```
+
+Verified aliases are returned by default. Candidate and disputed aliases require
+an explicit opt-in, rejected aliases are excluded, and homonyms remain ambiguous.
+Every alias assertion retains its source, locator, license, language, and review
+status. The registry never merges entity records.
+
+
+### Bounded multi-hop relationship paths
+
+When the researcher already knows the canonical endpoint IDs, HistoryPy can
+enumerate sourced relationship paths without guessing entities from prose:
+
+```python
+from historypy import RelationshipPathQuery, find_relationship_paths
+
+report = find_relationship_paths(
+    dataset,
+    RelationshipPathQuery(
+        "person-001", "place-001",
+        max_hops=3,
+        predicates=("member_of", None, "located_in"),
+    ),
+)
+for path in report.paths:
+    print(path.entity_ids, path.source_ids)
+    print(path.relationships_missing_sources)
+```
+
+Each step retains its relationship ID, predicate, original direction, source
+IDs, and validity dates. Unsourced edges are flagged. Paths are structural
+hypotheses, not automatic historical conclusions; time-window compatibility
+and free-text question planning are available as review-only workflows.
+
+
+### Compare decomposition on French and English multi-hop retrieval
+
+A paired held-out benchmark compares full-query hybrid retrieval against
+decomposition-enabled hybrid retrieval on French HistoriQA and English
+HotpotQA. It reports Recall@10 and MRR@10 before and after decomposition, with
+per-language deltas and an equal-weight language macro-average.
+
+```bash
+python benchmarks/benchmark_multilingual_decomposition.py \
+  --french-corpus path/to/french_corpus.jsonl \
+  --french-questions path/to/french_questions.jsonl \
+  --english-hotpotqa path/to/hotpotqa.json \
+  --top-k 10 \
+  --output multilingual_decomposition_report.json
+```
+
+No benchmark numbers are hard-coded: run it with the actual corpus files.
+
+
+### Reviewable free-text multi-hop question workflow
+
+```python
+from historypy import ResearchPipeline
+
+report = ResearchPipeline(dataset).run_question(
+    "How was Ada Lovelace connected to Charles Babbage?",
+    alias_registry=verified_alias_registry,  # optional
+    predicate_lexicon={"collaborated_with": ("connected to", "worked with")},
+    max_hops=3,
+    direction="both",
+    max_path_queries=40,
+    max_explored_states=10000,
+)
+for review in report.path_reviews:
+    print(review.path.entity_ids)
+    print(review.temporal_status, review.source_independence.status)
+    for hop in review.hops:
+        print(hop.relationship_id, hop.predicate, hop.source_records)
+        print(hop.claim_ids, hop.evidence_links, hop.claim_analyses)
+```
+
+Only exact canonical names and researcher-verified aliases become entity
+candidates. Ambiguity, per-hop source records, path-wide source dependence,
+and temporal compatibility are exposed for review. Predicate phrases are
+candidate slots; path search remains unfiltered until the researcher confirms
+the intended relation sequence. A path is not proof of historical truth.
+
+
+Relationship records may link to claim records with `claim_ids=(...)`.
+The multi-hop workflow then reports claim-level evidence coverage for each
+hop. Missing claim links remain visible evidence gaps; source IDs alone are
+not a substitute for locators, quotations, and claim-level evidence review.
+
+
+Verified aliases can also participate in hybrid entity retrieval without
+losing provenance:
+
+```python
+entity_index = EntityAwareSearchIndex.build(
+    dataset, alias_registry=verified_alias_registry
+)
+hybrid = HybridSearchIndex(
+    DatasetSearchIndex.build(dataset),
+    BM25SearchIndex.build(dataset),
+    entity_index=entity_index,
+)
+for hit in hybrid.search("Augusta Ada", entity_language="en"):
+    print(hit.matched_entity_evidence)
+```
+
+Legacy aliases remain unverified; only reviewed registry assertions carry
+verified status, alias IDs, source references, and citation locators.
+
+
+Use `entity_language="fr"`, `"en"`, or another valid language tag to scope
+verified registry aliases while keeping canonical entity-name matching.
+
+
+Multi-hop question reviews also report claim-level contradictions, unsupported claims, missing locators, and a conservative path evidence status (`conflicting`, `contradicted`, `supported`, or `insufficient`). A contradicted hop cannot be masked by support on another hop; these labels summarize recorded evidence links and are not historical truth verdicts.
+
+
+### Researcher-reviewed source genealogy
+
+Use `SourceDependencyRegistry` to store cited, versioned dependency assertions for derivation, shared witnesses, shared archival records, syndication, and shared datasets. Only `verified` assertions affect independence analysis; candidate, disputed, and rejected assertions remain inert.
+
+```python
+registry = SourceDependencyRegistry(
+    dataset,
+    [SourceDependencyAssertion(
+        assertion_id="genealogy-001",
+        source_id="report-2",
+        related_source_id="witness-1",
+        dependency_type="derived_from",
+        evidence_source_id="catalogue-1",
+        locator="entry 42",
+        license="CC-BY-4.0",
+        review_status="verified",
+        reviewer="researcher-1",
+        reviewed_at="2026-11-25",
+    )],
+    registry_version="genealogy-1",
+    dataset_version="dataset-1",
+)
+report = registry.audit_source_set(["report-2", "witness-1"])
+```
+
+The registry keeps the citation and review history separate from the applied dataset snapshot. It does not assign source credibility or determine historical truth.
+
+### Multilingual alias candidate imports
+
+`import_wikidata_alias_candidates` accepts a Wikidata JSON export plus an explicit QID-to-canonical-entity mapping. It imports Bengali, English, and French aliases as `candidate` assertions only, with CC0 metadata and revision-pinned locators when `lastrevid` is available. Human review against appropriate independent sources is required before verification.
+
+
+## License
+
+HistoryPy is distributed under the **MIT License**. You may use, copy, modify,
+merge, publish, distribute, sublicense, and sell copies of the software,
+provided that the copyright and permission notices are included in substantial
+copies or portions. The software is provided without warranty; see
+[LICENSE](LICENSE) for the complete terms.
+
+Copyright (c) 2026 HistoryPy contributors.
+
+
+## Citing HistoryPy
+
+If you use HistoryPy in research or teaching, please cite the software. The
+repository includes machine-readable citation metadata in
+[`CITATION.cff`](CITATION.cff), which GitHub can use to display a recommended
+citation.
