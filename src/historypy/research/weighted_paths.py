@@ -7,6 +7,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from heapq import heappop, heappush
 from itertools import count
+from math import isfinite
 from typing import Mapping
 
 from historypy.core.dataset import HistoricalDataset
@@ -62,8 +63,8 @@ def find_weighted_relationship_paths(
             raise ValueError(f"{name} must be an integer between {minimum} and {maximum}")
     if isinstance(default_edge_cost, bool) or not isinstance(default_edge_cost, (int, float)):
         raise TypeError("default_edge_cost must be a number")
-    if default_edge_cost <= 0:
-        raise ValueError("default_edge_cost must be positive")
+    if not isfinite(default_edge_cost) or default_edge_cost <= 0:
+        raise ValueError("default_edge_cost must be finite and positive")
     costs = dict(edge_costs or {})
     relationships = {edge.id: edge for edge in dataset.relationships}
     unknown = set(costs) - set(relationships)
@@ -72,8 +73,8 @@ def find_weighted_relationship_paths(
     for key, value in costs.items():
         if isinstance(value, bool) or not isinstance(value, (int, float)):
             raise TypeError(f"Cost for {key!r} must be numeric")
-        if value <= 0:
-            raise ValueError(f"Cost for {key!r} must be positive")
+        if not isfinite(value) or value <= 0:
+            raise ValueError(f"Cost for {key!r} must be finite and positive")
     nodes = {
         item.id for collection in (
             dataset.events, dataset.people, dataset.places,
