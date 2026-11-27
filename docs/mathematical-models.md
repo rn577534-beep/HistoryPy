@@ -132,16 +132,20 @@ merge two records.
 
 1. Build a reviewed Bengali, English, and French name-pair gold set; report
    precision, recall, F1, and false-merge candidate rates by language/script.
-2. Add optional interactive renderers for graph, map, and timeline exports,
-   while keeping the core data exports dependency-free.
-3. Evaluate graph-centrality measures (PageRank and HITS) as structural
-   descriptors only, never as source credibility or truth.
-4. Add Monte Carlo sensitivity analysis for explicitly bounded uncertain dates
-   and researcher-supplied assumptions.
-5. Consider Bayesian models only after priors and conditional assumptions can
-   be justified, documented, and tested independently.
-6. Compare every proposed model against simple baselines on held-out datasets;
-   do not report performance gains without measured results.
+2. Add a true map renderer with an explicit projection, map tiles or offline
+   basemap choice, coordinate uncertainty, and historical boundary provenance.
+3. Extend Monte Carlo analysis to researcher-defined distributions only when
+   the assumptions, dependence structure, and calibration evidence are recorded.
+4. Benchmark PageRank/HITS and graph traversal on sparse networks at 10k,
+   100k, and 1M nodes; report runtime, memory, and convergence.
+5. Add an optional command-line interface for dataset validation, audits,
+   exports, and reproducible reports.
+6. Compare lexical, semantic, and hybrid retrieval on held-out multilingual
+   questions using Recall@k, MRR, nDCG, latency, and memory.
+7. Consider Bayesian or Dempster-Shafer models only after defensible priors,
+   conflict policies, and independent evaluation data are available.
+8. Compare every proposed model against simple baselines; do not report
+   performance gains without measured, reproducible results.
 
 
 ## Visualization and export layer
