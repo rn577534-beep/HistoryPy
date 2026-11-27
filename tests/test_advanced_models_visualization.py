@@ -14,6 +14,7 @@ from historypy import (
     dataset_graph_data,
     evidence_relation_entropy,
     find_weighted_relationship_paths,
+    render_visualization_html,
     shannon_entropy,
     source_type_entropy,
     timeline_visualization_data,
@@ -151,3 +152,25 @@ def test_graph_dot_geojson_and_timeline_exports_keep_provenance():
     assert timeline["entries"][0]["id"] == "e1"
     assert timeline["entries"][0]["start"] == 1800
     assert timeline["entries"][0]["interval_is_uncertain"]
+
+
+
+def test_interactive_html_report_is_self_contained_and_escapes_user_content():
+    dataset = sample_dataset()
+    html = render_visualization_html(dataset, title="<script>alert('x')</script>")
+    assert "<!doctype html>" in html
+    assert "&lt;script&gt;" in html
+    assert "<script>alert('x')</script>" not in html
+    assert 'data-target="network"' in html
+    assert 'data-target="timeline"' in html
+    assert 'data-target="places"' in html
+    assert "Sample person" in html
+    assert "Schematic latitude/longitude scatter only" in html
+
+
+def test_interactive_html_report_limits_large_networks_and_bad_options():
+    dataset = sample_dataset()
+    with pytest.raises(ValueError, match="at most"):
+        render_visualization_html(dataset, max_nodes=2)
+    with pytest.raises(ValueError, match="cannot be empty"):
+        render_visualization_html(dataset, title=" ")
