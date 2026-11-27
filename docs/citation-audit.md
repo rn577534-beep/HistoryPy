@@ -5,7 +5,7 @@ link and render a conservative Markdown citation from recorded fields.
 
 ## Audit citation metadata
 
-\`\`\`python
+```python
 from historypy import audit_evidence_citations
 
 # Audit every evidence link in the dataset.
@@ -24,7 +24,7 @@ for finding in audit.findings:
 
 # Or audit only the evidence attached to one known claim.
 claim_audit = audit_evidence_citations(dataset, claim_id="claim-001")
-\`\`\`
+```
 
 A citation is counted as complete when its evidence link has a locator and a
 quotation, and its source record has an absolute HTTP(S) URL. Findings use
@@ -40,11 +40,11 @@ claim ID raises KeyError.
 
 ## Render one recorded citation
 
-\`\`\`python
+```python
 from historypy import format_evidence_citation
 
 print(format_evidence_citation(dataset, evidence_index=0))
-\`\`\`
+```
 
 The formatter includes only metadata actually present in the source and
 evidence records: creator, title, publisher, publication date, locator, URL,
