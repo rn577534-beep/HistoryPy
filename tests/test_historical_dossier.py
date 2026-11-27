@@ -1,8 +1,8 @@
 from historypy import (
     EvidenceLink,
     HistoricalClaim,
-    HistoricalDate,
     HistoricalDataset,
+    HistoricalDate,
     HistoricalEvent,
     HistoricalOrganization,
     HistoricalPerson,
