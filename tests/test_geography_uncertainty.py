@@ -13,4 +13,4 @@ def test_distance_interval_includes_coordinate_uncertainty():
 
 def test_distance_interval_rejects_invalid_uncertainty():
     with pytest.raises(ValueError, match="non-negative"):
-        distance_interval_km(0, 0, 0, 1, uncertainty_radius_a_km=-1)
+        distance_interval_km(0, 0, 0, 1, uncertainty_radius_a_km=-1, uncertainty_radius_b_km=0)
