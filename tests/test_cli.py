@@ -1,4 +1,5 @@
 import json
+
 from historypy import HistoricalDataset, HistoricalDate, HistoricalEvent, HistoricalPlace
 from historypy.cli import main
 from historypy.io import save_dataset
