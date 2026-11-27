@@ -184,7 +184,7 @@ from historypy.research import (
 
 __version__ = "1.0.1.dev0"
 
-__all__ = [
+__all__ = [  # noqa: RUF022 - preserve public API grouping
     "__version__",
     "AggregationReport",
     "AliasAssertion",
