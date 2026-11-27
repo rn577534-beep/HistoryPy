@@ -52,6 +52,24 @@ Both tools report limitations. Monte Carlo outputs are not calibrated
 historical probabilities; graph centrality is not a measure of truth,
 credibility, or historical importance.
 
+## Retrieval evaluation engine
+
+Compare trigram, BM25, and hybrid reciprocal-rank-fusion on the same
+researcher-reviewed relevance judgments. The evaluation reports Precision@k,
+Recall@k, MRR@k, nDCG@k, Success@k, latency percentiles, bootstrap confidence
+intervals, and paired differences between systems.
+
+~~~bash
+historypy evaluate research.json benchmark-cases.json \
+  --top-k 10 --bootstrap-samples 2000 --seed 2026 \
+  --output retrieval-evaluation.json
+~~~
+
+The benchmark input format, statistical interpretation, and Python API are
+documented in [the retrieval evaluation guide](docs/retrieval-evaluation-engine.md).
+Metrics assess retrieval against supplied labels; they do not establish
+historical truth or source credibility.
+
 ## Mathematical models
 
 See [the mathematical model inventory, implementation status, and evaluation policy](docs/mathematical-models.md).
