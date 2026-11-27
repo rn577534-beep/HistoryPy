@@ -114,3 +114,23 @@ genealogy must be reviewed before counting sources as independent.
 The workflow never copies full copyrighted books or news articles. It uses
 catalogue metadata and original publisher/archive links, subject to each
 provider's terms, rate limits, and item-level rights.
+
+## Optional real multilingual embeddings
+
+Install the optional model runtime and request a multilingual model explicitly:
+
+```bash
+pip install "historypy[semantic]"
+historypy research research.json "What happened?" \
+  --variant "bn=কী ঘটেছিল?" \
+  --semantic-model "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2" \
+  --no-source-check --output research-report.md
+```
+
+The CLI builds a vector index for the current dataset before searching the
+original and supplied language variants. Model downloads can be large and
+require network access on first use. Model quality, supported languages,
+license, and suitability for historical names should be checked before
+research use. Semantic similarity is only a ranking signal; inspect original
+sources and citations. Omit --semantic-model to use lexical and provider search
+without loading a model.
