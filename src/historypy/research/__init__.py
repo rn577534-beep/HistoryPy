@@ -11,6 +11,7 @@ from historypy.research.audit_trail import (
     verify_research_audit_trail,
 )
 from historypy.research.bm25 import BM25SearchHit, BM25SearchIndex
+from historypy.research.cached_search import CachedHybridSearchIndex, SearchCacheStats
 from historypy.research.benchmark import run_retrieval_benchmark
 from historypy.research.evaluation import (
     ConfidenceInterval,
@@ -187,6 +188,8 @@ __all__ = [  # noqa: RUF022 - preserve public API grouping
     "BayesianUpdate",
     "BM25SearchHit",
     "BM25SearchIndex",
+    "CachedHybridSearchIndex",
+    "SearchCacheStats",
     "ConfidenceInterval",
     "EvaluationReport",
     "MetricValues",
