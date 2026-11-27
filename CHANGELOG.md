@@ -8,6 +8,20 @@ PEP 440; pre-release versions are identified explicitly.
 ## [Unreleased]
 
 ### Added
+- Allen interval algebra for thirteen temporal relations between comparable,
+  fully bounded historical dates.
+- Shannon entropy summaries for recorded evidence-relation and source-type
+  distributions; these are descriptive, not truth or credibility scores.
+- Caller-cost-weighted relationship path search with explicit provenance gaps.
+- Dependency-free graph, Graphviz DOT, GeoJSON, and uncertainty-aware timeline
+  visualization exports.
+- Tests for temporal relations, entropy, weighted paths, and visual exports.
+
+### Fixed
+- Correct import ordering in the name-similarity implementation.
+
+
+### Added
 - Explainable multi-metric name similarity using Jaro-Winkler, Levenshtein,
   Damerau-Levenshtein, character-trigram Dice, and token Jaccard scores.
 - Mathematical model inventory and evaluation policy in `docs/mathematical-models.md`.
