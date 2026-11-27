@@ -5,9 +5,9 @@ Entropy describes category diversity, not truth or source credibility.
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Mapping
 from dataclasses import dataclass
 from math import log2
-from typing import Mapping
 
 from historypy.core.dataset import HistoricalDataset
 
