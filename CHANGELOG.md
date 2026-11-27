@@ -7,6 +7,15 @@ PEP 440; pre-release versions are identified explicitly.
 
 ## [Unreleased]
 
+### Added
+- Explainable multi-metric name similarity using Jaro-Winkler, Levenshtein,
+  Damerau-Levenshtein, character-trigram Dice, and token Jaccard scores.
+- Mathematical model inventory and evaluation policy in `docs/mathematical-models.md`.
+
+### Changed
+- Entity duplicate suggestions and fuzzy alias retrieval use the transparent
+  name-similarity ensemble; candidates remain review-only.
+
 ### Notes
 - Add new changes here. Benchmark results must be generated from the
   documented licensed datasets; no unmeasured performance gains are claimed.
