@@ -42,6 +42,10 @@ from historypy.research.comparison import (
     MetricObservation,
     compare_metrics,
 )
+from historypy.research.embeddings import (
+    SentenceTransformerEmbedder,
+    build_multilingual_semantic_index,
+)
 from historypy.research.engine import (
     ResearchFacets,
     ResearchQuery,
@@ -328,6 +332,8 @@ __all__ = [  # noqa: RUF022 - preserve public API grouping
     "search_dataset",
     "SearchHit",
     "select_paths_by_temporal_policy",
+    "SentenceTransformerEmbedder",
+    "build_multilingual_semantic_index",
     "SemanticSearchHit",
     "SemanticSearchIndex",
     "shannon_entropy",
