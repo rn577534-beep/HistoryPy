@@ -35,7 +35,7 @@ from historypy.integrations.open_catalogs import (
     OpenLibrarySearch,
 )
 
-__all__ = [  # noqa: RUF022 - preserve public API grouping
+__all__ = [
     "AggregationReport",
     "CrossVerificationReport",
     "DuplicateCandidateGroup",
