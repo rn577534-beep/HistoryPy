@@ -59,3 +59,12 @@ def test_evaluator_validates_cutoff_and_bootstrap_count():
         evaluate_rankings(
             {"q": ["a"]}, {"s": {"q": ["a"]}}, bootstrap_samples=10
         )
+
+
+def test_evaluator_rejects_incomplete_latency_samples():
+    with pytest.raises(ValueError, match="latency query IDs"):
+        evaluate_rankings(
+            {"q1": ["a"], "q2": ["b"]},
+            {"system": {"q1": ["a"], "q2": ["b"]}},
+            latencies_ms={"system": {"q1": 1.0}},
+        )
