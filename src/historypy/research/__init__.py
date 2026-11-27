@@ -1,5 +1,7 @@
 """Research utilities for evidence-aware historical analysis."""
 
+# ruff: noqa: I001 - keep the curated public API import grouping stable
+
 from historypy.research.alias_import import import_wikidata_alias_candidates
 from historypy.research.alias_registry import AliasAssertion, AliasMatch, AliasRegistry
 from historypy.research.audit_trail import (
