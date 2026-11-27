@@ -11,6 +11,7 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass
 from datetime import date
+from math import floor
 
 from historypy.core.dataset import HistoricalDataset
 from historypy.core.models import HistoricalDate
@@ -75,6 +76,8 @@ def analyze_temporal_sensitivity(
     *,
     iterations: int = 10_000,
     seed: int | None = 0,
+    distribution: str = "uniform",
+    mode_quantile: float = 0.5,
 ) -> TemporalSensitivityReport:
     """Estimate how often one uncertain event date precedes another.
 
@@ -98,6 +101,14 @@ def analyze_temporal_sensitivity(
         raise ValueError("iterations must be between 100 and 1,000,000")
     if seed is not None and (isinstance(seed, bool) or not isinstance(seed, int)):
         raise TypeError("seed must be an integer or None")
+    if distribution not in {"uniform", "triangular"}:
+        raise ValueError("distribution must be 'uniform' or 'triangular'")
+    if (
+        isinstance(mode_quantile, bool)
+        or not isinstance(mode_quantile, (int, float))
+        or not 0.0 <= mode_quantile <= 1.0
+    ):
+        raise ValueError("mode_quantile must be between 0 and 1")
 
     events = {event.id: event for event in dataset.events}
     if first_event_id not in events:
@@ -116,10 +127,19 @@ def analyze_temporal_sensitivity(
         raise ValueError("Date bounds must be ordered")
 
     rng = random.Random(seed)
+
+    def sample(low: int, high: int) -> int:
+        if distribution == "uniform":
+            return rng.randint(low, high)
+        mode = low + float(mode_quantile) * (high - low)
+        # Half-unit-expanded bounds approximate a discrete triangular distribution.
+        value = rng.triangular(low - 0.5, high + 0.5, mode)
+        return min(high, max(low, floor(value + 0.5)))
+
     first_before = simultaneous = second_before = 0
     for _ in range(iterations):
-        first_sample = rng.randint(first_low, first_high)
-        second_sample = rng.randint(second_low, second_high)
+        first_sample = sample(first_low, first_high)
+        second_sample = sample(second_low, second_high)
         if first_sample < second_sample:
             first_before += 1
         elif first_sample > second_sample:
@@ -144,8 +164,9 @@ def analyze_temporal_sensitivity(
         simultaneous_ci95=_wilson_interval(simultaneous, iterations),
         second_before_first_ci95=_wilson_interval(second_before, iterations),
         sampling_policy=(
-            "Discrete uniform, independent samples over each event's inclusive "
+            f"Discrete {distribution}, independent samples over each event's inclusive "
             f"{'day' if first_unit == 'iso-day' else 'astronomical-year'} bounds"
+            + (f"; mode quantile={mode_quantile}" if distribution == "triangular" else "")
         ),
         limitations=tuple(limitations),
     )
