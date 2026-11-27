@@ -39,6 +39,17 @@ def dataset_graph_data(dataset: HistoricalDataset) -> dict[str, Any]:
     for item in dataset.sources:
         nodes.append({"id": "source:" + item.id, "label": item.title, "kind": "source"})
 
+    # Link every source-cited entity to its bibliographic source node.
+    for node in tuple(nodes):
+        for source_id in node.get("source_ids", []):
+            edges.append({
+                "id": f"entity-source:{node['id']}:{source_id}",
+                "source": node["id"],
+                "target": "source:" + source_id,
+                "kind": "entity_source",
+                "predicate": "cited_by",
+            })
+
     for relationship in dataset.relationships:
         edges.append({
             "id": relationship.id,
