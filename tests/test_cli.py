@@ -92,3 +92,18 @@ def test_cli_dossier_writes_stepwise_markdown(tmp_path):
     assert "Example event" in rendered
     assert "Example place" in rendered
     assert "Interpretation protocol" in rendered
+
+
+
+def test_cli_dossier_supports_structured_json_export(tmp_path):
+    dataset_path = tmp_path / "dataset.json"
+    save_dataset(sample_dataset(), dataset_path)
+    output = tmp_path / "historical-dossier.json"
+
+    assert main([
+        "dossier", str(dataset_path), "--format", "json", "--output", str(output)
+    ]) == 0
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert report["title"] == "Historical dossier"
+    assert report["chapters"][0]["event"]["title"] == "Example event"
+    assert report["timeline"]["entries"][0]["record_id"] == "event-1"

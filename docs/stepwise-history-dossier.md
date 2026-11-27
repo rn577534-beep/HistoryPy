@@ -90,3 +90,11 @@ By default, events with indeterminate dates remain included and are identified
 as such. Add `--exclude-indeterminate-dates` to omit them from the chronological
 chapters; the report still counts them as a research gap. Omit `--output` to
 write Markdown to standard output.
+
+For downstream applications, use `--format json` to export the complete
+structured dossier (chapters, timeline, entities, evidence links, quality
+findings and research gaps) rather than rendered Markdown:
+
+```bash
+historypy dossier research.json --format json --output historical-dossier.json
+```
