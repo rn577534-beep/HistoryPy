@@ -167,6 +167,13 @@ from historypy.research.temporal_sensitivity import (
     analyze_temporal_sensitivity,
 )
 from historypy.research.timeline import TimelineEntry, TimelineResult, timeline_for_dataset
+from historypy.research.dossier import (
+    ClaimReview,
+    EventChapter,
+    HistoricalDossier,
+    build_historical_dossier,
+    render_historical_dossier,
+)
 from historypy.research.verification import ClaimAssessment, assess_claim
 from historypy.research.visualization import (
     dataset_graph_data,
@@ -219,6 +226,11 @@ __all__ = [  # noqa: RUF022 - preserve public API grouping
     "audit_evidence_citations",
     "format_evidence_citation",
     "ClaimAssessment",
+    "ClaimReview",
+    "EventChapter",
+    "HistoricalDossier",
+    "build_historical_dossier",
+    "render_historical_dossier",
     "ClaimConfidenceReport",
     "analyze_claim_confidence",
     "SourceVerificationReport",
