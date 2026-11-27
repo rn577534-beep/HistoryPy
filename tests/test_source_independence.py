@@ -166,6 +166,10 @@ def test_multiple_disconnected_dependency_families_remain_separate():
                 shared_evidence_group_ids=("dispatch-a",),
             ),
             SourceRecord(
+                id="paper-a-copy", title="Paper A copy", source_type="secondary",
+                shared_evidence_group_ids=("dispatch-a",),
+            ),
+            SourceRecord(
                 id="wire-b", title="Wire B", source_type="primary",
                 shared_evidence_group_ids=("dispatch-b",),
             ),
@@ -173,16 +177,20 @@ def test_multiple_disconnected_dependency_families_remain_separate():
                 id="paper-b", title="Paper B", source_type="secondary",
                 shared_evidence_group_ids=("dispatch-b",),
             ),
+            SourceRecord(
+                id="paper-b-copy", title="Paper B copy", source_type="secondary",
+                shared_evidence_group_ids=("dispatch-b",),
+            ),
             SourceRecord(id="unknown", title="Unknown origin", source_type="other"),
         ),
-        ("paper-a", "paper-b", "unknown"),
+        ("paper-a", "paper-a-copy", "paper-b", "paper-b-copy", "unknown"),
     )
 
     report = analyze_claim_source_independence(dataset, "claim-1")
 
     assert report.status == "known_dependence_and_unknown"
     assert [cluster.evidence_source_ids for cluster in report.dependent_clusters] == [
-        ("paper-a",), ("paper-b",)
+        ("paper-a", "paper-a-copy"), ("paper-b", "paper-b-copy")
     ]
     assert [cluster.bridge_source_ids for cluster in report.dependent_clusters] == [
         ("wire-a",), ("wire-b",)
