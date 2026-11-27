@@ -874,6 +874,10 @@ entity candidates. Ambiguous aliases return every matching entity with an
 ambiguity count; do not treat a name match as proof that two records refer to
 the same person or place.
 
+## Live source checks, claim documentation, and open catalogs
+
+HistoryPy can check source URL reachability and exact recorded quotation presence with `verify_source_urls`, discover corroborating candidates across providers with `cross_verify_claim`, and report a transparent claim documentation score with `analyze_claim_confidence` (not a truth probability). Book/news metadata providers include Project Gutenberg via Gutendex, Open Library, Internet Archive, Library of Congress, Europeana, GDELT, and The Guardian Open Platform. Results remain candidates until reviewed; copyright and record-level rights must be respected. See [open books and news API guide](docs/open-books-and-news-apis.md).
+
 ## Claim-level citation auditing
 
 Use audit_evidence_citations(dataset, claim_id=...) to detect missing citation locators, quotations, missing source URLs, and malformed non-HTTP(S) URLs. format_evidence_citation(dataset, evidence_index) renders only recorded bibliographic and locator metadata. This is a traceability audit, not live URL verification, quotation authentication, or a historical-truth score. See the citation audit guide (docs/citation-audit.md).

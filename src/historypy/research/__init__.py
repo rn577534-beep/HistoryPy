@@ -22,6 +22,15 @@ from historypy.research.evaluation import (
     evaluate_rankings,
     evaluation_report_dict,
 )
+from historypy.research.confidence import (
+    ClaimConfidenceReport,
+    analyze_claim_confidence,
+)
+from historypy.research.source_verification import (
+    SourceVerificationReport,
+    SourceVerificationResult,
+    verify_source_urls,
+)
 from historypy.research.citations import (
     CitationFinding,
     EvidenceCitationAudit,
@@ -210,6 +219,11 @@ __all__ = [  # noqa: RUF022 - preserve public API grouping
     "audit_evidence_citations",
     "format_evidence_citation",
     "ClaimAssessment",
+    "ClaimConfidenceReport",
+    "analyze_claim_confidence",
+    "SourceVerificationReport",
+    "SourceVerificationResult",
+    "verify_source_urls",
     "ClaimEvidenceAnalysis",
     "claims_with_conflicting_evidence",
     "ClaimSourceIndependenceReport",
