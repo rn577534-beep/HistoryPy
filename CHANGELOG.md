@@ -8,6 +8,12 @@ PEP 440; pre-release versions are identified explicitly.
 ## [Unreleased]
 
 ### Added
+- Dependency-free `historypy` CLI for dataset validation, citation audits, and GeoJSON, Graphviz, timeline, and HTML exports.
+- Explicit-prior Bayesian likelihood-ratio updates and Dempster-Shafer mass combination with conflict reporting; neither infers source credibility or historical truth.
+- Tests for CLI workflows and probabilistic evidence calculations.
+
+
+### Added
 - Self-contained interactive HTML research report with network, timeline, and coordinate views; researcher text is HTML-escaped.
 - Reproducible Monte Carlo sensitivity analysis for two bounded event dates,
   including explicit uniform sampling assumptions and Wilson intervals.
