@@ -194,7 +194,7 @@ from historypy.research import (
     verify_research_audit_trail,
 )
 
-__version__ = "1.0.1.dev0"
+__version__ = "1.0.1"
 
 __all__ = [  # noqa: RUF022 - preserve public API grouping
     "__version__",
