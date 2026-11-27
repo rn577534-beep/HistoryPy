@@ -1,6 +1,6 @@
 from historypy import HistoricalDataset, HistoricalDate, HistoricalEvent, HistoricalPlace
-from historypy.io import save_dataset
 from historypy.cli import main
+from historypy.io import save_dataset
 
 
 def sample_dataset():
