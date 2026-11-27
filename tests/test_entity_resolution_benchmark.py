@@ -1,6 +1,14 @@
+import importlib.util
+from pathlib import Path
+
 import pytest
 
-from benchmarks.benchmark_entity_resolution import evaluate
+MODULE_PATH = Path(__file__).parents[1] / "benchmarks" / "benchmark_entity_resolution.py"
+SPEC = importlib.util.spec_from_file_location("historypy_entity_resolution_benchmark", MODULE_PATH)
+assert SPEC is not None and SPEC.loader is not None
+MODULE = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(MODULE)
+evaluate = MODULE.evaluate
 
 
 def test_multilingual_benchmark_reports_metrics_per_language():
