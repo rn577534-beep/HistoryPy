@@ -15,6 +15,16 @@ from historypy.integrations.collection_apis import (
     HarvardArtMuseumsSearch,
     SmithsonianSearch,
 )
+from historypy.integrations.open_catalogs import (
+    GDELTNewsSearch,
+    GuardianNewsSearch,
+    GutendexSearch,
+    OpenLibrarySearch,
+)
+from historypy.integrations.cross_verification import (
+    CrossVerificationReport,
+    cross_verify_claim,
+)
 from historypy.integrations.historical_apis import (
     EuropeanaSearch,
     ExternalRecord,
@@ -27,6 +37,12 @@ from historypy.integrations.historical_apis import (
 
 __all__ = [
     "AggregationReport",
+    "CrossVerificationReport",
+    "cross_verify_claim",
+    "GDELTNewsSearch",
+    "GuardianNewsSearch",
+    "GutendexSearch",
+    "OpenLibrarySearch",
     "DuplicateCandidateGroup",
     "EuropeanaSearch",
     "ExternalRecord",
