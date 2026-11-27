@@ -1,5 +1,7 @@
 """HistoryPy: evidence-aware tools for historical research."""
 
+# ruff: noqa: I001 - keep the curated public API import grouping stable
+
 from historypy.chronology import AllenRelation, allen_interval_relation
 from historypy.core.dataset import HistoricalDataset, ValidationIssue
 from historypy.core.entities import (
