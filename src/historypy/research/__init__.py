@@ -124,7 +124,6 @@ from historypy.research.source_independence import (
 )
 from historypy.research.timeline import TimelineEntry, TimelineResult, timeline_for_dataset
 from historypy.research.verification import ClaimAssessment, assess_claim
-
 from historypy.research.visualization import (
     dataset_graph_data,
     export_visualization_json,
