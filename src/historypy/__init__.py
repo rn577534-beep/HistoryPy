@@ -59,6 +59,11 @@ from historypy.io import (
     save_dataset_csv_bundle,
 )
 from historypy.research import (
+    analyze_temporal_sensitivity,
+    analyze_graph_centrality,
+    TemporalSensitivityReport,
+    NodeCentrality,
+    GraphCentralityReport,
     AliasAssertion,
     AliasMatch,
     AliasRegistry,
@@ -336,4 +341,9 @@ __all__ = [
     "to_source_record",
     "verify_research_audit_trail",
 
+    "GraphCentralityReport",
+    "NodeCentrality",
+    "TemporalSensitivityReport",
+    "analyze_graph_centrality",
+    "analyze_temporal_sensitivity",
 ]
