@@ -10,22 +10,32 @@ from dataclasses import dataclass, replace
 from historypy.core.dataset import HistoricalDataset
 from historypy.core.models import SourceRecord
 from historypy.integrations.aggregation import (
-    DuplicateCandidateGroup, MetadataConflict, SearchProvider,
-    compare_metadata, find_duplicate_candidates, to_source_record,
+    DuplicateCandidateGroup,
+    MetadataConflict,
+    SearchProvider,
+    compare_metadata,
+    find_duplicate_candidates,
+    to_source_record,
 )
 from historypy.integrations.historical_apis import (
-    ExternalRecord, InternetArchiveSearch, LibraryOfCongressSearch,
-    MediaWikiSearch, WikidataSearch,
+    ExternalRecord,
+    InternetArchiveSearch,
+    LibraryOfCongressSearch,
+    MediaWikiSearch,
+    WikidataSearch,
 )
 from historypy.integrations.open_catalogs import (
-    GDELTNewsSearch, GuardianNewsSearch, GutendexSearch, OpenLibrarySearch,
+    GDELTNewsSearch,
+    GuardianNewsSearch,
+    GutendexSearch,
+    OpenLibrarySearch,
 )
 from historypy.research.alias_registry import AliasRegistry
-from historypy.research.dossier import HistoricalDossier, build_historical_dossier, render_historical_dossier
-from historypy.research.pipeline import ResearchPipeline, ResearchReport, render_research_report
+from historypy.research.dossier import (\n    HistoricalDossier,\n    build_historical_dossier,\n    render_historical_dossier,\n)
+from historypy.research.pipeline import (\n    ResearchPipeline,\n    ResearchReport,\n    render_research_report,\n)
 from historypy.research.question_planner import QuestionExecutionReport
 from historypy.research.semantic import EmbeddingBatch, SemanticSearchIndex
-from historypy.research.source_verification import SourceVerificationReport, verify_source_urls
+from historypy.research.source_verification import (\n    SourceVerificationReport,\n    verify_source_urls,\n)
 
 
 @dataclass(frozen=True, slots=True)
