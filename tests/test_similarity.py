@@ -20,10 +20,9 @@ def test_similarity_is_case_and_unicode_normalization_aware():
 
 def test_damerau_levenshtein_rewards_adjacent_transposition():
     transposed = compare_names("hte", "the")
-    ordinary = compare_names("hte", "the")
-    assert transposed.damerau_levenshtein == 1.0
+    assert transposed.damerau_levenshtein == pytest.approx(2 / 3)
+    assert transposed.levenshtein == pytest.approx(1 / 3)
     assert transposed.levenshtein < transposed.damerau_levenshtein
-    assert ordinary.combined == transposed.combined
 
 
 def test_fuzzy_name_ensemble_detects_near_spelling_without_claiming_identity():
