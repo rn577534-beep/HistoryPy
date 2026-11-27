@@ -8,7 +8,7 @@ from __future__ import annotations
 import os
 import time
 from collections.abc import Iterator
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 
 from historypy.integrations.historical_apis import (
     ExternalRecord,
@@ -157,7 +157,12 @@ class GutendexSearch:
                     yielded += 1
                     if yielded >= max_records:
                         return
-            url = payload.get("next")
+            next_url = payload.get("next")
+            if next_url:
+                parsed = urlsplit(next_url)
+                if parsed.scheme != "https" or parsed.hostname != "gutendex.com":
+                    raise ValueError("Gutendex returned an unexpected pagination URL")
+            url = next_url
             if url and pages < max_pages and yielded < max_records and page_delay:
                 time.sleep(page_delay)
 
