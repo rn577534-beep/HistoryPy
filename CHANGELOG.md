@@ -8,6 +8,9 @@ PEP 440; pre-release versions are identified explicitly.
 ## [Unreleased]
 
 ### Added
+- Retrieval evaluation engine comparing trigram, BM25, and hybrid RRF with Precision@k, Recall@k, MRR@k, nDCG@k, Success@k, latency percentiles, bootstrap intervals, and paired comparisons.
+- CLI command to run reproducible retrieval evaluations from researcher-reviewed relevance judgments.
+- Tests and documentation for statistical evaluation and identical-query comparisons.
 - Dependency-free `historypy` CLI for dataset validation, citation audits, and GeoJSON, Graphviz, timeline, and HTML exports.
 - Explicit-prior Bayesian likelihood-ratio updates and Dempster-Shafer mass combination with conflict reporting; neither infers source credibility or historical truth.
 - Tests for CLI workflows and probabilistic evidence calculations.\n- A multilingual entity-resolution gold-set benchmark harness reporting per-language precision, recall, F1, and false-positive rate without inventing labels.\n- Conservative point-distance uncertainty bounds from researcher-supplied coordinate error radii.\n- Optional discrete triangular temporal sensitivity sampling with reproducible seeds and explicit mode quantiles.

@@ -1,5 +1,7 @@
 """Research utilities for evidence-aware historical analysis."""
 
+# ruff: noqa: I001 - keep the curated public API import grouping stable
+
 from historypy.research.alias_import import import_wikidata_alias_candidates
 from historypy.research.alias_registry import AliasAssertion, AliasMatch, AliasRegistry
 from historypy.research.audit_trail import (
@@ -9,6 +11,16 @@ from historypy.research.audit_trail import (
     verify_research_audit_trail,
 )
 from historypy.research.bm25 import BM25SearchHit, BM25SearchIndex
+from historypy.research.benchmark import run_retrieval_benchmark
+from historypy.research.evaluation import (
+    ConfidenceInterval,
+    EvaluationReport,
+    MetricValues,
+    PairedComparison,
+    SystemEvaluation,
+    evaluate_rankings,
+    evaluation_report_dict,
+)
 from historypy.research.comparison import (
     MetricComparison,
     MetricObservation,
@@ -175,6 +187,14 @@ __all__ = [  # noqa: RUF022 - preserve public API grouping
     "BayesianUpdate",
     "BM25SearchHit",
     "BM25SearchIndex",
+    "ConfidenceInterval",
+    "EvaluationReport",
+    "MetricValues",
+    "PairedComparison",
+    "SystemEvaluation",
+    "evaluate_rankings",
+    "evaluation_report_dict",
+    "run_retrieval_benchmark",
     "CitationCompletenessReport",
     "ClaimAssessment",
     "ClaimEvidenceAnalysis",

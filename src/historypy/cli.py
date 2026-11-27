@@ -8,7 +8,7 @@ from dataclasses import asdict
 from pathlib import Path
 
 from historypy.io import load_dataset
-from historypy.research import audit_citation_completeness
+from historypy.research import audit_citation_completeness, run_retrieval_benchmark
 from historypy.research.visualization import (
     render_visualization_html,
     timeline_visualization_data,
@@ -40,6 +40,14 @@ def build_parser() -> argparse.ArgumentParser:
     audit.add_argument("dataset", type=Path)
     audit.add_argument("--output", type=Path)
 
+    evaluate = subparsers.add_parser("evaluate", help="compare retrieval methods on reviewed relevance judgments")
+    evaluate.add_argument("dataset", type=Path)
+    evaluate.add_argument("cases", type=Path, help="JSON file containing reviewed query cases")
+    evaluate.add_argument("--top-k", type=int, default=10)
+    evaluate.add_argument("--bootstrap-samples", type=int, default=2000)
+    evaluate.add_argument("--seed", type=int, default=2026)
+    evaluate.add_argument("--output", type=Path, required=True)
+
     export = subparsers.add_parser("export", help="export a visualization artifact")
     export.add_argument("dataset", type=Path)
     export.add_argument("--format", choices=("geojson", "graphviz", "timeline", "html"), required=True)
@@ -60,6 +68,19 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "audit":
             report = audit_citation_completeness(dataset)
             _write_output(json.dumps(asdict(report), indent=2, sort_keys=True), args.output)
+            return 0
+        if args.command == "evaluate":
+            cases = json.loads(args.cases.read_text(encoding="utf-8"))
+            if not isinstance(cases, list):
+                raise ValueError("benchmark cases file must contain a JSON array")
+            report = run_retrieval_benchmark(
+                dataset,
+                cases,
+                cutoff=args.top_k,
+                bootstrap_samples=args.bootstrap_samples,
+                seed=args.seed,
+            )
+            _write_output(json.dumps(asdict(report), ensure_ascii=False, indent=2), args.output)
             return 0
         if args.format == "geojson":
             rendered = json.dumps(to_geojson(dataset), ensure_ascii=False, indent=2, sort_keys=True)
