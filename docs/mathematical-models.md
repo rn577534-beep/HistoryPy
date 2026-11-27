@@ -58,6 +58,15 @@ print(report.first_before_second_ci95)
 print(report.simultaneous_probability)
 ```
 
+## Interactive visualization report
+
+`render_visualization_html(dataset)` creates a self-contained HTML file with
+switchable relationship-network, timeline-table, and place-coordinate views.
+It has no plotting dependency and escapes researcher-supplied labels before
+embedding them in markup. The graph view is intentionally capped for small
+networks. The place panel is a coordinate scatter, not a basemap; use GeoJSON
+with a GIS tool for actual geographic context.
+
 ## Implemented graph centrality
 
 `analyze_graph_centrality(dataset)` calculates PageRank and HITS hub/authority
