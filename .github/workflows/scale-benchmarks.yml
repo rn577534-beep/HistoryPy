@@ -31,3 +31,6 @@ jobs:
         run: python -m pip install -e .
       - name: Benchmark ${{ matrix.records }} records
         run: python benchmarks/benchmark_scale.py --records ${{ matrix.records }} --repeat 1
+      - name: Smoke-test cache and batch benchmark
+        if: matrix.records == 100000
+        run: python benchmarks/benchmark_cached_search.py --records 1000 --repeat 1 --workers 2
