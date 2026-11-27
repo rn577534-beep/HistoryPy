@@ -74,3 +74,19 @@ The engine is only as complete as its input dataset. It does not search the web,
 download books, authenticate archival material, translate source texts, or
 write a causal narrative. Those are separate research steps; results should be
 reviewed and entered as sourced records before dossier assembly.
+
+## Command-line use
+
+After installing HistoryPy, build the same report without writing Python code:
+
+```bash
+historypy dossier research.json \
+  --title "A study of a historical period" \
+  --scope-note "Geographic and chronological boundaries." \
+  --output historical-dossier.md
+```
+
+By default, events with indeterminate dates remain included and are identified
+as such. Add `--exclude-indeterminate-dates` to omit them from the chronological
+chapters; the report still counts them as a research gap. Omit `--output` to
+write Markdown to standard output.
