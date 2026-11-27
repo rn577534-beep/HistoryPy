@@ -10,13 +10,12 @@ import unicodedata
 from collections import defaultdict
 from collections.abc import Iterable
 from dataclasses import dataclass, replace
-from historypy.research.similarity import compare_names
-
 from historypy.core.dataset import HistoricalDataset
 from historypy.research.alias_registry import AliasRegistry
 from historypy.research.bm25 import BM25SearchIndex
 from historypy.research.search_index import DatasetSearchIndex
 from historypy.research.semantic import EmbeddingBatch, SemanticSearchIndex
+from historypy.research.similarity import compare_names
 
 
 @dataclass(frozen=True, slots=True)
