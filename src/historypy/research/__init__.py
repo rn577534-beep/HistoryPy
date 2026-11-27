@@ -134,6 +134,7 @@ from historypy.research.source_independence import (
 from historypy.research.timeline import TimelineEntry, TimelineResult, timeline_for_dataset
 from historypy.research.verification import ClaimAssessment, assess_claim
 from historypy.research.visualization import (
+    render_visualization_html,
     dataset_graph_data,
     export_visualization_json,
     timeline_visualization_data,
@@ -228,6 +229,7 @@ __all__ = [
     "render_claim_report",
     "render_event_source_comparison",
     "render_research_report",
+    "render_visualization_html",
     "ResearchAction",
     "ResearchFacets",
     "ResearchPipeline",
