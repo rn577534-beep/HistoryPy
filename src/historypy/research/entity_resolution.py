@@ -9,7 +9,7 @@ from __future__ import annotations
 import re
 from collections.abc import Iterable
 from dataclasses import dataclass
-from difflib import SequenceMatcher
+from historypy.research.similarity import compare_names
 
 from historypy.core.dataset import HistoricalDataset
 
@@ -51,19 +51,10 @@ def _name_similarity(left: str, right: str) -> float:
     left_norm, right_norm = _normalize(left), _normalize(right)
     if not left_norm or not right_norm:
         return 0.0
-    if left_norm == right_norm:
-        return 1.0
     # Very short strings are too collision-prone for fuzzy matching.
     if min(len(left_norm), len(right_norm)) < 4:
         return 0.0
-    sequence_score = SequenceMatcher(None, left_norm, right_norm).ratio()
-    left_tokens, right_tokens = set(left_norm.split()), set(right_norm.split())
-    token_score = (
-        len(left_tokens & right_tokens) / len(left_tokens | right_tokens)
-        if left_tokens | right_tokens else 0.0
-    )
-    return max(sequence_score, token_score)
-
+    return compare_names(left, right).combined
 
 def suggest_entity_matches(
     dataset: HistoricalDataset,
