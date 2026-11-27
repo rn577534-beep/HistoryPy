@@ -72,3 +72,23 @@ def test_cli_evaluate_runs_comparable_retrieval_methods(tmp_path):
     assert {item["system"] for item in report["systems"]} == {
         "trigram", "bm25", "hybrid_rrf"
     }
+
+
+
+def test_cli_dossier_writes_stepwise_markdown(tmp_path):
+    dataset_path = tmp_path / "dataset.json"
+    save_dataset(sample_dataset(), dataset_path)
+    output = tmp_path / "historical-dossier.md"
+
+    assert main([
+        "dossier", str(dataset_path),
+        "--title", "Example dossier",
+        "--scope-note", "A defined research scope.",
+        "--output", str(output),
+    ]) == 0
+    rendered = output.read_text(encoding="utf-8")
+    assert "# Example dossier" in rendered
+    assert "A defined research scope." in rendered
+    assert "Example event" in rendered
+    assert "Example place" in rendered
+    assert "Interpretation protocol" in rendered
