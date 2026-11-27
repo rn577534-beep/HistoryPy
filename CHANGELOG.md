@@ -8,6 +8,11 @@ PEP 440; pre-release versions are identified explicitly.
 ## [Unreleased]
 
 ### Added
+- Reproducible Monte Carlo sensitivity analysis for two bounded event dates,
+  including explicit uniform sampling assumptions and Wilson intervals.
+- PageRank and HITS structural centrality for recorded directed relationships,
+  retaining isolated entities and reporting convergence metadata.
+- Parameter, reproducibility, calendar-compatibility, and graph-structure tests.
 - Allen interval algebra for thirteen temporal relations between comparable,
   fully bounded historical dates.
 - Shannon entropy summaries for recorded evidence-relation and source-type
