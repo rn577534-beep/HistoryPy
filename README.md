@@ -60,6 +60,9 @@ batches of queries. Parallel batches are opt-in and depend on workload type;
 CPU-bound pure-Python searches are not guaranteed to become faster.
 
 See [fast retrieval](docs/fast-retrieval.md) for the Python API and limitations.
+Run the reproducible cache/batch benchmark with
+`python benchmarks/benchmark_cached_search.py --records 100000 --repeat 5`;
+see [benchmark methodology](docs/cache-performance-benchmark.md).
 
 ## Retrieval evaluation engine
 
