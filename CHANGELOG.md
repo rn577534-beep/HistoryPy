@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.1] - 2026-11-27
+
+### Added
+- Retrieval evaluation with Precision@k, Recall@k, MRR@k, nDCG@k, Success@k, bootstrap confidence intervals, paired comparisons, and latency reporting.
+- Bounded, thread-safe LRU caching and ordered batch hybrid retrieval.
+- Reproducible cache/batch and large-scale selective-search benchmarks, including correctness parity checks.
+
+### Performance observations
+- On the GitHub Actions synthetic 100,000-record fixture, indexed selective search took 3.066 ms versus 53.309 ms for linear search (17.39x observed speedup).
+- On the synthetic 1,000,000-record fixture, indexed search took 66.977 ms versus 861.430 ms for linear search (12.86x observed speedup), with exact result parity. Peak process RSS was 1,022.281 MiB; this is a high-memory stress-test result, not a claim of low-memory production readiness.
+- Cache and batch benchmark results are workload-dependent. Parallel execution was slower than sequential execution in the tested small synthetic batch, so parallelism remains opt-in.
+
+### Notes
+- Benchmarks use synthetic data and do not measure historical truth, evidence quality, or real-world historical retrieval relevance.
+
+
 All notable changes to HistoryPy are documented here.
 
 This project follows a lightweight Keep a Changelog structure. Versions follow

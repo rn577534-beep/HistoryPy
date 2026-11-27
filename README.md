@@ -92,7 +92,7 @@ Requires Python 3.10 or newer.
 
 ### Install the published package (recommended)
 
-HistoryPy 1.0.0 is published on PyPI:
+HistoryPy 1.0.1 is the current release on PyPI:
 
 ```bash
 python -m pip install --upgrade historypy
