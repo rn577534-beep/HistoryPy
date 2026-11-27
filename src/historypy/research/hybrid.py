@@ -10,7 +10,7 @@ import unicodedata
 from collections import defaultdict
 from collections.abc import Iterable
 from dataclasses import dataclass, replace
-from difflib import SequenceMatcher
+from historypy.research.similarity import compare_names
 
 from historypy.core.dataset import HistoricalDataset
 from historypy.research.alias_registry import AliasRegistry
@@ -420,7 +420,7 @@ class EntityAwareSearchIndex:
             if not alias_tokens:
                 continue
             similarity = max(
-                SequenceMatcher(None, query_token, alias_token).ratio()
+                compare_names(query_token, alias_token).combined
                 for query_token in query_tokens
                 for alias_token in alias_tokens
             )
