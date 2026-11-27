@@ -24,6 +24,17 @@ HistoryPy can export research datasets for external visualization tools:
 
 See [mathematical models and visualization exports](docs/mathematical-models.md). A complete runnable example is available in [examples/visualization_exports.py](examples/visualization_exports.py).
 
+## Temporal sensitivity and network analysis
+
+- `analyze_temporal_sensitivity(...)` estimates the ordering of two bounded
+  event dates under a reproducible, explicitly stated uniform sampling policy.
+- `analyze_graph_centrality(dataset)` calculates PageRank and HITS on recorded
+  directed relationships, including isolated entities.
+
+Both tools report limitations. Monte Carlo outputs are not calibrated
+historical probabilities; graph centrality is not a measure of truth,
+credibility, or historical importance.
+
 ## Mathematical models
 
 See [the mathematical model inventory, implementation status, and evaluation policy](docs/mathematical-models.md).
