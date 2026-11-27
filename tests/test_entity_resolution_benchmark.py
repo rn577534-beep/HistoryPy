@@ -26,5 +26,5 @@ def test_multilingual_benchmark_reports_metrics_per_language():
 
 
 def test_benchmark_rejects_non_boolean_gold_label():
-    with pytest.raises(ValueError, match="boolean"):
+    with pytest.raises(TypeError, match="boolean"):
         evaluate([{"language": "en", "left": "a", "right": "b", "match": 1}], 0.5)
