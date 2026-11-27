@@ -23,6 +23,9 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Information Analysis",
 ]
 
+[project.scripts]
+historypy = "historypy.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/rn577534-beep/HistoryPy"
 Repository = "https://github.com/rn577534-beep/HistoryPy"
