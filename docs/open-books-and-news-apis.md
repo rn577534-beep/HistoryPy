@@ -25,7 +25,7 @@ libraries, scrape provider websites, or copy full copyrighted books/news stories
 
 ## Example: discover books
 
-\`\`\`python
+```python
 from historypy import GutendexSearch, OpenLibrarySearch
 
 gutenberg = GutendexSearch()
@@ -35,7 +35,7 @@ for book in gutenberg.iter_search("early Islamic history", max_records=500):
 open_library = OpenLibrarySearch()
 for book in open_library.search("early Islamic history", limit=20):
     print(book.title, book.creator, book.url)
-\`\`\`
+```
 
 The iter_search method is an explicit, bounded pagination workflow. Its default ceiling is
 1,000 results, and callers can raise it to at most 10,000. This is a discovery
@@ -45,7 +45,7 @@ official monthly data dumps for bulk research datasets.
 
 ## Example: search news
 
-\`\`\`python
+```python
 from historypy import GDELTNewsSearch
 
 news = GDELTNewsSearch().search(
@@ -55,23 +55,23 @@ news = GDELTNewsSearch().search(
 )
 for article in news:
     print(article.title, article.creator, article.url)
-\`\`\`
+```
 
 The optional Guardian provider requires a key:
 
-\`\`\`bash
+```bash
 export GUARDIAN_API_KEY="your-key"
-\`\`\`
+```
 
-\`\`\`python
+```python
 from historypy import GuardianNewsSearch
 
 articles = GuardianNewsSearch().search("archaeology", limit=10)
-\`\`\`
+```
 
 ## Federated cross-checking
 
-\`\`\`python
+```python
 from historypy import (
     GDELTNewsSearch,
     GutendexSearch,
@@ -95,7 +95,7 @@ print(report.candidate_count)
 print(report.provider_report.failures)
 print(report.duplicate_candidates)
 print(report.metadata_conflicts)
-\`\`\`
+```
 
 Search candidates are never automatically linked as supporting evidence. A
 catalog hit may be a derivative record, a later reprint, an inaccurate record,
@@ -105,7 +105,7 @@ do not automatically mean multiple independent sources.
 
 ## Live source and quotation checks
 
-\`\`\`python
+```python
 from historypy import verify_source_urls
 
 report = verify_source_urls(dataset, claim_id="claim-001")
@@ -117,7 +117,7 @@ for result in report.results:
         result.quotation_status,
         result.checked_url,
     )
-\`\`\`
+```
 
 The verifier checks only HTTP(S) reachability and exact quotation presence
 after case-folding and whitespace normalization. It is bounded to 2 MB per
@@ -128,7 +128,7 @@ prove authenticity or context.
 
 ## Claim documentation assessment
 
-\`\`\`python
+```python
 from historypy import analyze_claim_confidence
 
 assessment = analyze_claim_confidence(dataset, "claim-001")
@@ -137,7 +137,7 @@ print(assessment.documentation_band)
 print(assessment.evidence_status)
 print(assessment.source_independence_status)
 print(assessment.limitations)
-\`\`\`
+```
 
 The 0-100 score is a documentation-completeness heuristic, not a probability
 that the historical claim is true. It combines citation traceability (50%),
