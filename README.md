@@ -22,7 +22,7 @@ HistoryPy can export research datasets for external visualization tools:
 - GeoJSON place maps: `to_geojson(dataset)`
 - Uncertainty-aware timeline data: `timeline_visualization_data(dataset)`
 
-See [mathematical models and visualization exports](docs/mathematical-models.md).
+See [mathematical models and visualization exports](docs/mathematical-models.md). A complete runnable example is available in [examples/visualization_exports.py](examples/visualization_exports.py).
 
 ## Mathematical models
 
