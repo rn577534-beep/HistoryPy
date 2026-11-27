@@ -9,8 +9,8 @@ HistoryPy is an evidence-aware Python toolkit for organizing and analyzing histo
 1. **Core records** — dates, events, claims, sources, evidence, people, places, civilizations, organizations, and relationships.
 2. **Dataset integrity** — in-memory collections with stable identifiers and referential-integrity diagnostics.
 3. **Chronology** — bounded dates, BCE/CE astronomical year numbering, calendar labels, and overlap detection.
-4. **Knowledge graph** — directed, typed relationships, graph traversal, shortest paths, and connected components.
-5. **Research tools** — evidence retrieval, conflict summaries, lexical search, event/date overlap queries, and conservative possible-duplicate suggestions.
+4. **Knowledge graph** — directed, typed relationships, graph traversal, shortest paths, connected components, and structural PageRank/HITS analysis.
+5. **Research tools** — evidence retrieval, conflict summaries, lexical search, event/date overlap queries, conservative possible-duplicate suggestions, and reproducible temporal sensitivity analysis.
 6. **Interchange** — versioned JSON serialization, validation on import, and UTF-8 file persistence.
 7. **Future interfaces and analysis** — source comparison, entity resolution, geographic analysis, network measures, CSV interchange, command-line tools, APIs, notebooks, and visual research interfaces.
 
@@ -53,3 +53,17 @@ Every imported dataset should record its source and maintainer, license and perm
 ## Current implementation
 
 The early 0.1.x codebase includes dependency-light core records, chronology operations, entity records, dataset validation, relationship graph analysis, evidence summaries, lexical and temporal research queries, versioned JSON import/export, and automated tests. It does not include a comprehensive historical dataset, calendar-conversion engine, geospatial index, semantic search, or automatic source authentication. Entity matching is candidate generation only, not automatic identity resolution.
+
+
+## Sensitivity and network analysis
+
+Temporal Monte Carlo analysis requires two fully bounded event dates with
+matching calendars and bound representations. Its discrete uniform sampling
+policy and random seed are explicit and reported with Wilson confidence
+intervals. It does not infer priors, widen circa ranges, convert calendars, or
+claim causal direction.
+
+PageRank and HITS operate only on recorded directed relationship edges.
+Isolated entities remain in the graph. Centrality scores describe graph
+structure and must not be interpreted as historical importance, source
+credibility, influence, or truth. Both algorithms report convergence status.
