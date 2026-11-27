@@ -8,7 +8,12 @@ from dataclasses import asdict
 from pathlib import Path
 
 from historypy.io import load_dataset
-from historypy.research import audit_citation_completeness, run_retrieval_benchmark
+from historypy.research import (
+    audit_citation_completeness,
+    build_historical_dossier,
+    render_historical_dossier,
+    run_retrieval_benchmark,
+)
 from historypy.research.visualization import (
     render_visualization_html,
     timeline_visualization_data,
@@ -40,6 +45,13 @@ def build_parser() -> argparse.ArgumentParser:
     audit.add_argument("dataset", type=Path)
     audit.add_argument("--output", type=Path)
 
+    dossier = subparsers.add_parser("dossier", help="organize a dataset into a stepwise historical dossier")
+    dossier.add_argument("dataset", type=Path)
+    dossier.add_argument("--title", default="Historical dossier")
+    dossier.add_argument("--scope-note", default="")
+    dossier.add_argument("--exclude-indeterminate-dates", action="store_true")
+    dossier.add_argument("--output", type=Path)
+
     evaluate = subparsers.add_parser("evaluate", help="compare retrieval methods on reviewed relevance judgments")
     evaluate.add_argument("dataset", type=Path)
     evaluate.add_argument("cases", type=Path, help="JSON file containing reviewed query cases")
@@ -68,6 +80,15 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "audit":
             report = audit_citation_completeness(dataset)
             _write_output(json.dumps(asdict(report), indent=2, sort_keys=True), args.output)
+            return 0
+        if args.command == "dossier":
+            dossier = build_historical_dossier(
+                dataset,
+                title=args.title,
+                scope_note=args.scope_note,
+                include_indeterminate_dates=not args.exclude_indeterminate_dates,
+            )
+            _write_output(render_historical_dossier(dossier), args.output)
             return 0
         if args.command == "evaluate":
             cases = json.loads(args.cases.read_text(encoding="utf-8"))
