@@ -60,7 +60,7 @@ def test_integrated_workflow_runs_original_and_researcher_supplied_language_quer
     assert len(report.external_records) == 3
     assert report.dossier.title == "Research dossier"
     assert report.source_verification is None
-    assert "not automatically imported" in " ".join(report.gaps)
+    assert "none was auto-imported as evidence" in " ".join(report.gaps)
     rendered = render_integrated_research_report(report)
     assert "Multilingual discovery" in rendered
     assert "Historical dossier" in rendered
