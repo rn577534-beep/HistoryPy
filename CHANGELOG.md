@@ -8,6 +8,7 @@ PEP 440; pre-release versions are identified explicitly.
 ## [Unreleased]
 
 ### Added
+- Self-contained interactive HTML research report with network, timeline, and coordinate views; researcher text is HTML-escaped.
 - Reproducible Monte Carlo sensitivity analysis for two bounded event dates,
   including explicit uniform sampling assumptions and Wilson intervals.
 - PageRank and HITS structural centrality for recorded directed relationships,
