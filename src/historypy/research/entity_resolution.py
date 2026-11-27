@@ -9,9 +9,8 @@ from __future__ import annotations
 import re
 from collections.abc import Iterable
 from dataclasses import dataclass
-from historypy.research.similarity import compare_names
-
 from historypy.core.dataset import HistoricalDataset
+from historypy.research.similarity import compare_names
 
 
 @dataclass(frozen=True, slots=True)
