@@ -6,7 +6,7 @@ historical importance, source credibility, influence, or truth.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from math import sqrt
+from math import isfinite, sqrt
 
 from historypy.core.dataset import HistoricalDataset
 
@@ -61,12 +61,12 @@ def analyze_graph_centrality(
     dataset.require_valid()
     if isinstance(damping, bool) or not isinstance(damping, (int, float)):
         raise TypeError("damping must be numeric")
-    if not 0 < damping < 1:
-        raise ValueError("damping must be strictly between 0 and 1")
+    if not isfinite(damping) or not 0 < damping < 1:
+        raise ValueError("damping must be finite and strictly between 0 and 1")
     if isinstance(tolerance, bool) or not isinstance(tolerance, (int, float)):
         raise TypeError("tolerance must be numeric")
-    if tolerance <= 0:
-        raise ValueError("tolerance must be positive")
+    if not isfinite(tolerance) or tolerance <= 0:
+        raise ValueError("tolerance must be finite and positive")
     if isinstance(max_iterations, bool) or not isinstance(max_iterations, int):
         raise TypeError("max_iterations must be an integer")
     if not 1 <= max_iterations <= 100_000:
