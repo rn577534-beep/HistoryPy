@@ -9,9 +9,13 @@ from pathlib import Path
 
 from historypy.io import load_dataset
 from historypy.research import (
+    HistoricalResearchWorkflow,
+    ResearchQueryVariant,
     audit_citation_completeness,
     build_historical_dossier,
+    build_multilingual_semantic_index,
     render_historical_dossier,
+    render_integrated_research_report,
     run_retrieval_benchmark,
 )
 from historypy.research.visualization import (
@@ -53,6 +57,18 @@ def build_parser() -> argparse.ArgumentParser:
     dossier.add_argument("--format", choices=("markdown", "json"), default="markdown")
     dossier.add_argument("--output", type=Path)
 
+    research = subparsers.add_parser("research", help="run integrated multilingual historical research")
+    research.add_argument("dataset", type=Path)
+    research.add_argument("question")
+    research.add_argument("--variant", action="append", default=[], metavar="LANG=TEXT", help="researcher-supplied translated/transliterated query; repeatable")
+    research.add_argument("--no-external", action="store_true")
+    research.add_argument("--no-source-check", action="store_true")
+    research.add_argument("--semantic-model", help="optional multilingual sentence-transformers model; requires historypy[semantic]")
+    research.add_argument("--title", default="Historical research dossier")
+    research.add_argument("--scope-note", default="")
+    research.add_argument("--format", choices=("markdown", "json"), default="markdown")
+    research.add_argument("--output", type=Path)
+
     evaluate = subparsers.add_parser("evaluate", help="compare retrieval methods on reviewed relevance judgments")
     evaluate.add_argument("dataset", type=Path)
     evaluate.add_argument("cases", type=Path, help="JSON file containing reviewed query cases")
@@ -93,6 +109,35 @@ def main(argv: list[str] | None = None) -> int:
                 json.dumps(asdict(dossier), ensure_ascii=False, indent=2, sort_keys=True)
                 if args.format == "json"
                 else render_historical_dossier(dossier)
+            )
+            _write_output(rendered, args.output)
+            return 0
+        if args.command == "research":
+            variants = []
+            for raw in args.variant:
+                language, separator, text = raw.partition("=")
+                if not separator or not language.strip() or not text.strip():
+                    raise ValueError("--variant must use LANG=TEXT, for example bn=বাংলার ইতিহাস")
+                variants.append(ResearchQueryVariant(text=text.strip(), language=language.strip()))
+            semantic_index = embedder = None
+            if args.semantic_model:
+                semantic_index, embedder = build_multilingual_semantic_index(
+                    dataset, model_name=args.semantic_model
+                )
+            report = HistoricalResearchWorkflow(
+                dataset, semantic_index=semantic_index, embedder=embedder
+            ).run(
+                args.question,
+                query_variants=tuple(variants),
+                include_external=not args.no_external,
+                verify_sources=not args.no_source_check,
+                dossier_title=args.title,
+                scope_note=args.scope_note,
+            )
+            rendered = (
+                json.dumps(asdict(report), ensure_ascii=False, indent=2, sort_keys=True)
+                if args.format == "json"
+                else render_integrated_research_report(report)
             )
             _write_output(rendered, args.output)
             return 0

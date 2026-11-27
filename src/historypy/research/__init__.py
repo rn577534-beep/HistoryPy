@@ -42,6 +42,10 @@ from historypy.research.comparison import (
     MetricObservation,
     compare_metrics,
 )
+from historypy.research.embeddings import (
+    SentenceTransformerEmbedder,
+    build_multilingual_semantic_index,
+)
 from historypy.research.engine import (
     ResearchFacets,
     ResearchQuery,
@@ -175,6 +179,15 @@ from historypy.research.dossier import (
     render_historical_dossier,
 )
 from historypy.research.verification import ClaimAssessment, assess_claim
+from historypy.research.workflow import (
+    HistoricalResearchWorkflow,
+    IntegratedResearchReport,
+    QueryDiscovery,
+    ResearchQueryVariant,
+    default_historical_providers,
+    render_integrated_research_report,
+    select_external_sources,
+)
 from historypy.research.visualization import (
     dataset_graph_data,
     export_visualization_json,
@@ -226,6 +239,13 @@ __all__ = [  # noqa: RUF022 - preserve public API grouping
     "audit_evidence_citations",
     "format_evidence_citation",
     "ClaimAssessment",
+    "HistoricalResearchWorkflow",
+    "IntegratedResearchReport",
+    "QueryDiscovery",
+    "ResearchQueryVariant",
+    "default_historical_providers",
+    "render_integrated_research_report",
+    "select_external_sources",
     "ClaimReview",
     "EventChapter",
     "HistoricalDossier",
@@ -312,6 +332,8 @@ __all__ = [  # noqa: RUF022 - preserve public API grouping
     "search_dataset",
     "SearchHit",
     "select_paths_by_temporal_policy",
+    "SentenceTransformerEmbedder",
+    "build_multilingual_semantic_index",
     "SemanticSearchHit",
     "SemanticSearchIndex",
     "shannon_entropy",
