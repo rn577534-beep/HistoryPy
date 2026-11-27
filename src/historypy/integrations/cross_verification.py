@@ -70,7 +70,7 @@ def cross_verify_claim(
     )
     records = result.records
     notes = [
-        "Search hits are discovery candidates, not evidence automatically attached to the claim.",
+        "Search hits are discovery candidates and are not automatically attached as evidence to the claim.",
         "A result's title, snippet, and metadata do not verify the underlying historical assertion.",
         "Different providers may index the same original source; provider count is not independent corroboration.",
         "Inspect source provenance, full context, date, authorship, and rights before importing a record.",
