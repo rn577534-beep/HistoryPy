@@ -1,10 +1,10 @@
 from historypy import (
+    BM25SearchIndex,
     CachedHybridSearchIndex,
     DatasetSearchIndex,
     HistoricalDataset,
     HistoricalPerson,
     HybridSearchIndex,
-    BM25SearchIndex,
 )
 
 
