@@ -52,6 +52,15 @@ Both tools report limitations. Monte Carlo outputs are not calibrated
 historical probabilities; graph centrality is not a measure of truth,
 credibility, or historical importance.
 
+## Fast repeated and batch retrieval
+
+Wrap a hybrid search index with a bounded, thread-safe LRU cache to reuse
+identical searches, inspect cache hit/miss statistics, and execute ordered
+batches of queries. Parallel batches are opt-in and depend on workload type;
+CPU-bound pure-Python searches are not guaranteed to become faster.
+
+See [fast retrieval](docs/fast-retrieval.md) for the Python API and limitations.
+
 ## Retrieval evaluation engine
 
 Compare trigram, BM25, and hybrid reciprocal-rank-fusion on the same
