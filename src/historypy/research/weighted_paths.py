@@ -4,11 +4,11 @@ Costs are caller-defined traversal preferences, not probabilities or truth.
 """
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from heapq import heappop, heappush
 from itertools import count
 from math import isfinite
-from typing import Mapping
 
 from historypy.core.dataset import HistoricalDataset
 from historypy.core.entities import HistoricalRelationship
