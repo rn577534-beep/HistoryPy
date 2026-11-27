@@ -44,6 +44,7 @@ from historypy.research.evidence_analysis import (
 )
 from historypy.research.geography import (
     PlaceDistance,
+    distance_interval_km,
     great_circle_distance_km,
     places_within_radius,
 )
@@ -192,6 +193,7 @@ __all__ = [
     "NameSimilarityScores",
     "NodeCentrality",
     "PlaceDistance",
+    "distance_interval_km",
     "PredicateCandidate",
     "QualityFinding",
     "QuestionExecutionReport",
