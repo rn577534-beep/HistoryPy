@@ -1,3 +1,4 @@
+import json
 from historypy import HistoricalDataset, HistoricalDate, HistoricalEvent, HistoricalPlace
 from historypy.cli import main
 from historypy.io import save_dataset
@@ -49,3 +50,24 @@ def test_cli_invalid_file_returns_error_code(tmp_path, capsys):
     missing = tmp_path / "missing.json"
     assert main(["validate", str(missing)]) == 2
     assert "error" in capsys.readouterr().err
+
+
+
+def test_cli_evaluate_runs_comparable_retrieval_methods(tmp_path):
+    dataset_path = tmp_path / "dataset.json"
+    save_dataset(sample_dataset(), dataset_path)
+    cases_path = tmp_path / "cases.json"
+    cases_path.write_text(json.dumps([
+        {"id": "q1", "query": "Example event", "relevant": ["event:event-1"]}
+    ]), encoding="utf-8")
+    output = tmp_path / "evaluation.json"
+
+    assert main([
+        "evaluate", str(dataset_path), str(cases_path),
+        "--top-k", "5", "--bootstrap-samples", "200", "--output", str(output),
+    ]) == 0
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert report["query_count"] == 1
+    assert {item["system"] for item in report["systems"]} == {
+        "trigram", "bm25", "hybrid_rrf"
+    }
