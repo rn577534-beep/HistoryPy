@@ -61,10 +61,6 @@ from historypy.research.network_analysis import (
     NodeCentrality,
     analyze_graph_centrality,
 )
-from historypy.research.temporal_sensitivity import (
-    TemporalSensitivityReport,
-    analyze_temporal_sensitivity,
-)
 from historypy.research.pipeline import (
     ResearchPipeline,
     ResearchReport,
@@ -131,12 +127,16 @@ from historypy.research.source_independence import (
     analyze_source_set_independence,
     audit_source_independence,
 )
+from historypy.research.temporal_sensitivity import (
+    TemporalSensitivityReport,
+    analyze_temporal_sensitivity,
+)
 from historypy.research.timeline import TimelineEntry, TimelineResult, timeline_for_dataset
 from historypy.research.verification import ClaimAssessment, assess_claim
 from historypy.research.visualization import (
-    render_visualization_html,
     dataset_graph_data,
     export_visualization_json,
+    render_visualization_html,
     timeline_visualization_data,
     to_geojson,
     to_graphviz_dot,
