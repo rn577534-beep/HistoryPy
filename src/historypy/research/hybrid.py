@@ -10,6 +10,7 @@ import unicodedata
 from collections import defaultdict
 from collections.abc import Iterable
 from dataclasses import dataclass, replace
+
 from historypy.core.dataset import HistoricalDataset
 from historypy.research.alias_registry import AliasRegistry
 from historypy.research.bm25 import BM25SearchIndex
