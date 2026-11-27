@@ -50,6 +50,7 @@ def build_parser() -> argparse.ArgumentParser:
     dossier.add_argument("--title", default="Historical dossier")
     dossier.add_argument("--scope-note", default="")
     dossier.add_argument("--exclude-indeterminate-dates", action="store_true")
+    dossier.add_argument("--format", choices=("markdown", "json"), default="markdown")
     dossier.add_argument("--output", type=Path)
 
     evaluate = subparsers.add_parser("evaluate", help="compare retrieval methods on reviewed relevance judgments")
@@ -88,7 +89,12 @@ def main(argv: list[str] | None = None) -> int:
                 scope_note=args.scope_note,
                 include_indeterminate_dates=not args.exclude_indeterminate_dates,
             )
-            _write_output(render_historical_dossier(dossier), args.output)
+            rendered = (
+                json.dumps(asdict(dossier), ensure_ascii=False, indent=2, sort_keys=True)
+                if args.format == "json"
+                else render_historical_dossier(dossier)
+            )
+            _write_output(rendered, args.output)
             return 0
         if args.command == "evaluate":
             cases = json.loads(args.cases.read_text(encoding="utf-8"))
