@@ -16,6 +16,7 @@ from historypy.research import (
     HistoricalResearchWorkflow,
     ResearchQueryVariant,
     render_integrated_research_report,
+    build_multilingual_semantic_index,
 )
 from historypy.research.visualization import (
     render_visualization_html,
@@ -62,6 +63,7 @@ def build_parser() -> argparse.ArgumentParser:
     research.add_argument("--variant", action="append", default=[], metavar="LANG=TEXT", help="researcher-supplied translated/transliterated query; repeatable")
     research.add_argument("--no-external", action="store_true")
     research.add_argument("--no-source-check", action="store_true")
+    research.add_argument("--semantic-model", help="optional multilingual sentence-transformers model; requires historypy[semantic]")
     research.add_argument("--title", default="Historical research dossier")
     research.add_argument("--scope-note", default="")
     research.add_argument("--format", choices=("markdown", "json"), default="markdown")
@@ -117,7 +119,14 @@ def main(argv: list[str] | None = None) -> int:
                 if not separator or not language.strip() or not text.strip():
                     raise ValueError("--variant must use LANG=TEXT, for example bn=বাংলার ইতিহাস")
                 variants.append(ResearchQueryVariant(text=text.strip(), language=language.strip()))
-            report = HistoricalResearchWorkflow(dataset).run(
+            semantic_index = embedder = None
+            if args.semantic_model:
+                semantic_index, embedder = build_multilingual_semantic_index(
+                    dataset, model_name=args.semantic_model
+                )
+            report = HistoricalResearchWorkflow(
+                dataset, semantic_index=semantic_index, embedder=embedder
+            ).run(
                 args.question,
                 query_variants=tuple(variants),
                 include_external=not args.no_external,
