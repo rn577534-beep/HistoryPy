@@ -6,8 +6,8 @@ provenance before linking it to a claim.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
 from collections.abc import Sequence
+from dataclasses import dataclass
 
 from historypy.core.dataset import HistoricalDataset
 from historypy.integrations.aggregation import (
