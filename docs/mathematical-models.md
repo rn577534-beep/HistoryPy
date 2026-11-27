@@ -21,16 +21,59 @@ structure, and source dependence are separate questions.
 | Typed graph traversal | Explore recorded relationships | Implemented |
 | Source-dependency graph | Report known dependence and unknown dependence | Implemented |
 | Dijkstra-style cost-ordered search | Caller-weighted relationship paths | Implemented; positive explicit costs, source gaps surfaced separately |
-| PageRank / HITS | Structural graph centrality | Proposed; not evidence of truth |
+| PageRank / HITS | Structural centrality on recorded directed relationships | Implemented; structural descriptors only, never credibility or truth |
 | Allen interval algebra | 13 directed relations between bounded historical intervals | Implemented; returns unknown for incompatible or incomplete dates |
 | Shannon entropy | Describe category diversity in recorded evidence | Implemented; descriptive only, not truth or credibility |
 | Bayesian networks | Model explicit conditional assumptions | Proposed; requires defensible priors |
 | Dempster-Shafer | Represent belief and ignorance under explicit evidence rules | Proposed; requires careful conflict policy |
-| Monte Carlo | Sensitivity analysis for uncertain dates/parameters | Proposed |
+| Monte Carlo | Reproducible sensitivity analysis for two bounded event dates | Implemented; discrete uniform independent sampling with Wilson intervals, not calibrated historical probabilities |
 | TF-IDF | Alternative lexical vector-space retrieval | Proposed; compare against BM25 |
 | Logistic regression | Learn relevance ranking/classification | Proposed; requires labeled training data |
 | PCA / SVD | Reduce high-dimensional feature spaces | Proposed |
 | MinHash / LSH | Approximate near-duplicate candidate search at scale | Proposed |
+
+## Implemented temporal sensitivity analysis
+
+`analyze_temporal_sensitivity(dataset, first_event_id, second_event_id)`
+compares two fully bounded event dates by independently sampling each date
+from its inclusive researcher-supplied bounds. It reports the estimated
+probabilities that the first event is earlier, simultaneous, or later, with
+95% Wilson intervals and a reproducible random seed.
+
+The current policy uses discrete uniform sampling over explicit ISO-day bounds
+or astronomical-year bounds. It requires matching calendars and matching
+bound representations. It does not widen circa ranges, convert calendars,
+infer event duration, model dependence between dates, or establish causation.
+The output is a sensitivity analysis under an explicit assumption, not a
+historical probability.
+
+```python
+from historypy import analyze_temporal_sensitivity
+
+report = analyze_temporal_sensitivity(
+    dataset, "event-a", "event-b", iterations=20_000, seed=2026
+)
+print(report.first_before_second_probability)
+print(report.first_before_second_ci95)
+print(report.simultaneous_probability)
+```
+
+## Implemented graph centrality
+
+`analyze_graph_centrality(dataset)` calculates PageRank and HITS hub/authority
+scores using only explicit directed `HistoricalRelationship` records. Isolated
+entities are retained. Parallel relationships count as separate edges.
+Convergence metadata is included. These values describe network position only;
+they do not measure historical importance, causation, influence, source
+credibility, or truth.
+
+```python
+from historypy import analyze_graph_centrality
+
+report = analyze_graph_centrality(dataset)
+for item in report.scores[:10]:
+    print(item.node_id, item.pagerank, item.hub_score, item.authority_score)
+```
 
 ## Implemented name-similarity ensemble
 
