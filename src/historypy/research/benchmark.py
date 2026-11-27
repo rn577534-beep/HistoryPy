@@ -57,9 +57,9 @@ def run_retrieval_benchmark(
             raise ValueError(f"{query_id}: relevant must be a list of kind:id strings")
         relevance[query_id] = relevant
         methods = (
-            ("trigram", lambda: trigram.search(query, limit=cutoff)),
-            ("bm25", lambda: bm25.search(query, limit=cutoff)),
-            ("hybrid_rrf", lambda: hybrid.search(query, limit=cutoff)),
+            ("trigram", lambda query=query: trigram.search(query, limit=cutoff)),
+            ("bm25", lambda query=query: bm25.search(query, limit=cutoff)),
+            ("hybrid_rrf", lambda query=query: hybrid.search(query, limit=cutoff)),
         )
         for name, search in methods:
             started = perf_counter()
