@@ -9,14 +9,14 @@ from pathlib import Path
 
 from historypy.io import load_dataset
 from historypy.research import (
-    audit_citation_completeness,
-    build_historical_dossier,
-    render_historical_dossier,
-    run_retrieval_benchmark,
     HistoricalResearchWorkflow,
     ResearchQueryVariant,
-    render_integrated_research_report,
+    audit_citation_completeness,
+    build_historical_dossier,
     build_multilingual_semantic_index,
+    render_historical_dossier,
+    render_integrated_research_report,
+    run_retrieval_benchmark,
 )
 from historypy.research.visualization import (
     render_visualization_html,
