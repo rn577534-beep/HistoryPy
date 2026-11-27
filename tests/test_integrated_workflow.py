@@ -5,8 +5,8 @@ from historypy import (
     HistoricalResearchWorkflow,
     ResearchQueryVariant,
     SourceRecord,
-    select_external_sources,
     render_integrated_research_report,
+    select_external_sources,
 )
 from historypy.integrations import ExternalRecord
 
