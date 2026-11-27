@@ -76,15 +76,20 @@ precision, recall, F1, false-merge candidate rate, and results separately by
 language/script and entity type. A fuzzy candidate must never automatically
 merge two records.
 
-## Next implementation stages
+## Next research and implementation stages
 
-1. Evaluate the name ensemble on reviewed Bengali, English, and French pairs.
-2. Add interval-algebra relations while preserving unknown calendar semantics.
-3. Add explainable weighted relationship paths without treating path length as
-   historical plausibility.
-4. Add information-theoretic summaries of evidence coverage and conflict.
-5. Only add Bayesian or learned models after priors or labeled data can be
-   documented and independently evaluated.
+1. Build a reviewed Bengali, English, and French name-pair gold set; report
+   precision, recall, F1, and false-merge candidate rates by language/script.
+2. Add optional interactive renderers for graph, map, and timeline exports,
+   while keeping the core data exports dependency-free.
+3. Evaluate graph-centrality measures (PageRank and HITS) as structural
+   descriptors only, never as source credibility or truth.
+4. Add Monte Carlo sensitivity analysis for explicitly bounded uncertain dates
+   and researcher-supplied assumptions.
+5. Consider Bayesian models only after priors and conditional assumptions can
+   be justified, documented, and tested independently.
+6. Compare every proposed model against simple baselines on held-out datasets;
+   do not report performance gains without measured results.
 
 
 ## Visualization and export layer
