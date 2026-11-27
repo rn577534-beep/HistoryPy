@@ -17,7 +17,7 @@ from historypy.core.entities import (
 from historypy.core.models import EvidenceLink, HistoricalClaim, HistoricalEvent, SourceRecord
 from historypy.research.evidence import EvidenceSummary, summarize_claim_evidence
 from historypy.research.quality import DatasetQualityReport, assess_dataset_quality
-from historypy.research.timeline import TimelineEntry, TimelineResult, timeline_for_dataset
+from historypy.research.timeline import TimelineResult, timeline_for_dataset
 from historypy.research.verification import ClaimAssessment, assess_claim
 
 
@@ -119,8 +119,6 @@ def build_historical_dossier(
     event_by_id = {event.id: event for event in dataset.events}
     people_by_id = {person.id: person for person in dataset.people}
     places_by_id = {place.id: place for place in dataset.places}
-    organizations_by_id = {item.id: item for item in dataset.organizations}
-    civilizations_by_id = {item.id: item for item in dataset.civilizations}
     sources_by_id = {source.id: source for source in dataset.sources}
     reviews = {claim.id: _claim_review(dataset, claim) for claim in dataset.claims}
 
@@ -230,8 +228,8 @@ def render_historical_dossier(dossier: HistoricalDossier) -> str:
     if dossier.scope_note:
         lines.extend((dossier.scope_note, ""))
     lines.extend((
-        "> Research organization, not an automated verdict on historical truth. "
-        "Claims and causal links are not inferred.",
+        ("> Research organization, not an automated verdict on historical truth. "
+         "Claims and causal links are not inferred."),
         "",
         "## 1. Chronological narrative",
         "",
