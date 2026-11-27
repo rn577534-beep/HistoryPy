@@ -1,4 +1,4 @@
-from historypy import HistoricalDataset, HistoricalEvent, HistoricalDate
+from historypy import HistoricalDate, HistoricalDataset, HistoricalEvent
 from historypy.research.benchmark import run_retrieval_benchmark
 
 
