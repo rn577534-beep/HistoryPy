@@ -69,6 +69,12 @@ from historypy.research.pipeline import (
     render_research_report,
 )
 from historypy.research.profile import DatasetProfile, profile_dataset
+from historypy.research.probabilistic_evidence import (
+    BayesianUpdate,
+    DempsterShaferResult,
+    bayesian_update,
+    combine_dempster_shafer,
+)
 from historypy.research.provenance import DatasetProvenanceReport, audit_dataset_provenance
 from historypy.research.quality import (
     DatasetQualityReport,
@@ -153,6 +159,8 @@ __all__ = [
     "AliasRegistry",
     "BM25SearchHit",
     "BM25SearchIndex",
+    "BayesianUpdate",
+    "DempsterShaferResult",
     "CitationCompletenessReport",
     "ClaimAssessment",
     "ClaimEvidenceAnalysis",
@@ -217,6 +225,8 @@ __all__ = [
     "WeightedPathReport",
     "WeightedRelationshipPath",
     "analyze_claim_evidence",
+    "bayesian_update",
+    "combine_dempster_shafer",
     "analyze_claim_source_independence",
     "analyze_graph_centrality",
     "analyze_source_set_independence",
