@@ -24,6 +24,23 @@ HistoryPy can export research datasets for external visualization tools:
 
 See [mathematical models and visualization exports](docs/mathematical-models.md). A complete runnable example is available in [examples/visualization_exports.py](examples/visualization_exports.py).
 
+## Interactive research report
+
+Create a self-contained HTML report with Network, Timeline, and Places views:
+
+```python
+from pathlib import Path
+from historypy import render_visualization_html
+
+html = render_visualization_html(dataset, title="Research overview")
+Path("historypy-report.html").write_text(html, encoding="utf-8")
+```
+
+The Places panel is a schematic coordinate plot, not a basemap. Use
+`to_geojson(dataset)` with a GIS renderer for geographic context. The HTML
+graph view is intended for small networks; use the structured graph export for
+larger datasets.
+
 ## Temporal sensitivity and network analysis
 
 - `analyze_temporal_sensitivity(...)` estimates the ordering of two bounded
