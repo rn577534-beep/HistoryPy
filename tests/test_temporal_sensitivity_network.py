@@ -53,6 +53,8 @@ def test_graph_centrality_empty_and_non_converged_cases_are_reported():
     [
         ({"damping": 1.0}, ValueError),
         ({"tolerance": 0.0}, ValueError),
+        ({"tolerance": float("nan")}, ValueError),
+        ({"damping": float("inf")}, ValueError),
         ({"max_iterations": 0}, ValueError),
     ],
 )
@@ -98,7 +100,8 @@ def test_temporal_sensitivity_is_reproducible_and_reports_uncertainty():
         dataset, "early", "uncertain", iterations=5000, seed=42
     )
     assert first == second
-    assert first.first_before_second_probability == pytest.approx(2 / 3, abs=0.03)
+    assert first.first_before_second_probability == pytest.approx(1 / 3, abs=0.03)
+    assert first.second_before_first_probability == pytest.approx(1 / 3, abs=0.03)
     assert first.first_before_second_ci95[0] <= first.first_before_second_probability
     assert first.first_before_second_ci95[1] >= first.first_before_second_probability
     assert sum((
