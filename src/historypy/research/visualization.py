@@ -20,7 +20,6 @@ def dataset_graph_data(dataset: HistoricalDataset) -> dict[str, Any]:
     dataset.require_valid()
     nodes: list[dict[str, Any]] = []
     edges: list[dict[str, Any]] = []
-    entity_labels: dict[str, str] = {}
 
     collections = (
         ("event", dataset.events, lambda item: item.title),
@@ -31,7 +30,6 @@ def dataset_graph_data(dataset: HistoricalDataset) -> dict[str, Any]:
     )
     for kind, records, label_fn in collections:
         for item in records:
-            entity_labels[item.id] = label_fn(item)
             nodes.append({
                 "id": item.id, "label": label_fn(item), "kind": kind,
                 "source_ids": list(getattr(item, "source_ids", ())),
@@ -62,9 +60,6 @@ def dataset_graph_data(dataset: HistoricalDataset) -> dict[str, Any]:
                 "kind": "occurred_at", "predicate": "occurred_at",
                 "source_ids": list(event.source_ids),
             })
-    for claim in dataset.claims:
-        for source_id in (link.source_id for link in dataset.evidence if link.claim_id == claim.id):
-            pass
     for index, link in enumerate(dataset.evidence):
         edges.append({
             "id": f"evidence:{index}:{link.claim_id}:{link.source_id}",
