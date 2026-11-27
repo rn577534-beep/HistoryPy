@@ -13,6 +13,10 @@ HistoryPy is designed to help researchers represent historical information witho
 - Record provenance and respect copyright and dataset licenses.
 - Support histories from all regions and periods without assuming one chronology is universal.
 
+## Mathematical models
+
+See [the mathematical model inventory, implementation status, and evaluation policy](docs/mathematical-models.md).
+
 ## Installation
 
 Requires Python 3.10 or newer.
