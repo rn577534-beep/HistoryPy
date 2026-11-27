@@ -317,7 +317,7 @@ def render_visualization_html(
         map_svg = "<p>No places with researcher-supplied coordinates are available.</p>"
 
     safe_title = escape(title)
-    return f\'''<!doctype html>
+    return f'''<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -378,4 +378,4 @@ document.querySelectorAll("button[data-target]").forEach((button) => {{
 }});
 </script>
 </body>
-</html>\'''
+</html>'''
