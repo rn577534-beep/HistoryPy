@@ -22,7 +22,7 @@ def evaluate(rows: list[dict[str, Any]], threshold: float) -> dict[str, Any]:
         language = str(row["language"])
         expected = row["match"]
         if not isinstance(expected, bool):
-            raise ValueError("match must be a JSON boolean")
+            raise TypeError("match must be a JSON boolean")
         predicted = compare_names(str(row["left"]), str(row["right"])).combined >= threshold
         bucket = groups[language]
         bucket["total"] += 1
