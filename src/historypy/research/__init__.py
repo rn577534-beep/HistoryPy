@@ -87,6 +87,7 @@ from historypy.research.relationship_paths import (
 from historypy.research.report import render_claim_report
 from historypy.research.search_index import DatasetSearchIndex
 from historypy.research.semantic import SemanticSearchHit, SemanticSearchIndex
+from historypy.research.similarity import NameSimilarityScores, compare_names
 from historypy.research.source_audit import (
     SourceMetadataAudit,
     audit_dataset_sources,
@@ -150,6 +151,7 @@ __all__ = [
     "HybridSearchIndex",
     "MetricComparison",
     "MetricObservation",
+    "NameSimilarityScores",
     "PlaceDistance",
     "PredicateCandidate",
     "QualityFinding",
@@ -194,6 +196,7 @@ __all__ = [
     "claims_with_conflicting_evidence",
     "compare_event_sources",
     "compare_metrics",
+    "compare_names",
     "content_hash",
     "decompose_research_question",
     "events_overlapping",
