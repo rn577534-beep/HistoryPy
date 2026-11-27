@@ -13,6 +13,17 @@ HistoryPy is designed to help researchers represent historical information witho
 - Record provenance and respect copyright and dataset licenses.
 - Support histories from all regions and periods without assuming one chronology is universal.
 
+## Graphs, maps, and timelines
+
+HistoryPy can export research datasets for external visualization tools:
+
+- Typed knowledge/evidence graph data: `dataset_graph_data(dataset)`
+- Graphviz network diagrams: `to_graphviz_dot(dataset)`
+- GeoJSON place maps: `to_geojson(dataset)`
+- Uncertainty-aware timeline data: `timeline_visualization_data(dataset)`
+
+See [mathematical models and visualization exports](docs/mathematical-models.md).
+
 ## Mathematical models
 
 See [the mathematical model inventory, implementation status, and evaluation policy](docs/mathematical-models.md).
