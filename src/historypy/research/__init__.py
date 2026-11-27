@@ -69,13 +69,13 @@ from historypy.research.pipeline import (
     ResearchTaskResult,
     render_research_report,
 )
-from historypy.research.profile import DatasetProfile, profile_dataset
 from historypy.research.probabilistic_evidence import (
     BayesianUpdate,
     DempsterShaferResult,
     bayesian_update,
     combine_dempster_shafer,
 )
+from historypy.research.profile import DatasetProfile, profile_dataset
 from historypy.research.provenance import DatasetProvenanceReport, audit_dataset_provenance
 from historypy.research.quality import (
     DatasetQualityReport,
@@ -161,7 +161,6 @@ __all__ = [
     "BM25SearchHit",
     "BM25SearchIndex",
     "BayesianUpdate",
-    "DempsterShaferResult",
     "CitationCompletenessReport",
     "ClaimAssessment",
     "ClaimEvidenceAnalysis",
@@ -172,6 +171,7 @@ __all__ = [
     "DatasetSearchIndex",
     "DatasetSourceIndependenceReport",
     "DecomposedQuery",
+    "DempsterShaferResult",
     "DependencyCluster",
     "DependencyReviewStatus",
     "DependencyType",
@@ -193,7 +193,6 @@ __all__ = [
     "NameSimilarityScores",
     "NodeCentrality",
     "PlaceDistance",
-    "distance_interval_km",
     "PredicateCandidate",
     "QualityFinding",
     "QuestionExecutionReport",
@@ -227,8 +226,6 @@ __all__ = [
     "WeightedPathReport",
     "WeightedRelationshipPath",
     "analyze_claim_evidence",
-    "bayesian_update",
-    "combine_dempster_shafer",
     "analyze_claim_source_independence",
     "analyze_graph_centrality",
     "analyze_source_set_independence",
@@ -241,13 +238,16 @@ __all__ = [
     "audit_dataset_sources",
     "audit_source_independence",
     "audit_source_record",
+    "bayesian_update",
     "claims_with_conflicting_evidence",
+    "combine_dempster_shafer",
     "compare_event_sources",
     "compare_metrics",
     "compare_names",
     "content_hash",
     "dataset_graph_data",
     "decompose_research_question",
+    "distance_interval_km",
     "events_overlapping",
     "evidence_for_claim",
     "evidence_relation_entropy",
@@ -276,5 +276,4 @@ __all__ = [
     "to_geojson",
     "to_graphviz_dot",
     "verify_research_audit_trail",
-
 ]
