@@ -10,7 +10,7 @@ PEP 440; pre-release versions are identified explicitly.
 ### Added
 - Dependency-free `historypy` CLI for dataset validation, citation audits, and GeoJSON, Graphviz, timeline, and HTML exports.
 - Explicit-prior Bayesian likelihood-ratio updates and Dempster-Shafer mass combination with conflict reporting; neither infers source credibility or historical truth.
-- Tests for CLI workflows and probabilistic evidence calculations.
+- Tests for CLI workflows and probabilistic evidence calculations.\n- A multilingual entity-resolution gold-set benchmark harness reporting per-language precision, recall, F1, and false-positive rate without inventing labels.\n- Conservative point-distance uncertainty bounds from researcher-supplied coordinate error radii.\n- Optional discrete triangular temporal sensitivity sampling with reproducible seeds and explicit mode quantiles.
 
 
 ### Added
