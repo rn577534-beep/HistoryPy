@@ -126,6 +126,10 @@ def test_weighted_paths_follow_caller_costs_and_report_source_gaps():
     assert path.source_ids == ("s1",)
     assert path.relationships_missing_sources == ("r2",)
     assert "not credibility" in report.cost_policy
+    with pytest.raises(ValueError, match="finite"):
+        find_weighted_relationship_paths(
+            sample_dataset(), "p1", "place1", edge_costs={"r1": float("inf")}
+        )
 
 
 def test_graph_dot_geojson_and_timeline_exports_keep_provenance():
@@ -133,6 +137,7 @@ def test_graph_dot_geojson_and_timeline_exports_keep_provenance():
     graph = dataset_graph_data(dataset)
     assert any(node["kind"] == "claim" for node in graph["nodes"])
     assert any(edge["kind"] == "evidence" for edge in graph["edges"])
+    assert any(edge["kind"] == "entity_source" for edge in graph["edges"])
     dot = to_graphviz_dot(dataset)
     assert "digraph HistoryPy" in dot
     assert "participated_in" in dot
