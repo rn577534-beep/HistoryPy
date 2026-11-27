@@ -107,3 +107,21 @@ def test_cli_dossier_supports_structured_json_export(tmp_path):
     assert report["title"] == "Historical dossier"
     assert report["chapters"][0]["event"]["title"] == "Example event"
     assert report["timeline"]["entries"][0]["record_id"] == "event-1"
+
+
+
+def test_cli_integrated_research_without_network(tmp_path):
+    dataset_path = tmp_path / "dataset.json"
+    save_dataset(sample_dataset(), dataset_path)
+    output = tmp_path / "integrated.md"
+
+    assert main([
+        "research", str(dataset_path), "Example event",
+        "--variant", "bn=ঐতিহাসিক ঘটনা",
+        "--no-external", "--no-source-check",
+        "--output", str(output),
+    ]) == 0
+    rendered = output.read_text(encoding="utf-8")
+    assert "Integrated historical research" in rendered
+    assert "ঐতিহাসিক ঘটনা" in rendered
+    assert "Historical dossier" in rendered
