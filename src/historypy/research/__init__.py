@@ -22,6 +22,12 @@ from historypy.research.evaluation import (
     evaluate_rankings,
     evaluation_report_dict,
 )
+from historypy.research.citations import (
+    CitationFinding,
+    EvidenceCitationAudit,
+    audit_evidence_citations,
+    format_evidence_citation,
+)
 from historypy.research.comparison import (
     MetricComparison,
     MetricObservation,
@@ -199,6 +205,10 @@ __all__ = [  # noqa: RUF022 - preserve public API grouping
     "evaluation_report_dict",
     "run_retrieval_benchmark",
     "CitationCompletenessReport",
+    "CitationFinding",
+    "EvidenceCitationAudit",
+    "audit_evidence_citations",
+    "format_evidence_citation",
     "ClaimAssessment",
     "ClaimEvidenceAnalysis",
     "claims_with_conflicting_evidence",

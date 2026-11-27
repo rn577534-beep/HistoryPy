@@ -874,6 +874,10 @@ entity candidates. Ambiguous aliases return every matching entity with an
 ambiguity count; do not treat a name match as proof that two records refer to
 the same person or place.
 
+## Claim-level citation auditing
+
+Use audit_evidence_citations(dataset, claim_id=...) to detect missing citation locators, quotations, missing source URLs, and malformed non-HTTP(S) URLs. format_evidence_citation(dataset, evidence_index) renders only recorded bibliographic and locator metadata. This is a traceability audit, not live URL verification, quotation authentication, or a historical-truth score. See the citation audit guide (docs/citation-audit.md).
+
 ## Citation completeness and source dependence
 
 Each SourceRecord can optionally record researcher-known source dependencies
