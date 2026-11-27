@@ -1,23 +1,15 @@
 # Releasing HistoryPy
 
-HistoryPy 1.0.0 is published on PyPI:
+The first production release, `historypy==1.0.0`, is published on PyPI:
+https://pypi.org/project/historypy/
 
-- Project: https://pypi.org/project/historypy/
-- Installation: `python -m pip install --upgrade historypy`
-- GitHub release: https://github.com/rn577534-beep/HistoryPy/releases/tag/v1.0.0
+## Release checklist
 
-## Before preparing another release
-
-1. Review open issues and the changes merged into the default branch.
-2. Run the full test suite and lint checks on Python 3.10, 3.11, 3.12,
-   and 3.13 using `.github/workflows/tests.yml`.
-3. Review the public API and README examples. Confirm that every documented
-   import and example matches the code.
-4. Update the version in both `pyproject.toml` and
-   `src/historypy/__init__.py`; keep them identical.
-5. Add a dated release section to `CHANGELOG.md` and update the README only
-   when user-facing behavior or installation instructions change.
-6. Build the wheel and source distribution and validate them:
+1. Review open issues and all changes merged into `main`.
+2. Confirm `pyproject.toml` and `src/historypy/__init__.py` contain the same version.
+3. Update `CHANGELOG.md` with an accurate release section. Do not mark a release as published before PyPI verification.
+4. Run tests and lint on Python 3.10–3.13 using `.github/workflows/tests.yml`.
+5. Build and validate both distributions:
 
    ```bash
    python -m pip install --upgrade build twine
@@ -25,51 +17,33 @@ HistoryPy 1.0.0 is published on PyPI:
    python -m twine check --strict dist/*
    ```
 
-7. Inspect both distribution archives. Confirm that the package modules,
-   README metadata, and MIT license are included. Install the built wheel in
-   a clean environment and run an import/version smoke test.
-
-## Publishing
-
-1. Commit the release preparation to the default branch.
-2. Create a Git tag matching the package version, for example `v1.0.1`.
-3. Create and publish a GitHub Release for that tag.
-4. The `.github/workflows/publish.yml` workflow runs the test suite and lint,
-   builds and validates both distribution formats, then publishes them to
-   PyPI using Trusted Publishing.
-5. Check the GitHub Actions run. Both the build and publish jobs must succeed.
-6. Verify the new version and its release files on PyPI, then install it in a
-   clean environment:
+6. Inspect the wheel and source archive for package modules, README metadata, and the MIT license. Install the wheel in a clean environment and verify the imported version.
+7. Before creating a production GitHub Release, verify the PyPI Trusted Publisher configuration below.
+8. Create a tag matching the version (for example, `v1.0.2`) and publish the GitHub Release only after all checks pass.
+9. Monitor `.github/workflows/publish.yml`. Both build and publish jobs must succeed.
+10. Verify the exact version and distribution files on PyPI, then test a clean installation:
 
    ```bash
    python -m pip install --upgrade pip
-   python -m pip install --upgrade historypy
+   python -m pip install --no-cache-dir historypy==VERSION
    python -c "import historypy; print(historypy.__version__)"
    ```
 
-PyPI release files are immutable in practice. Never reuse a version number
-for changed contents. If a published version has a serious issue, publish a
-new version and consider yanking the affected release rather than trying to
-replace its files.
-
 ## Trusted Publishing configuration
 
-The production GitHub Actions workflow expects:
+The PyPI project must have a Trusted Publisher configured with:
 
-- PyPI project: `historypy`
 - Owner: `rn577534-beep`
 - Repository: `HistoryPy`
 - Workflow filename: `publish.yml`
 - GitHub environment: `pypi`
 
-The workflow uses OpenID Connect Trusted Publishing. Do not add a long-lived
-PyPI API token to repository secrets for this workflow.
+The workflow uses OpenID Connect. Do not store a long-lived PyPI API token in repository secrets. If the publisher is not configured, stop before publishing a GitHub Release and complete the setup in the PyPI project settings.
 
-A separate TestPyPI rehearsal can be run with
-`.github/workflows/publish-testpypi.yml`. TestPyPI has a separate project
-namespace and publisher configuration; it is not the production PyPI project.
+A separate rehearsal is possible with `.github/workflows/publish-testpypi.yml`, but TestPyPI requires its own project and publisher configuration.
 
-## Important project boundaries
+## Version immutability and project boundaries
 
-A successful package upload only makes the Python library installable. It does
-not certify historical claims, source reliability, or research conclusions.
+Never reuse a version number for changed package contents. If a published release has a serious issue, publish a new version and consider yanking the affected release.
+
+A successful package upload only makes the Python library installable. It does not certify historical claims, source reliability, or research conclusions.
