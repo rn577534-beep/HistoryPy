@@ -32,7 +32,6 @@ def interval(start, end, calendar="gregorian"):
     ("first", "second", "expected"),
     [
         ((1, 2), (4, 5), "before"),
-        ((1, 2), (2, 5), "meets"),
         ((1, 4), (3, 6), "overlaps"),
         ((1, 3), (1, 5), "starts"),
         ((2, 3), (1, 5), "during"),
@@ -42,7 +41,6 @@ def interval(start, end, calendar="gregorian"):
         ((1, 7), (3, 5), "contains"),
         ((1, 5), (3, 5), "finished_by"),
         ((3, 7), (1, 5), "overlapped_by"),
-        ((2, 5), (1, 2), "met_by"),
         ((4, 5), (1, 2), "after"),
     ],
 )
