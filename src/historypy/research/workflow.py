@@ -31,11 +31,22 @@ from historypy.integrations.open_catalogs import (
     OpenLibrarySearch,
 )
 from historypy.research.alias_registry import AliasRegistry
-from historypy.research.dossier import (\n    HistoricalDossier,\n    build_historical_dossier,\n    render_historical_dossier,\n)
-from historypy.research.pipeline import (\n    ResearchPipeline,\n    ResearchReport,\n    render_research_report,\n)
+from historypy.research.dossier import (
+    HistoricalDossier,
+    build_historical_dossier,
+    render_historical_dossier,
+)
+from historypy.research.pipeline import (
+    ResearchPipeline,
+    ResearchReport,
+    render_research_report,
+)
 from historypy.research.question_planner import QuestionExecutionReport
 from historypy.research.semantic import EmbeddingBatch, SemanticSearchIndex
-from historypy.research.source_verification import (\n    SourceVerificationReport,\n    verify_source_urls,\n)
+from historypy.research.source_verification import (
+    SourceVerificationReport,
+    verify_source_urls,
+)
 
 
 @dataclass(frozen=True, slots=True)
