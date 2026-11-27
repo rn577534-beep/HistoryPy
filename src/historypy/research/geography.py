@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from math import asin, cos, radians, sin, sqrt
+from math import asin, cos, isfinite, radians, sin, sqrt
 
 from historypy.core.dataset import HistoricalDataset
 
@@ -46,6 +46,38 @@ def great_circle_distance_km(
         + cos(lat1) * cos(lat2) * sin(delta_lon / 2) ** 2
     )
     return 6371.0088 * 2 * asin(sqrt(min(1.0, haversine)))
+
+
+
+def distance_interval_km(
+    latitude_a: float,
+    longitude_a: float,
+    latitude_b: float,
+    longitude_b: float,
+    *,
+    uncertainty_radius_a_km: float,
+    uncertainty_radius_b_km: float,
+) -> tuple[float, float]:
+    """Return conservative distance bounds for two uncertain point locations.
+
+    Each uncertainty radius is a researcher-supplied upper bound in kilometres.
+    Triangle inequality gives [max(0, d-r_a-r_b), d+r_a+r_b]. This is not a
+    probability interval, a historical boundary model, or a geodetic survey.
+    """
+    radii = (uncertainty_radius_a_km, uncertainty_radius_b_km)
+    if any(
+        isinstance(radius, bool)
+        or not isinstance(radius, (int, float))
+        or not isfinite(radius)
+        or radius < 0
+        for radius in radii
+    ):
+        raise ValueError("uncertainty radii must be finite non-negative numbers")
+    distance = great_circle_distance_km(
+        latitude_a, longitude_a, latitude_b, longitude_b
+    )
+    total_uncertainty = float(uncertainty_radius_a_km + uncertainty_radius_b_km)
+    return max(0.0, distance - total_uncertainty), distance + total_uncertainty
 
 
 def places_within_radius(

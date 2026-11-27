@@ -24,8 +24,8 @@ structure, and source dependence are separate questions.
 | PageRank / HITS | Structural centrality on recorded directed relationships | Implemented; structural descriptors only, never credibility or truth |
 | Allen interval algebra | 13 directed relations between bounded historical intervals | Implemented; returns unknown for incompatible or incomplete dates |
 | Shannon entropy | Describe category diversity in recorded evidence | Implemented; descriptive only, not truth or credibility |
-| Bayesian networks | Model explicit conditional assumptions | Proposed; requires defensible priors |
-| Dempster-Shafer | Represent belief and ignorance under explicit evidence rules | Proposed; requires careful conflict policy |
+| Bayesian likelihood-ratio update | Update an explicit binary prior with a researcher-supplied likelihood ratio | Implemented as a transparent single-hypothesis update; not a Bayesian network |
+| Dempster-Shafer | Combine explicit support, opposition, and ignorance masses | Implemented with normalized Dempster rule and explicit conflict mass; total conflict rejected |
 | Monte Carlo | Reproducible sensitivity analysis for two bounded event dates | Implemented; discrete uniform independent sampling with Wilson intervals, not calibrated historical probabilities |
 | TF-IDF | Alternative lexical vector-space retrieval | Proposed; compare against BM25 |
 | Logistic regression | Learn relevance ranking/classification | Proposed; requires labeled training data |
@@ -180,3 +180,48 @@ GeoJSON coordinates are only exported when supplied by the researcher. They
 are not inferred from place names. A map point represents a recorded location,
 not necessarily a precise historical boundary. Timeline exports preserve
 calendar and date uncertainty; renderers must not silently normalize calendars.
+
+
+## Command-line interface
+
+After installation, use the `historypy` command:
+
+```bash
+historypy validate research.json
+historypy audit research.json --output citation-audit.json
+historypy export research.json --format geojson --output places.geojson
+historypy export research.json --format graphviz --output network.dot
+historypy export research.json --format timeline --output timeline.json
+historypy export research.json --format html --output report.html
+```
+
+The CLI reads the versioned HistoryPy JSON dataset format. It does not infer
+coordinates or silently convert historical calendars.
+
+## Explicit probabilistic evidence models
+
+Bayesian updates require a researcher-supplied prior and likelihood ratio:
+
+```python
+from historypy import bayesian_update
+
+result = bayesian_update(prior=0.2, likelihood_ratio=4.0)
+print(result.posterior)  # 0.5
+```
+
+Dempster-Shafer combination accepts three masses over support, opposition,
+and ignorance. It reports conflict and rejects total conflict:
+
+```python
+from historypy import combine_dempster_shafer
+
+result = combine_dempster_shafer(
+    {"support": 0.6, "opposition": 0.1, "ignorance": 0.3},
+    {"support": 0.5, "opposition": 0.2, "ignorance": 0.3},
+)
+print(result.support, result.opposition, result.ignorance, result.conflict)
+```
+
+These functions combine explicit researcher assumptions. They do not estimate
+priors or likelihoods from the number of citations, and their outputs are not
+source-credibility or historical-truth scores.
