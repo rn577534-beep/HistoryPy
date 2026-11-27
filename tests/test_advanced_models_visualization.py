@@ -50,6 +50,17 @@ def test_allen_interval_relations(first, second, expected):
     assert allen_interval_relation(interval(*first), interval(*second)) == expected
 
 
+def test_allen_meets_and_met_by_use_touching_explicit_date_bounds():
+    first = HistoricalDate(
+        earliest="1900-01-01", latest="1900-01-02", calendar="gregorian"
+    )
+    second = HistoricalDate(
+        earliest="1900-01-02", latest="1900-01-03", calendar="gregorian"
+    )
+    assert allen_interval_relation(first, second) == "meets"
+    assert allen_interval_relation(second, first) == "met_by"
+
+
 def test_allen_relations_preserve_unknown_and_calendar_incomparability():
     assert allen_interval_relation(
         interval(1, 2, "julian"), interval(1, 2, "gregorian")
