@@ -20,10 +20,10 @@ structure, and source dependence are separate questions.
 | Interval overlap / three-valued logic | Compare uncertain historical dates | Implemented |
 | Typed graph traversal | Explore recorded relationships | Implemented |
 | Source-dependency graph | Report known dependence and unknown dependence | Implemented |
-| Dijkstra / A* | Cost-aware relationship paths | Proposed; not yet implemented |
+| Dijkstra-style cost-ordered search | Caller-weighted relationship paths | Implemented; positive explicit costs, source gaps surfaced separately |
 | PageRank / HITS | Structural graph centrality | Proposed; not evidence of truth |
-| Allen interval algebra | Rich temporal relations | Proposed |
-| Shannon entropy | Describe distributional uncertainty | Proposed |
+| Allen interval algebra | 13 directed relations between bounded historical intervals | Implemented; returns unknown for incompatible or incomplete dates |
+| Shannon entropy | Describe category diversity in recorded evidence | Implemented; descriptive only, not truth or credibility |
 | Bayesian networks | Model explicit conditional assumptions | Proposed; requires defensible priors |
 | Dempster-Shafer | Represent belief and ignorance under explicit evidence rules | Proposed; requires careful conflict policy |
 | Monte Carlo | Sensitivity analysis for uncertain dates/parameters | Proposed |
@@ -85,3 +85,37 @@ merge two records.
 4. Add information-theoretic summaries of evidence coverage and conflict.
 5. Only add Bayesian or learned models after priors or labeled data can be
    documented and independently evaluated.
+
+
+## Visualization and export layer
+
+The dependency-free visualization module exports structured data for external
+renderers instead of forcing a plotting dependency into the core package:
+
+- `dataset_graph_data(dataset)`: typed entity, relationship, claim, source,
+  evidence, and source-derivation graph data.
+- `to_graphviz_dot(dataset)`: Graphviz DOT for network diagrams.
+- `to_geojson(dataset)`: GeoJSON point features for places with recorded
+  coordinates, including source IDs and associated event IDs.
+- `timeline_visualization_data(dataset)`: interval-aware data for Gantt and
+  timeline renderers, including calendar, precision, circa, and uncertainty.
+- `export_visualization_json(data)`: stable JSON serialization.
+
+Example:
+
+```python
+from historypy import (
+    dataset_graph_data, to_geojson, to_graphviz_dot,
+    timeline_visualization_data,
+)
+
+graph = dataset_graph_data(dataset)
+geojson = to_geojson(dataset)
+dot_text = to_graphviz_dot(dataset)
+timeline = timeline_visualization_data(dataset)
+```
+
+GeoJSON coordinates are only exported when supplied by the researcher. They
+are not inferred from place names. A map point represents a recorded location,
+not necessarily a precise historical boundary. Timeline exports preserve
+calendar and date uncertainty; renderers must not silently normalize calendars.
