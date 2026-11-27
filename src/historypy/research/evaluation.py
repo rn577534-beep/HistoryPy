@@ -202,12 +202,20 @@ def evaluate_rankings(
             name: _bootstrap_interval(values, samples=bootstrap_samples, rng=rng)
             for name, values in columns.items()
         }
-        latency_values = list(latencies_ms.get(system, {}).values()) if latencies_ms and system in latencies_ms else []
-        if latency_values and (
-            len(latency_values) != len(judged)
-            or any(not math.isfinite(value) or value < 0 for value in latency_values)
-        ):
-            raise ValueError("latencies must be finite, non-negative, and cover every query")
+        latency_values: list[float] = []
+        if latencies_ms is not None and system in latencies_ms:
+            system_latencies = latencies_ms[system]
+            if set(system_latencies) != expected_queries:
+                raise ValueError(f"{system}: latency query IDs must match relevance judgments")
+            latency_values = [system_latencies[qid] for qid in judged]
+            if any(
+                isinstance(value, bool)
+                or not isinstance(value, (int, float))
+                or not math.isfinite(value)
+                or value < 0
+                for value in latency_values
+            ):
+                raise ValueError("latencies must be finite and non-negative")
         system_rows.append(SystemEvaluation(
             system=system,
             query_count=len(judged),
