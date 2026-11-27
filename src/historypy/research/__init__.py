@@ -56,6 +56,15 @@ from historypy.research.hybrid import (
     HybridSearchIndex,
     decompose_research_question,
 )
+from historypy.research.network_analysis import (
+    GraphCentralityReport,
+    NodeCentrality,
+    analyze_graph_centrality,
+)
+from historypy.research.temporal_sensitivity import (
+    TemporalSensitivityReport,
+    analyze_temporal_sensitivity,
+)
 from historypy.research.pipeline import (
     ResearchPipeline,
     ResearchReport,
@@ -249,4 +258,9 @@ __all__ = [
     "to_graphviz_dot",
     "verify_research_audit_trail",
 
+    "GraphCentralityReport",
+    "NodeCentrality",
+    "TemporalSensitivityReport",
+    "analyze_graph_centrality",
+    "analyze_temporal_sensitivity",
 ]
