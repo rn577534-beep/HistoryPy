@@ -59,6 +59,7 @@ from historypy.io import (
     save_dataset_csv_bundle,
 )
 from historypy.research import (
+    render_visualization_html,
     analyze_temporal_sensitivity,
     analyze_graph_centrality,
     TemporalSensitivityReport,
@@ -297,6 +298,7 @@ __all__ = [
     "render_claim_report",
     "render_event_source_comparison",
     "render_research_report",
+    "render_visualization_html",
     "ResearchAction",
     "ResearchFacets",
     "ResearchPipeline",
