@@ -154,7 +154,7 @@ from historypy.research.weighted_paths import (
     find_weighted_relationship_paths,
 )
 
-__all__ = [
+__all__ = [  # noqa: RUF022 - preserve public API grouping
     "AliasAssertion",
     "AliasMatch",
     "AliasRegistry",
