@@ -14,6 +14,24 @@ from historypy.research.comparison import (
     MetricObservation,
     compare_metrics,
 )
+from historypy.research.entropy import (
+    EntropyReport,
+    evidence_relation_entropy,
+    shannon_entropy,
+    source_type_entropy,
+)
+from historypy.research.visualization import (
+    dataset_graph_data,
+    export_visualization_json,
+    timeline_visualization_data,
+    to_geojson,
+    to_graphviz_dot,
+)
+from historypy.research.weighted_paths import (
+    WeightedPathReport,
+    WeightedRelationshipPath,
+    find_weighted_relationship_paths,
+)
 from historypy.research.engine import (
     ResearchFacets,
     ResearchQuery,
@@ -142,6 +160,7 @@ __all__ = [
     "EntityAliasSuggestion",
     "EntityAwareSearchIndex",
     "EntityMatchCandidate",
+    "EntropyReport",
     "EntityMentionCandidate",
     "EventSourceComparison",
     "EventSourceEntry",
@@ -182,6 +201,8 @@ __all__ = [
     "TemporalPathSelection",
     "TimelineEntry",
     "TimelineResult",
+    "WeightedPathReport",
+    "WeightedRelationshipPath",
     "analyze_claim_evidence",
     "analyze_claim_source_independence",
     "analyze_source_set_independence",
@@ -198,12 +219,16 @@ __all__ = [
     "compare_metrics",
     "compare_names",
     "content_hash",
+    "dataset_graph_data",
     "decompose_research_question",
+    "evidence_relation_entropy",
+    "export_visualization_json",
     "events_overlapping",
     "evidence_for_claim",
     "execute_question_plan",
     "execute_research_query",
     "find_relationship_paths",
+    "find_weighted_relationship_paths",
     "great_circle_distance_km",
     "import_wikidata_alias_candidates",
     "places_within_radius",
@@ -214,8 +239,13 @@ __all__ = [
     "render_research_report",
     "search_dataset",
     "select_paths_by_temporal_policy",
+    "shannon_entropy",
+    "source_type_entropy",
     "suggest_entity_matches",
     "summarize_claim_evidence",
     "timeline_for_dataset",
+    "timeline_visualization_data",
+    "to_geojson",
+    "to_graphviz_dot",
     "verify_research_audit_trail",
 ]
