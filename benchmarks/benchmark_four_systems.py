@@ -6,6 +6,7 @@ No relevance labels are generated or altered by this script.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import platform
 import time
