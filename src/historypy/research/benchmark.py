@@ -11,7 +11,6 @@ from historypy.research.evaluation import EvaluationReport, evaluate_rankings
 from historypy.research.hybrid import HybridSearchIndex
 from historypy.research.search_index import DatasetSearchIndex
 from historypy.research.semantic import EmbeddingBatch, SemanticSearchIndex
-from historypy.research.query import _searchable_records
 
 
 def run_retrieval_benchmark(
@@ -37,13 +36,13 @@ def run_retrieval_benchmark(
         raise ValueError("benchmark cases cannot be empty")
     if (semantic_index is None) != (embedder is None):
         raise ValueError("semantic_index and embedder must be supplied together")
+    trigram = DatasetSearchIndex.build(dataset)
+    bm25 = BM25SearchIndex.build(dataset)
     if semantic_index is not None:
-        expected = tuple((row[0], row[1]) for row in _searchable_records(dataset))
+        expected = tuple((row[0], row[1]) for row in trigram.records)
         actual = tuple((row[0], row[1]) for row in semantic_index.records)
         if actual != expected:
             raise ValueError("semantic index must represent the same dataset snapshot")
-    trigram = DatasetSearchIndex.build(dataset)
-    bm25 = BM25SearchIndex.build(dataset)
     hybrid = HybridSearchIndex(trigram, bm25, semantic=semantic_index)
     relevance: dict[str, Sequence[str]] = {}
     system_names = ["trigram", "bm25"]
