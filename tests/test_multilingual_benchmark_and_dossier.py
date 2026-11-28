@@ -91,7 +91,7 @@ def test_dossier_reports_evidence_balance_source_dependence_and_date_uncertainty
     assert "1 supporting, 1 contradicting" in rendered
     assert "Source independence: `known_dependence`" in rendered
     assert "Dependent evidence sources: source-a, source-b" in rendered
-    assert "Date uncertainty: precision: decade; approximate date" in rendered
+    assert "**Date uncertainty:** precision: decade; approximate date" in rendered
     assert "source wording: around the early 13th century" in rendered
 
 
