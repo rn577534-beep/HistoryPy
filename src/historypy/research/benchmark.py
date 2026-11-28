@@ -10,6 +10,8 @@ from historypy.research.bm25 import BM25SearchIndex
 from historypy.research.evaluation import EvaluationReport, evaluate_rankings
 from historypy.research.hybrid import HybridSearchIndex
 from historypy.research.search_index import DatasetSearchIndex
+from historypy.research.semantic import EmbeddingBatch, SemanticSearchIndex
+from historypy.research.query import _searchable_records
 
 
 def run_retrieval_benchmark(
@@ -19,8 +21,10 @@ def run_retrieval_benchmark(
     cutoff: int = 10,
     bootstrap_samples: int = 2000,
     seed: int = 2026,
+    semantic_index: SemanticSearchIndex | None = None,
+    embedder: EmbeddingBatch | None = None,
 ) -> EvaluationReport:
-    """Evaluate trigram, BM25, and reciprocal-rank-fusion on identical cases.
+    """Evaluate trigram, BM25, optional semantic, and RRF on identical cases.
 
     Each case is {"id": ..., "query": ..., "relevant": [...]}. Relevant IDs
     use kind:id form, such as event:event-12. All judgments must be
@@ -31,16 +35,23 @@ def run_retrieval_benchmark(
     dataset.require_valid()
     if not cases:
         raise ValueError("benchmark cases cannot be empty")
+    if (semantic_index is None) != (embedder is None):
+        raise ValueError("semantic_index and embedder must be supplied together")
+    if semantic_index is not None:
+        expected = tuple((row[0], row[1]) for row in _searchable_records(dataset))
+        actual = tuple((row[0], row[1]) for row in semantic_index.records)
+        if actual != expected:
+            raise ValueError("semantic index must represent the same dataset snapshot")
     trigram = DatasetSearchIndex.build(dataset)
     bm25 = BM25SearchIndex.build(dataset)
-    hybrid = HybridSearchIndex(trigram, bm25)
+    hybrid = HybridSearchIndex(trigram, bm25, semantic=semantic_index)
     relevance: dict[str, Sequence[str]] = {}
-    rankings: dict[str, dict[str, Sequence[str]]] = {
-        "trigram": {}, "bm25": {}, "hybrid_rrf": {}
-    }
-    latencies: dict[str, dict[str, float]] = {
-        "trigram": {}, "bm25": {}, "hybrid_rrf": {}
-    }
+    system_names = ["trigram", "bm25"]
+    if semantic_index is not None:
+        system_names.append("semantic")
+    system_names.append("hybrid_rrf")
+    rankings: dict[str, dict[str, Sequence[str]]] = {name: {} for name in system_names}
+    latencies: dict[str, dict[str, float]] = {name: {} for name in system_names}
     for case in cases:
         query_id = case.get("id")
         query = case.get("query")
@@ -56,11 +67,23 @@ def run_retrieval_benchmark(
         ):
             raise ValueError(f"{query_id}: relevant must be a list of kind:id strings")
         relevance[query_id] = relevant
-        methods = (
+        methods = [
             ("trigram", lambda query=query: trigram.search(query, limit=cutoff)),
             ("bm25", lambda query=query: bm25.search(query, limit=cutoff)),
-            ("hybrid_rrf", lambda query=query: hybrid.search(query, limit=cutoff)),
-        )
+        ]
+        if semantic_index is not None and embedder is not None:
+            methods.append((
+                "semantic",
+                lambda query=query: semantic_index.search(
+                    query, embedder=embedder, limit=cutoff
+                ),
+            ))
+        methods.append((
+            "hybrid_rrf",
+            lambda query=query: hybrid.search(
+                query, embedder=embedder, limit=cutoff
+            ),
+        ))
         for name, search in methods:
             started = perf_counter()
             hits = search()
