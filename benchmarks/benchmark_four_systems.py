@@ -52,6 +52,7 @@ def build_cases(
         cases.append({
             "id": query_id,
             "query": query,
+            "question_type": str(row.get("question_type") or "unspecified"),
             "relevant": [f"event:{record_id}" for record_id in resolved],
         })
     if not cases:
