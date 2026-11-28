@@ -17,11 +17,11 @@ from historypy.core.entities import (
 from historypy.core.models import EvidenceLink, HistoricalClaim, HistoricalEvent, SourceRecord
 from historypy.research.evidence import EvidenceSummary, summarize_claim_evidence
 from historypy.research.quality import DatasetQualityReport, assess_dataset_quality
-from historypy.research.timeline import TimelineResult, timeline_for_dataset
 from historypy.research.source_independence import (
     ClaimSourceIndependenceReport,
     analyze_claim_source_independence,
 )
+from historypy.research.timeline import TimelineResult, timeline_for_dataset
 from historypy.research.verification import ClaimAssessment, assess_claim
 
 
