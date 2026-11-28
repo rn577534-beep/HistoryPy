@@ -6,6 +6,7 @@ No relevance labels are generated or altered by this script.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import platform
 import time
@@ -35,24 +36,46 @@ def build_cases(
     question_rows: list[dict[str, Any]],
     id_map: dict[str, tuple[str, ...]],
 ) -> list[dict[str, Any]]:
-    """Convert original gold IDs to stable HistoryPy event IDs."""
+    """Convert gold IDs to unique stable query IDs without losing collisions.
+
+    Exact duplicate question/label rows are deduplicated. If the upstream
+    question identifier is reused for a different query or gold set, a stable
+    content hash is appended so both judgments remain independently evaluable.
+    """
     cases = []
-    seen: set[str] = set()
+    seen_ids: dict[str, str] = {}
+    seen_payloads: set[tuple[str, str, tuple[str, ...]]] = set()
     for row in question_rows:
-        query_id = str(row.get("question_id") or row.get("id") or "").strip()
+        base_id = str(row.get("question_id") or row.get("id") or "").strip()
         query = str(row.get("question") or "").strip()
-        if not query_id or not query:
+        if not query:
             continue
-        if query_id in seen:
-            raise ValueError(f"Duplicate question ID: {query_id}")
-        seen.add(query_id)
         resolved = resolve_gold_ids(row, id_map)
         if not resolved:
             continue
+        question_type = str(row.get("question_type") or "unspecified")
+        payload = (query, question_type, tuple(sorted(resolved)))
+        if payload in seen_payloads:
+            continue
+        seen_payloads.add(payload)
+        if not base_id:
+            raise ValueError("Every evaluable question must have a question_id or id")
+        fingerprint = hashlib.sha256(
+            json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()[:12]
+        query_id = base_id
+        if query_id in seen_ids:
+            query_id = f"{base_id}::{fingerprint}"
+        if query_id in seen_ids:
+            if seen_ids[query_id] == fingerprint:
+                continue
+            raise ValueError(f"Stable question ID collision for {base_id!r}")
+        seen_ids[query_id] = fingerprint
         cases.append({
             "id": query_id,
+            "source_question_id": base_id,
             "query": query,
-            "question_type": str(row.get("question_type") or "unspecified"),
+            "question_type": question_type,
             "relevant": [f"event:{record_id}" for record_id in resolved],
         })
     if not cases:
