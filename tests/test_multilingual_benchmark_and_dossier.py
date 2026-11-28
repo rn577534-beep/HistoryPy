@@ -41,7 +41,7 @@ def _dataset():
             "event-1", "A disputed transition",
             HistoricalDate(
                 earliest_year=1200, latest_year=1210, precision="decade",
-                calendar="julian", circa=True, original_expression="around the early 13th century",
+                calendar="gregorian", circa=True, original_expression="around the early 13th century",
             ),
         ),),
         people=(HistoricalPerson("person-1", "Saladin"),),
