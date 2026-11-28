@@ -1,4 +1,6 @@
 """Seven-part student learning data assembled from sourced historical records."""
+
+# ruff: noqa: I001 - preserve readable public imports
 from __future__ import annotations
 
 from typing import Any
