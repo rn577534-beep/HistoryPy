@@ -28,6 +28,19 @@ All notable changes to HistoryPy are documented here. Versions follow PEP 440.
 - Confidence and source-verification outputs are research aids, not probabilities of historical truth or proof of source authenticity.
 - Synthetic benchmark results are workload-specific and do not establish real-world historical retrieval quality.
 
+## [1.1.0] - Pending PyPI publication
+
+### Added
+- Verified, citation-backed multilingual aliases can contribute to entity duplicate-review candidates, with alias provenance and ambiguity retained.
+- Retrieval benchmark API and CLI compare Trigram, BM25, optional Semantic, and Hybrid RRF on identical researcher-judged cases.
+- Held-out HistoriQA four-system benchmark workflow reports Recall@10, MRR@10, nDCG@10, latency distributions, bootstrap confidence intervals, and paired comparisons.
+- Historical dossiers display supporting/contradicting evidence balance, source-dependency clusters, unknown independence, and date uncertainty metadata.
+
+### Notes
+- This is a release candidate entry only. It must not be described as published until the GitHub Release workflow and PyPI upload are verified.
+- The four-system benchmark is French-language and 1887-specific; it does not establish Bengali-English historical retrieval quality.
+- Bengali-English entity-resolution accuracy still requires a licensed, researcher-reviewed bilingual gold set.
+
 ## [1.0.1] - 2026-11-27
 
 ### Added

@@ -3,6 +3,12 @@
 The first production release, `historypy==1.0.0`, is published on PyPI:
 https://pypi.org/project/historypy/
 
+As of 2026-11-28, the live PyPI JSON API reports `1.0.0` as the latest and
+only published HistoryPy version. The repository's `1.0.1` and `1.0.2`
+development versions were not uploaded. The next candidate is `1.1.0`;
+publishing remains blocked until the four-system benchmark artifact is reviewed
+and all release checks pass.
+
 ## Release checklist
 
 1. Review open issues and all changes merged into `main`.
@@ -19,7 +25,7 @@ https://pypi.org/project/historypy/
 
 6. Inspect the wheel and source archive for package modules, README metadata, and the MIT license. Install the wheel in a clean environment and verify the imported version.
 7. Before creating a production GitHub Release, verify the PyPI Trusted Publisher configuration below.
-8. Create a tag matching the version (for example, `v1.0.2`) and publish the GitHub Release only after all checks pass.
+8. Create a tag matching the version (for example, `v1.1.0`) and publish the GitHub Release only after all checks pass.
 9. Monitor `.github/workflows/publish.yml`. Both build and publish jobs must succeed.
 10. Verify the exact version and distribution files on PyPI, then test a clean installation:
 
