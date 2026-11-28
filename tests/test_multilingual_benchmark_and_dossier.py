@@ -82,7 +82,7 @@ def test_semantic_benchmark_requires_index_and_embedder_together():
         run_retrieval_benchmark(
             _dataset(),
             [{"id": "q1", "query": "city", "relevant": ["event:event-1"]}],
-            embedder=lambda texts: ((1.0, 0.0) for _ in texts),
+            embedder=lambda texts: tuple((1.0, 0.0) for _ in texts),
         )
 
 
