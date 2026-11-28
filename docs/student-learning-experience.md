@@ -24,20 +24,16 @@ A source link is not proof of authenticity or truth.
 ## Python API
 
 ```python
-from historypy import (
-    load_dataset,
-    learning_experience_data,
-    render_learning_experience_html,
-)
+from historypy import load_dataset, learning_experience_data
 
 dataset = load_dataset("research-dataset.json")
 view = learning_experience_data(dataset, event_id="event-001")
-html = render_learning_experience_html(dataset, event_id="event-001")
 ```
 
-The HTML is self-contained and can be saved by the calling application as a
-standalone learning page. The data builder is also suitable for a custom
-frontend, mobile app, or classroom platform.
+The returned structure is JSON-ready and can power a custom interactive
+frontend, mobile app, map, timeline, or classroom platform. Existing
+`render_visualization_html` remains available for the general research graph,
+timeline, and coordinate-plot report.
 
 ## Assessment is intentionally separate
 
