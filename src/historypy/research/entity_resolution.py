@@ -29,6 +29,7 @@ class EntityMatchCandidate:
     matched_alias_ids: tuple[str, ...] = ()
     matched_languages: tuple[str, ...] = ()
     matched_review_statuses: tuple[str, ...] = ()
+    ambiguous_alias: bool = False
 
 
 def _normalize(value: str) -> str:
@@ -116,6 +117,17 @@ def suggest_entity_matches(
         if alias_registry.dataset != dataset:
             raise ValueError("alias_registry must belong to the supplied dataset snapshot")
 
+    registry_alias_entities: dict[str, set[str]] = {}
+    if alias_registry is not None:
+        for assertion in alias_registry.assertions:
+            if assertion.review_status == "rejected":
+                continue
+            if assertion.review_status != "verified" and not include_unverified_aliases:
+                continue
+            registry_alias_entities.setdefault(_normalize(assertion.alias), set()).add(
+                f"{assertion.entity_kind}:{assertion.entity_id}"
+            )
+
     candidates: list[EntityMatchCandidate] = []
     for kind in dict.fromkeys(kinds):
         records = sorted(
@@ -152,6 +164,10 @@ def suggest_entity_matches(
                         matched_alias_ids=tuple(value for value in (best[3], best[4]) if value),
                         matched_languages=(best[5], best[6]),
                         matched_review_statuses=(best[7], best[8]),
+                        ambiguous_alias=(
+                            _normalize(best[1]) == _normalize(best[2])
+                            and len(registry_alias_entities.get(_normalize(best[1]), ())) > 1
+                        ),
                     ))
     candidates.sort(
         key=lambda item: (-item.similarity, item.kind, item.left_id, item.right_id)
