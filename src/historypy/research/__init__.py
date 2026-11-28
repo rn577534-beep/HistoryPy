@@ -179,6 +179,7 @@ from historypy.research.dossier import (
     render_historical_dossier,
 )
 from historypy.research.verification import ClaimAssessment, assess_claim
+from historypy.research.learning import learning_experience_data
 from historypy.research.workflow import (
     HistoricalResearchWorkflow,
     IntegratedResearchReport,
@@ -357,4 +358,5 @@ __all__ = [  # noqa: RUF022 - preserve public API grouping
     "verify_research_audit_trail",
     "WeightedPathReport",
     "WeightedRelationshipPath",
+    "learning_experience_data",
 ]

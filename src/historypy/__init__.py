@@ -209,6 +209,7 @@ from historypy.research import (
     render_event_source_comparison,
     render_research_report,
     render_visualization_html,
+    learning_experience_data,
     run_retrieval_benchmark,
     search_dataset,
     select_paths_by_temporal_policy,
@@ -437,4 +438,5 @@ __all__ = [  # noqa: RUF022 - preserve public API grouping
     "WeightedPathReport",
     "WeightedRelationshipPath",
     "WikidataSearch",
+    "learning_experience_data",
 ]
