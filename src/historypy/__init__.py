@@ -223,7 +223,7 @@ from historypy.research import (
     verify_research_audit_trail,
 )
 
-__version__ = "1.0.2"
+__version__ = "1.1.0"
 
 __all__ = [  # noqa: RUF022 - preserve public API grouping
     "__version__",
