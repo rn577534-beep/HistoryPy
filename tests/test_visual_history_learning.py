@@ -1,5 +1,7 @@
 """Tests for seven-part visual history learning data."""
 
+# ruff: noqa: I001 - preserve readable public imports
+
 import pytest
 
 from historypy import (
