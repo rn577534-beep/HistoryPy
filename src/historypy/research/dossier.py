@@ -17,6 +17,10 @@ from historypy.core.entities import (
 from historypy.core.models import EvidenceLink, HistoricalClaim, HistoricalEvent, SourceRecord
 from historypy.research.evidence import EvidenceSummary, summarize_claim_evidence
 from historypy.research.quality import DatasetQualityReport, assess_dataset_quality
+from historypy.research.source_independence import (
+    ClaimSourceIndependenceReport,
+    analyze_claim_source_independence,
+)
 from historypy.research.timeline import TimelineResult, timeline_for_dataset
 from historypy.research.verification import ClaimAssessment, assess_claim
 
@@ -30,6 +34,7 @@ class ClaimReview:
     evidence: tuple[EvidenceLink, ...]
     summary: EvidenceSummary
     sources: tuple[SourceRecord, ...]
+    independence: ClaimSourceIndependenceReport
 
 
 @dataclass(frozen=True, slots=True)
@@ -78,6 +83,7 @@ def _claim_review(dataset: HistoricalDataset, claim: HistoricalClaim) -> ClaimRe
         evidence=links,
         summary=summarize_claim_evidence(dataset, claim.id),
         sources=linked_sources,
+        independence=analyze_claim_source_independence(dataset, claim.id),
     )
 
 
@@ -239,6 +245,16 @@ def render_historical_dossier(dossier: HistoricalDossier) -> str:
     for index, chapter in enumerate(dossier.chapters, 1):
         event = chapter.event
         lines.extend((f"### {index}. {event.title}", "", f"**Date:** {event.date.display()}", ""))
+        date_notes = []
+        if event.date.precision != "unknown":
+            date_notes.append(f"precision: {event.date.precision}")
+        if event.date.circa:
+            date_notes.append("approximate date")
+        if event.date.original_expression:
+            date_notes.append(f"source wording: {event.date.original_expression}")
+        if date_notes:
+            lines.append("**Date uncertainty:** " + "; ".join(date_notes) + ".")
+            lines.append("")
         if event.summary:
             lines.extend((event.summary, ""))
         if chapter.places:
@@ -276,6 +292,39 @@ def render_historical_dossier(dossier: HistoricalDossier) -> str:
                     quote_text = f'; excerpt: “{link.quotation}”' if link.quotation else ""
                     lines.append(
                         f"  - {link.relation}: {source_text}{locator_text}{quote_text}"
+                    )
+                support_count = sum(link.relation == "supports" for link in review.evidence)
+                contradiction_count = sum(
+                    link.relation == "contradicts" for link in review.evidence
+                )
+                contextual_count = sum(
+                    link.relation == "contextualizes" for link in review.evidence
+                )
+                mention_count = sum(link.relation == "mentions" for link in review.evidence)
+                lines.append(
+                    f"  - Evidence balance: {support_count} supporting, "
+                    f"{contradiction_count} contradicting, {contextual_count} contextualizing, "
+                    f"{mention_count} mentioning."
+                )
+                independence = review.independence
+                lines.append(
+                    f"  - Source independence: `{independence.status}`; "
+                    f"{len(independence.dependent_clusters)} known dependency cluster(s); "
+                    f"{len(independence.unknown_source_ids)} source(s) with unknown independence."
+                )
+                for cluster in independence.dependent_clusters:
+                    lines.append(
+                        "    - Dependent evidence sources: "
+                        + ", ".join(cluster.evidence_source_ids)
+                        + (
+                            "; intermediate sources: " + ", ".join(cluster.bridge_source_ids)
+                            if cluster.bridge_source_ids else ""
+                        )
+                    )
+                if independence.unknown_source_ids:
+                    lines.append(
+                        "    - Independence not established for: "
+                        + ", ".join(independence.unknown_source_ids)
                     )
         else:
             lines.append("**Claims:** No claim is explicitly linked to this event.")

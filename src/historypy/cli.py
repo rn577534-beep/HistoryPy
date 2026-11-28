@@ -75,6 +75,7 @@ def build_parser() -> argparse.ArgumentParser:
     evaluate.add_argument("--top-k", type=int, default=10)
     evaluate.add_argument("--bootstrap-samples", type=int, default=2000)
     evaluate.add_argument("--seed", type=int, default=2026)
+    evaluate.add_argument("--semantic-model", help="optional embedding model; adds semantic and semantic-hybrid systems")
     evaluate.add_argument("--output", type=Path, required=True)
 
     export = subparsers.add_parser("export", help="export a visualization artifact")
@@ -145,12 +146,19 @@ def main(argv: list[str] | None = None) -> int:
             cases = json.loads(args.cases.read_text(encoding="utf-8"))
             if not isinstance(cases, list):
                 raise ValueError("benchmark cases file must contain a JSON array")
+            semantic_index = embedder = None
+            if args.semantic_model:
+                semantic_index, embedder = build_multilingual_semantic_index(
+                    dataset, model_name=args.semantic_model
+                )
             report = run_retrieval_benchmark(
                 dataset,
                 cases,
                 cutoff=args.top_k,
                 bootstrap_samples=args.bootstrap_samples,
                 seed=args.seed,
+                semantic_index=semantic_index,
+                embedder=embedder,
             )
             _write_output(json.dumps(asdict(report), ensure_ascii=False, indent=2), args.output)
             return 0
