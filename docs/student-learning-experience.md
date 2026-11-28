@@ -45,8 +45,8 @@ asks to be tested. This release does not silently start or insert a test.
 
 - "Elsewhere" is constrained to events in the same dataset and comparable,
   explicitly bounded intervals on the same named calendar.
-- Place views require coordinates in the dataset. No geocoding or map tiles are
-  silently fetched.
+- Places without coordinates are still listed but cannot be plotted on a map.
+  No geocoding or map tiles are silently fetched.
 - The storyboard is a structured visual outline, not an automatically verified
   historical reconstruction.
 - Historical interpretations remain subject to source criticism and human review.
