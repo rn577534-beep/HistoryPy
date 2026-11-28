@@ -11,6 +11,7 @@ def test_build_cases_preserves_researcher_gold_document_ids():
     assert cases == [{
         "id": "q-001",
         "query": "What reforms were discussed?",
+        "question_type": "unspecified",
         "relevant": ["event:parliament::document-1"],
     }]
 
